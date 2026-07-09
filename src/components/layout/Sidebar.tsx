@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { LayoutDashboard, Library, ListChecks, Settings, ChevronRight, LogOut, Bell } from 'lucide-react';
+import { LayoutDashboard, Library, ListChecks, Settings, HelpCircle, ChevronRight, LogOut, Bell } from 'lucide-react';
 import { useStore, type TabId } from '../../store/useStore';
 import { NotificationCenter } from './NotificationCenter';
 
@@ -8,6 +8,7 @@ const NAV: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'library', label: 'Library', icon: Library },
   { id: 'presets', label: 'Presets', icon: ListChecks },
   { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'help', label: 'Help', icon: HelpCircle },
 ];
 
 export function Sidebar() {
