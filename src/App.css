@@ -1451,6 +1451,28 @@
   gap: 12px;
 }
 
+.library-popular {
+  margin-bottom: 20px;
+}
+
+.library-popular__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  margin-bottom: 10px;
+}
+
+.service-card-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.service-card-row__item {
+  flex: 0 0 200px;
+}
+
 .service-card {
   position: relative;
   overflow: visible;

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Wrench, Plus, Play } from 'lucide-react';
+import { Wrench, Plus, Play, MapPin, Waypoints } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { LibraryPickerGrid } from '../common/LibraryPickerGrid';
+import { ServiceCard } from '../common/ServiceCard';
 import { ServiceDetailModal } from '../dashboard/ServiceDetailModal';
 import { CreateCustomServiceModal } from './CreateCustomServiceModal';
 import { ManualServiceIntroModal } from './ManualServiceIntroModal';
@@ -11,6 +12,7 @@ import {
   buildCatalogDisplayItems,
   buildCustomDisplayItems,
   filterItemsByTab,
+  getPopularDisplayItems,
   resolveServiceIds,
   resolveDisplayItemServiceId,
   type LibraryTab,
@@ -34,6 +36,7 @@ export function Library() {
   const catalogItems = buildCatalogDisplayItems();
   const customItems = buildCustomDisplayItems(library);
   const visibleItems = filterItemsByTab(tab, catalogItems, customItems);
+  const popularItems = getPopularDisplayItems(catalogItems);
 
   function handleStart() {
     const serviceIds = resolveServiceIds(selectedIds, getOrCreateServiceForEntry);
@@ -75,6 +78,31 @@ export function Library() {
               <Play size={12} />
               Start
             </button>
+          </div>
+        </div>
+      )}
+
+      {popularItems.length > 0 && (
+        <div className="library-popular">
+          <div className="library-popular__title">Popular services</div>
+          <div className="service-card-row">
+            {popularItems.map((item) => (
+              <div key={item.id} className="service-card-row__item">
+                <ServiceCard
+                  icon={item.icon}
+                  name={item.name}
+                  chips={[
+                    { icon: MapPin, label: item.regionLabel },
+                    { icon: Waypoints, label: item.transportLabel },
+                  ]}
+                  selected={selectedIds.has(item.id)}
+                  onClick={() => toggleSelected(item.id)}
+                  onSettingsClick={() =>
+                    openServiceDetail(resolveDisplayItemServiceId(item, getOrCreateServiceForEntry))
+                  }
+                />
+              </div>
+            ))}
           </div>
         </div>
       )}
