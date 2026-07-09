@@ -23,7 +23,7 @@ import {
   type CustomServiceInput,
 } from '../data/factory';
 
-export type TabId = 'dashboard' | 'library' | 'presets' | 'settings';
+export type TabId = 'dashboard' | 'library' | 'presets' | 'settings' | 'help';
 
 interface RoutePatch {
   latencyMs?: number;

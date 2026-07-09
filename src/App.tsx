@@ -7,6 +7,7 @@ import { Dashboard } from './components/dashboard/Dashboard';
 import { Library } from './components/library/Library';
 import { Presets } from './components/presets/Presets';
 import { Settings } from './components/settings/Settings';
+import { Help } from './components/help/Help';
 import { AuthScreen } from './components/auth/AuthScreen';
 import { Toast } from './components/common/Toast';
 
@@ -65,6 +66,7 @@ function App() {
           {activeTab === 'library' && <Library />}
           {activeTab === 'presets' && <Presets />}
           {activeTab === 'settings' && <Settings />}
+          {activeTab === 'help' && <Help />}
         </div>
         <Toast />
       </div>
@@ -86,6 +88,7 @@ function App() {
               {activeTab === 'library' && <Library />}
               {activeTab === 'presets' && <Presets />}
               {activeTab === 'settings' && <Settings />}
+          {activeTab === 'help' && <Help />}
             </div>
           </div>
         </div>
