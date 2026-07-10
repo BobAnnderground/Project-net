@@ -60,7 +60,7 @@ export function SavePresetModal({ serviceIds, onClose }: { serviceIds: string[];
       }
     >
       {hasExistingPresets && (
-        <div className="segmented" style={{ marginBottom: 14 }}>
+        <div className="segmented" style={{ marginBottom: 'var(--space-16)' }}>
           <button
             className={`segmented__option ${mode === 'existing' ? 'segmented__option--active' : ''}`}
             style={{ flex: 1 }}
@@ -81,7 +81,7 @@ export function SavePresetModal({ serviceIds, onClose }: { serviceIds: string[];
       {mode === 'existing' ? (
         <div className="form-group">
           <label className="form-label">Preset</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
             {presets.map((p) => (
               <button
                 key={p.id}
@@ -122,7 +122,7 @@ export function SavePresetModal({ serviceIds, onClose }: { serviceIds: string[];
       </div>
 
       {error && (
-        <div className="warning-box" style={{ marginTop: 10, borderColor: 'var(--err)', background: 'var(--err-dim)', color: 'var(--err)' }}>
+        <div className="warning-box" style={{ marginTop: 'var(--space-12)', borderColor: 'var(--err)', background: 'var(--err-dim)', color: 'var(--err)' }}>
           {error}
         </div>
       )}

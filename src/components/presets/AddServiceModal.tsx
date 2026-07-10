@@ -64,7 +64,7 @@ export function AddServiceModal({ presetId, onClose }: { presetId: string; onClo
         </>
       }
     >
-      <div className="form-label" style={{ marginBottom: 8 }}>
+      <div className="form-label" style={{ marginBottom: 'var(--space-8)' }}>
         Services{selectedIds.size > 0 ? ` — ${selectedIds.size} selected` : ''}
       </div>
 
@@ -81,7 +81,7 @@ export function AddServiceModal({ presetId, onClose }: { presetId: string; onClo
       />
 
       {error && (
-        <div className="warning-box" style={{ marginTop: 10, borderColor: 'var(--err)', background: 'var(--err-dim)', color: 'var(--err)' }}>
+        <div className="warning-box" style={{ marginTop: 'var(--space-12)', borderColor: 'var(--err)', background: 'var(--err-dim)', color: 'var(--err)' }}>
           {error}
         </div>
       )}

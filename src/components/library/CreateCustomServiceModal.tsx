@@ -60,13 +60,13 @@ export function CreateCustomServiceModal({
         </>
       }
     >
-      <div className="warning-box" style={{ marginBottom: 14 }}>
+      <div className="warning-box" style={{ marginBottom: 'var(--space-16)' }}>
         <AlertTriangle size={16} />
         A manually added service isn't reviewed by the Fixnet team. You're responsible for correct configuration
         and for resolving any connection issues.
       </div>
 
-      <p className="form-hint" style={{ marginBottom: 12 }}>
+      <p className="form-hint" style={{ marginBottom: 'var(--space-12)' }}>
         Fill in at least one — you can combine a domain, an executable file, and an IP range.
       </p>
 
@@ -81,7 +81,7 @@ export function CreateCustomServiceModal({
           }}
           placeholder="example.com"
         />
-        <label className="checkbox-row" style={{ marginTop: 4 }}>
+        <label className="checkbox-row" style={{ marginTop: 'var(--space-4)' }}>
           <input
             type="checkbox"
             checked={includeSubdomains}

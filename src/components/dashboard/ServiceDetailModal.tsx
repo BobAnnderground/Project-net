@@ -164,13 +164,13 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
       )}
 
       {showAdvancedSettings && (
-        <div className="form-group" style={{ borderTop: '1px solid var(--border)', paddingTop: 12, marginTop: 4 }}>
+        <div className="form-group" style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-12)', marginTop: 'var(--space-4)' }}>
           <label className="form-label">Advanced settings</label>
-          <div className="form-hint" style={{ marginBottom: 10 }}>
+          <div className="form-hint" style={{ marginBottom: 'var(--space-12)' }}>
             Technical detection details and network rules — for experienced users.
           </div>
 
-          <div className="detail-grid" style={{ marginBottom: 10 }}>
+          <div className="detail-grid" style={{ marginBottom: 'var(--space-12)' }}>
             <div className="detail-stat">
               <div className="detail-stat__label">Detection method</div>
               <div className="detail-stat__value" style={{ fontSize: 13 }}>{service.detectionMethod}</div>
@@ -208,7 +208,7 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
           <div className="form-group">
             <label className="form-label">Additional network rules</label>
             {service.additionalRules.map((rule) => (
-              <div key={rule.id} style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+              <div key={rule.id} style={{ display: 'flex', gap: 'var(--space-8)', marginBottom: 'var(--space-8)' }}>
                 <select
                   className="form-select"
                   value={rule.type}
@@ -249,7 +249,7 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+      <div style={{ display: 'flex', gap: 'var(--space-8)', marginTop: 'var(--space-8)' }}>
         <button className="btn" style={{ flex: 1, justifyContent: 'center' }} onClick={handleAddToPreset}>
           <Plus size={14} />
           Add to preset

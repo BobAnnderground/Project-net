@@ -45,11 +45,41 @@
   --err: #ff3838;
   --err-dim: #41181c;
   --info: #7d8ff0;
+  --info-rgb: 125, 143, 240;
   --radius: 12px;
   --radius-sm: 8px;
   --radius-full: 999px;
   --font: "ABC Favorit", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: "Panama", Georgia, serif;
+  --font-mono: "Cascadia Code", "Consolas", "SF Mono", "Fira Code", ui-monospace, monospace;
+
+  /* Invariant colors: fixed regardless of theme (contrast against saturated
+     surfaces, shadows, overlays, and the hero banner's baked-in dark art). */
+  --on-accent: #ffffff;
+  --on-accent-rgb: 255, 255, 255;
+  --shadow-color-rgb: 0, 0, 0;
+  --overlay-rgb: 2, 5, 10;
+  --frames-bg-rgb: 20, 17, 22;
+  --window-bg: #0a0810;
+
+  /* Legacy values with no equivalent in design/tokens.json — kept at their
+     original value (no visual change) but named so nothing is a bare
+     literal. --btn-accent-text in particular predates the purple accent
+     and may want revisiting for contrast now that --accent is dark. */
+  --btn-accent-text: #051826;
+  --auth-cell-hover-border: #2e4a60;
+  --auth-btn-disabled-border: #253850;
+
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-68: 68px;
 }
 
 /* Light theme values are hand-derived from the dark palette (same accent
@@ -74,6 +104,7 @@
   --err: #dc2626;
   --err-dim: #fbe2e2;
   --info: #5768d6;
+  --info-rgb: 87, 104, 214;
 }
 
 * {
@@ -88,7 +119,7 @@ html, body {
 
 body {
   font-family: var(--font);
-  background: #0a0810;
+  background: var(--window-bg);
   display: flex;
   align-items: center;
   justify-content: center;

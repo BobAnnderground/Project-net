@@ -69,7 +69,7 @@ export function WelcomeOnboarding() {
     return (
       <div>
         <h1 className="onboard-heading">Where are you located?</h1>
-        <p className="settings-row__desc" style={{ marginBottom: 16 }}>
+        <p className="settings-row__desc" style={{ marginBottom: 'var(--space-16)' }}>
           Step 2 of 2 — this is only used to personalize your experience. Each service is still routed through
           whichever proxy region works best for it.
         </p>
@@ -107,7 +107,7 @@ export function WelcomeOnboarding() {
           <button className="btn" onClick={() => setStep(1)}>
             Back
           </button>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 'var(--space-8)' }}>
             <button className="btn" onClick={() => handleFinalize(null)}>
               Skip
             </button>
@@ -127,9 +127,9 @@ export function WelcomeOnboarding() {
   return (
     <div>
       <h1 className="onboard-heading">Choose the services you want to launch</h1>
-      <p className="settings-row__desc" style={{ marginBottom: 20 }}>Step 1 of 2</p>
+      <p className="settings-row__desc" style={{ marginBottom: 'var(--space-24)' }}>Step 1 of 2</p>
 
-      <div className="service-card-grid" style={{ marginBottom: 24 }}>
+      <div className="service-card-grid" style={{ marginBottom: 'var(--space-24)' }}>
         {visibleEntries.map((entry) => {
           const region = REGIONS.find((r) => r.id === entry.recommendedRegion);
           return (
