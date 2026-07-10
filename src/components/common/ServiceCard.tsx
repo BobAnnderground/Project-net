@@ -40,7 +40,7 @@ export function ServiceCard({ icon, name, chips, selected, onClick, onSettingsCl
     >
       {selected && (
         <div className="service-card__check">
-          <Check size={10} color="white" />
+          <Check size={10} color="var(--on-accent)" />
         </div>
       )}
 

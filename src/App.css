@@ -67,7 +67,7 @@
 
 .window-titlebar__btn--close:hover {
   background: var(--err);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .window-restore-chip {
@@ -82,7 +82,7 @@
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 12px 32px rgba(var(--shadow-color-rgb), 0.4);
   color: var(--text-0);
   font-size: 13px;
   font-weight: 600;
@@ -264,7 +264,7 @@
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 12px 32px rgba(var(--shadow-color-rgb), 0.4);
   z-index: 50;
   overflow: hidden;
 }
@@ -321,7 +321,7 @@
   top: -5px;
   right: -5px;
   background: var(--err);
-  color: white;
+  color: var(--on-accent);
   font-size: 10px;
   font-weight: 700;
   min-width: 16px;
@@ -344,7 +344,7 @@
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 12px 32px rgba(var(--shadow-color-rgb), 0.4);
   z-index: 50;
 }
 
@@ -504,7 +504,7 @@
 .btn--primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #051826;
+  color: var(--btn-accent-text);
 }
 
 .btn--ghost {
@@ -536,7 +536,7 @@
   border-radius: var(--radius);
   background-color: var(--panel-gradient-2);
   background-image:
-    linear-gradient(90deg, rgba(20, 17, 22, 0.8) 0%, rgba(20, 17, 22, 0.25) 45%, rgba(20, 17, 22, 0) 65%),
+    linear-gradient(90deg, rgba(var(--frames-bg-rgb), 0.8) 0%, rgba(var(--frames-bg-rgb), 0.25) 45%, rgba(var(--frames-bg-rgb), 0) 65%),
     url("/images/dashboard-hero.webp");
   background-size: cover, cover;
   background-position: left, right center;
@@ -679,7 +679,7 @@
 .status--inactive { color: var(--text-2); background: var(--bg-2); }
 .status--inactive .status-dot { background: var(--text-2); }
 
-.status--connecting { color: var(--info); background: rgba(125,143,240,0.12); }
+.status--connecting { color: var(--info); background: rgba(var(--info-rgb), 0.12); }
 .status--connecting .status-dot { background: var(--info); animation: pulse 1s infinite; }
 
 .status--connected { color: var(--ok); background: var(--ok-dim); }
@@ -746,7 +746,7 @@
 }
 
 .settings-key-box {
-  font-family: "Cascadia Code", "Consolas", "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.12em;
@@ -907,7 +907,7 @@
 
 .segmented__option--active {
   background: var(--accent);
-  color: #051826;
+  color: var(--btn-accent-text);
   font-weight: 600;
 }
 
@@ -1020,7 +1020,7 @@
 .modal-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(2, 5, 10, 0.6);
+  background: rgba(var(--overlay-rgb), 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1034,7 +1034,7 @@
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 50px rgba(var(--shadow-color-rgb), 0.5);
 }
 
 .modal--lg {
@@ -1141,7 +1141,7 @@
   background: var(--bg-1);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 8px 40px rgba(var(--shadow-color-rgb), 0.55);
   padding: var(--space-48);
 }
 
@@ -1234,7 +1234,7 @@
   background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-family: "Cascadia Code", "Consolas", "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 28px;
   font-weight: 500;
   letter-spacing: 0.12em;
@@ -1253,7 +1253,7 @@
 }
 
 .auth-cell:hover:not(:focus):not(.auth-cell--error):not(.auth-cell--success) {
-  border-color: #2e4a60;
+  border-color: var(--auth-cell-hover-border);
   background: var(--bg-3);
 }
 
@@ -1295,7 +1295,7 @@
 .auth-login-btn--disabled {
   background: var(--accent-dim);
   color: var(--text-2);
-  border: 1px solid #253850;
+  border: 1px solid var(--auth-btn-disabled-border);
   cursor: not-allowed;
 }
 
@@ -1348,7 +1348,7 @@
 }
 
 .auth-footer__code {
-  font-family: "Cascadia Code", "Consolas", "SF Mono", "Fira Code", ui-monospace, monospace;
+  font-family: var(--font-mono);
 }
 
 /* Crossfade wrappers */
@@ -1838,7 +1838,7 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--text-0);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 24px rgba(var(--shadow-color-rgb), 0.45);
   animation: toast-in 200ms ease-out;
 }
 
@@ -1852,7 +1852,7 @@
 .spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(var(--on-accent-rgb), 0.25);
   border-top-color: currentColor;
   border-radius: 50%;
   display: inline-block;

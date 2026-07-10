@@ -46,7 +46,7 @@ export function ServiceSessionModal({ serviceId, onClose }: { serviceId: string;
       </div>
 
       {route.usesBridge && bridge && (
-        <div className="warning-box" style={{ marginBottom: 'var(--space-12)', borderColor: 'var(--info)', background: 'rgba(125,143,240,0.1)', color: 'var(--info)' }}>
+        <div className="warning-box" style={{ marginBottom: 'var(--space-12)', borderColor: 'var(--info)', background: 'rgba(var(--info-rgb), 0.1)', color: 'var(--info)' }}>
           The connection is currently routed through the emergency bridge "{bridge.name}".
         </div>
       )}
