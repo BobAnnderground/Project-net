@@ -1,45 +1,78 @@
-:root {
-  color-scheme: dark;
-  --bg-0: #0d1117;
-  --bg-1: #131a22;
-  --bg-2: #1a232d;
-  --bg-3: #212c38;
-  --border: #2a3644;
-  --text-0: #eef2f6;
-  --text-1: #a9b7c6;
-  --text-2: #6b7a89;
-  --accent: #3ea6ff;
-  --accent-dim: #1f4864;
-  --ok: #35c975;
-  --ok-dim: #133a24;
-  --warn: #f0a83a;
-  --warn-dim: #4a3413;
-  --err: #f2495c;
-  --err-dim: #4a1a20;
-  --info: #7d8ff0;
-  --radius: 10px;
-  --radius-sm: 6px;
-  --font: "Segoe UI", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+@font-face {
+  font-family: "ABC Favorit";
+  src: url("/fonts/ABCFavoritCyrillicTrial-Book.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
+@font-face {
+  font-family: "ABC Favorit";
+  src: url("/fonts/ABCFavoritCyrillicTrial-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Panama";
+  src: url("/fonts/Panama-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  --bg-0: #141116;
+  --bg-1: #272429;
+  --bg-2: #302e32;
+  --bg-3: #353237;
+  --border: #3a373b;
+  --text-0: #ffffff;
+  --text-1: rgba(255, 255, 255, 0.56);
+  --text-2: rgba(255, 255, 255, 0.24);
+  --accent: #5b2299;
+  --accent-dim: #2e1745;
+  --accent-gradient-1: #8e65c2;
+  --accent-gradient-2: #390075;
+  --panel-gradient-1: #251930;
+  --panel-gradient-2: #1b1521;
+  --ok: #18b363;
+  --ok-dim: #152d23;
+  --warn: #f0db1a;
+  --warn-dim: #4b4417;
+  --err: #ff3838;
+  --err-dim: #41181c;
+  --info: #7d8ff0;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-full: 999px;
+  --font: "ABC Favorit", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Panama", Georgia, serif;
+}
+
+/* Light theme values are hand-derived from the dark palette (same accent
+   hue, darkened status colors for contrast on white) — no light mockups
+   exist yet, so treat as provisional until design delivers them. */
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg-0: #eef1f5;
+  --bg-0: #f5f1f8;
   --bg-1: #ffffff;
-  --bg-2: #f5f7fa;
-  --bg-3: #e9edf2;
-  --border: #d7dde4;
-  --text-0: #16202a;
-  --text-1: #4d5b68;
-  --text-2: #8894a0;
-  --accent: #1c7ed6;
-  --accent-dim: #dceafb;
-  --ok: #1f9d55;
-  --ok-dim: #e3f7ea;
-  --warn: #c9791a;
-  --warn-dim: #fbeed9;
-  --err: #d9273c;
-  --err-dim: #fbe1e4;
+  --bg-2: #f8f5fa;
+  --bg-3: #ede6f2;
+  --border: #ddd0e6;
+  --text-0: #1c1424;
+  --text-1: rgba(28, 20, 36, 0.62);
+  --text-2: rgba(28, 20, 36, 0.34);
+  --accent: #5b2299;
+  --accent-dim: #ece0f7;
+  --ok: #16a34a;
+  --ok-dim: #e1f7ea;
+  --warn: #a6790a;
+  --warn-dim: #fbf0d9;
+  --err: #dc2626;
+  --err-dim: #fbe2e2;
   --info: #5768d6;
 }
 
@@ -55,7 +88,7 @@ html, body {
 
 body {
   font-family: var(--font);
-  background: #05070a;
+  background: #0a0810;
   display: flex;
   align-items: center;
   justify-content: center;
