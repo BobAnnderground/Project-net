@@ -57,7 +57,7 @@ export function Dashboard() {
         <div>
           <DashboardHero variant="compact" />
           {lastSessionServices.length > 0 && (
-            <div className="quick-launch-card" style={{ marginBottom: 16 }}>
+            <div className="quick-launch-card" style={{ marginBottom: 'var(--space-16)' }}>
               <div className="quick-launch-card__info">
                 <div className="quick-launch-card__title">Last session</div>
                 <div className="quick-launch-card__icons">

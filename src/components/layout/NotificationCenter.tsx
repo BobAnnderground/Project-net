@@ -51,7 +51,7 @@ export function NotificationCenter({ onNavigate }: { onNavigate: () => void }) {
               className={`notif-item ${n.read ? '' : 'notif-item--unread'}`}
               onClick={() => markNotificationRead(n.id)}
             >
-              <Icon size={14} color={SEVERITY_COLOR[n.severity]} style={{ marginTop: 2, flexShrink: 0 }} />
+              <Icon size={14} color={SEVERITY_COLOR[n.severity]} style={{ marginTop: 'var(--space-4)', flexShrink: 0 }} />
               <div className="notif-item__body">
                 <div className="notif-item__message">{n.message}</div>
                 <div className="notif-item__meta">{timeAgo(n.createdAt)}</div>

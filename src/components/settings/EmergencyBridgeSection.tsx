@@ -47,16 +47,16 @@ export function EmergencyBridgeSection() {
   return (
     <div className="settings-section">
       <div className="settings-section__title">Emergency bridges</div>
-      <div className="settings-row__desc" style={{ marginBottom: 12 }}>
+      <div className="settings-row__desc" style={{ marginBottom: 'var(--space-12)' }}>
         Emergency bridges keep Fixnet connected when a route becomes unavailable — connected automatically, no
         setup needed.
       </div>
 
-      <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 6 }}>
+      <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)' }}>
         <div className="settings-row__label">Current emergency bridge</div>
         {emergencyBridge ? (
           <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-8)' }}>
               <div className="settings-key-box" style={{ flex: 1 }}>{emergencyBridge.code}</div>
               <span className={`status-badge status--${emergencyBridge.status === 'active' ? 'connected' : 'error'}`}>
                 <span className="status-dot" />
@@ -75,9 +75,9 @@ export function EmergencyBridgeSection() {
         )}
       </div>
 
-      <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 6, borderBottom: 'none' }}>
+      <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)', borderBottom: 'none' }}>
         <div className="settings-row__label">Add a new bridge</div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 'var(--space-8)' }}>
           <input
             className="form-input"
             style={{ flex: 1 }}
@@ -97,7 +97,7 @@ export function EmergencyBridgeSection() {
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+        <div style={{ display: 'flex', gap: 'var(--space-8)', marginTop: 'var(--space-8)' }}>
           <button className="btn btn--sm" onClick={() => handleCopySource('telegram')}>
             <Send size={12} />
             {copiedSource === 'telegram' ? 'Code copied' : 'Get via Telegram bot'}

@@ -148,9 +148,9 @@ export function Settings() {
       <div className="settings-section">
         <div className="settings-section__title">Account settings</div>
 
-        <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+        <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)' }}>
           <div className="settings-row__label">Key</div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-8)', alignItems: 'center' }}>
             <div className="settings-key-box">{formatKey(authKey)}</div>
             {pendingRegen ? (
               <>
@@ -226,7 +226,7 @@ export function Settings() {
         </div>
 
         <div className="settings-subheading">General connection settings</div>
-        <div className="settings-row__desc" style={{ marginBottom: 8 }}>
+        <div className="settings-row__desc" style={{ marginBottom: 'var(--space-8)' }}>
           Default parameters applied to newly added services.
         </div>
 
@@ -310,13 +310,13 @@ export function Settings() {
       </div>
 
       {appSettings.showAdvancedSettings && (
-        <div className="settings-section" style={{ marginTop: 10 }}>
+        <div className="settings-section" style={{ marginTop: 'var(--space-12)' }}>
           <div className="settings-section__title">Network simulation (mock parameters)</div>
-          <div className="settings-row__desc" style={{ marginBottom: 10 }}>
+          <div className="settings-row__desc" style={{ marginBottom: 'var(--space-12)' }}>
             NFR-3: frequency and probability of route degradation are configurable for testing the flow.
           </div>
 
-          <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 6 }}>
+          <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)' }}>
             <div className="settings-row__label">
               Degradation chance per tick: {appSettings.advancedNetwork.degradationChance}%
             </div>
@@ -332,7 +332,7 @@ export function Settings() {
             </div>
           </div>
 
-          <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 6 }}>
+          <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)' }}>
             <div className="settings-row__label">Route check interval</div>
             <div className="slider-row">
               <input

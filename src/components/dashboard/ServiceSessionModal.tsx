@@ -20,7 +20,7 @@ export function ServiceSessionModal({ serviceId, onClose }: { serviceId: string;
 
   return (
     <Modal title={service.name} onClose={onClose}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-16)' }}>
         <StatusBadge status={service.status} />
         <Toggle on={service.enabled} onClick={() => toggleServiceEnabled(service.id)} />
       </div>
@@ -36,17 +36,17 @@ export function ServiceSessionModal({ serviceId, onClose }: { serviceId: string;
         </div>
       </div>
 
-      <div className="chart-wrap" style={{ marginBottom: 14 }}>
+      <div className="chart-wrap" style={{ marginBottom: 'var(--space-16)' }}>
         <div className="chart-title">Latency (ms)</div>
         <QualityChart samples={history} metric="latencyMs" color="var(--accent)" />
       </div>
-      <div className="chart-wrap" style={{ marginBottom: 14 }}>
+      <div className="chart-wrap" style={{ marginBottom: 'var(--space-16)' }}>
         <div className="chart-title">Stability (%)</div>
         <QualityChart samples={history} metric="stability" color="var(--ok)" />
       </div>
 
       {route.usesBridge && bridge && (
-        <div className="warning-box" style={{ marginBottom: 12, borderColor: 'var(--info)', background: 'rgba(125,143,240,0.1)', color: 'var(--info)' }}>
+        <div className="warning-box" style={{ marginBottom: 'var(--space-12)', borderColor: 'var(--info)', background: 'rgba(125,143,240,0.1)', color: 'var(--info)' }}>
           The connection is currently routed through the emergency bridge "{bridge.name}".
         </div>
       )}
