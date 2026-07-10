@@ -3,6 +3,7 @@ import { useStore } from '../../store/useStore';
 import { ServiceDetailModal } from './ServiceDetailModal';
 import { WelcomeOnboarding } from './WelcomeOnboarding';
 import { RoutingDiagram } from './RoutingDiagram';
+import { ServiceIcon } from '../common/ServiceIcon';
 
 function DashboardHero({
   variant,
@@ -63,7 +64,7 @@ export function Dashboard() {
                 <div className="quick-launch-card__icons">
                   {lastSessionServices.map((s) => (
                     <span key={s.id} className="quick-launch-card__icon" title={s.name}>
-                      {s.icon}
+                      <ServiceIcon name={s.name} fallback={s.icon} size={16} />
                     </span>
                   ))}
                 </div>
@@ -87,7 +88,7 @@ export function Dashboard() {
                     <div className="quick-launch-card__icons">
                       {presetServices.map((s) => (
                         <span key={s.id} className="quick-launch-card__icon" title={s.name}>
-                          {s.icon}
+                          <ServiceIcon name={s.name} fallback={s.icon} size={16} />
                         </span>
                       ))}
                     </div>

@@ -57,6 +57,7 @@
      surfaces, shadows, overlays, and the hero banner's baked-in dark art). */
   --on-accent: #ffffff;
   --on-accent-rgb: 255, 255, 255;
+  --icon-swatch-bg: #ffffff;
   --shadow-color-rgb: 0, 0, 0;
   --overlay-rgb: 2, 5, 10;
   --frames-bg-rgb: 20, 17, 22;
