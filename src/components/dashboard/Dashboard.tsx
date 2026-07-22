@@ -28,11 +28,18 @@ export function Dashboard() {
     return <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('services')} />;
   }
 
+  const isRoutingLive = isRunning && library.some((s) => s.enabled);
+  const hasLastSession = !isRoutingLive && lastSessionServices.length > 0;
+
   return (
     <div>
-      <HeroBanner />
+      {hasLastSession ? (
+        <HeroBanner lastSession={{ services: lastSessionServices, onStart: relaunchLastSession }} />
+      ) : (
+        <HeroBanner />
+      )}
 
-      {isRunning && library.some((s) => s.enabled) ? (
+      {isRoutingLive ? (
         <RoutingDiagram />
       ) : (
         <div>

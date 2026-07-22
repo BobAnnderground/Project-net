@@ -416,14 +416,17 @@
   object-fit: fill;
 }
 
-/* Skip-onboarding state (empty library): banner grows to hold the routing
-   CTA row, and the key-visual anchors to the bottom at its natural aspect
-   ratio instead of stretching to fill the whole panel. */
-.hero-banner--cta {
+/* Skip-onboarding state (empty library) and last-session state (stopped,
+   has history) are both the "tall" hero treatment: the banner grows to
+   hold extra content, and the key-visual anchors to the bottom at its
+   natural aspect ratio instead of stretching to fill the whole panel. */
+.hero-banner--cta,
+.hero-banner--session {
   min-height: 620px;
 }
 
-.hero-banner--cta .hero-banner__art {
+.hero-banner--cta .hero-banner__art,
+.hero-banner--session .hero-banner__art {
   inset: auto 0 0 0;
   top: auto;
   height: auto;
@@ -436,9 +439,10 @@
   padding: var(--space-40) var(--space-48);
 }
 
-/* The CTA (skip-onboarding) state is centered per Figma; the compact
-   subtitle state stays left-aligned, matching the other mockup. */
-.hero-banner--cta .hero-banner__content {
+/* Both tall states are centered per Figma; the compact subtitle state
+   stays left-aligned, matching the other mockup. */
+.hero-banner--cta .hero-banner__content,
+.hero-banner--session .hero-banner__content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -456,6 +460,15 @@
      stay dark regardless of app theme, so its text must too. */
   color: var(--on-accent);
   margin: 0;
+}
+
+/* Last-session state uses Figma's smaller H2 style, not the H1 used by
+   the welcome/CTA states. */
+.hero-banner--session .hero-banner__title {
+  font-size: 46px;
+  line-height: 52px;
+  /* -1.4% of 46px */
+  letter-spacing: -0.644px;
 }
 
 .hero-banner__subtitle {
@@ -509,6 +522,9 @@
 }
 
 .hero-banner__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
   border: none;
   border-radius: var(--radius-sm);
   padding: var(--space-8) var(--space-12);
