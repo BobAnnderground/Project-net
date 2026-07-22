@@ -54,32 +54,6 @@ export function Dashboard() {
               </button>
             </div>
           )}
-
-          {presets.length > 0 && (
-            <div className="preset-preview-row">
-              {presets.map((preset) => {
-                const presetServices = preset.serviceConfigs
-                  .map((c) => library.find((s) => s.id === c.serviceId))
-                  .filter((s): s is NonNullable<typeof s> => !!s);
-                return (
-                  <div key={preset.id} className="preset-preview-card">
-                    <div className="preset-preview-card__name">{preset.name}</div>
-                    <div className="quick-launch-card__icons">
-                      {presetServices.map((s) => (
-                        <span key={s.id} className="quick-launch-card__icon" title={s.name}>
-                          <ServiceIcon name={s.name} fallback={s.icon} size={16} />
-                        </span>
-                      ))}
-                    </div>
-                    <button className="btn btn--sm btn--primary" onClick={() => launchPreset(preset.id)}>
-                      <Play size={12} />
-                      Launch
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       )}
 
