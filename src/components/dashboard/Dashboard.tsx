@@ -1,4 +1,4 @@
-import { Play, Plus } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { ServiceDetailModal } from './ServiceDetailModal';
 import { WelcomeOnboarding } from './WelcomeOnboarding';
@@ -26,20 +26,15 @@ export function Dashboard() {
     .map((id) => library.find((s) => s.id === id))
     .filter((s): s is NonNullable<typeof s> => !!s);
 
+  if (library.length === 0) {
+    return <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('library')} />;
+  }
+
   return (
     <div>
       <HeroBanner />
 
-      {library.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state__title">Library is empty</div>
-          <p style={{ marginBottom: 'var(--space-16)' }}>Add services from the library to start routing traffic.</p>
-          <button className="btn btn--primary" onClick={() => setActiveTab('library')}>
-            <Plus size={14} />
-            Go to library
-          </button>
-        </div>
-      ) : isRunning && library.some((s) => s.enabled) ? (
+      {isRunning && library.some((s) => s.enabled) ? (
         <RoutingDiagram />
       ) : (
         <div>
