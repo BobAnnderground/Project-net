@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Wrench, Plus, Play, MapPin, Waypoints } from 'lucide-react';
+import { Wrench, Play, MapPin, Waypoints } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { LibraryPickerGrid } from '../common/LibraryPickerGrid';
 import { ServiceCard } from '../common/ServiceCard';
 import { ServiceDetailModal } from '../dashboard/ServiceDetailModal';
 import { CreateCustomServiceModal } from './CreateCustomServiceModal';
 import { ManualServiceIntroModal } from './ManualServiceIntroModal';
-import { SavePresetModal } from '../presets/SavePresetModal';
 import { useServiceSelection } from '../../lib/useServiceSelection';
 import {
   buildCatalogDisplayItems,
@@ -21,17 +20,14 @@ import {
 export function Library() {
   const library = useStore((s) => s.library);
   const getOrCreateServiceForEntry = useStore((s) => s.getOrCreateServiceForEntry);
-  const enableServices = useStore((s) => s.enableServices);
   const startWithOnly = useStore((s) => s.startWithOnly);
   const activeServiceId = useStore((s) => s.activeServiceId);
   const openServiceDetail = useStore((s) => s.openServiceDetail);
   const closeServiceDetail = useStore((s) => s.closeServiceDetail);
   const setActiveTab = useStore((s) => s.setActiveTab);
   const [manualAddStep, setManualAddStep] = useState<'closed' | 'intro' | 'form'>('closed');
-  const [showSaveModal, setShowSaveModal] = useState(false);
   const [tab, setTab] = useState<LibraryTab>('all');
-  const [presetServiceIds, setPresetServiceIds] = useState<string[]>([]);
-  const { selectedIds, setSelectedIds, toggleSelected, handleSelectAllToggle } = useServiceSelection();
+  const { selectedIds, toggleSelected, handleSelectAllToggle } = useServiceSelection();
 
   const catalogItems = buildCatalogDisplayItems();
   const customItems = buildCustomDisplayItems(library);
@@ -42,13 +38,6 @@ export function Library() {
     const serviceIds = resolveServiceIds(selectedIds, getOrCreateServiceForEntry);
     startWithOnly(serviceIds);
     setActiveTab('dashboard');
-  }
-
-  function handleAddToPreset() {
-    const serviceIds = resolveServiceIds(selectedIds, getOrCreateServiceForEntry);
-    enableServices(serviceIds);
-    setPresetServiceIds(serviceIds);
-    setShowSaveModal(true);
   }
 
   return (
@@ -70,10 +59,6 @@ export function Library() {
             {selectedIds.size} service{selectedIds.size > 1 ? 's' : ''} selected
           </div>
           <div className="selection-bar__actions">
-            <button className="btn btn--sm" onClick={handleAddToPreset}>
-              <Plus size={12} />
-              Add to preset
-            </button>
             <button className="btn btn--sm btn--primary" onClick={handleStart}>
               <Play size={12} />
               Start
@@ -136,15 +121,6 @@ export function Library() {
           onCreated={() => {
             setManualAddStep('closed');
             setTab('custom');
-          }}
-        />
-      )}
-      {showSaveModal && (
-        <SavePresetModal
-          serviceIds={presetServiceIds}
-          onClose={() => {
-            setShowSaveModal(false);
-            setSelectedIds(new Set());
           }}
         />
       )}

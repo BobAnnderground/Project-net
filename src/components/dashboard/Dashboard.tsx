@@ -15,8 +15,6 @@ export function Dashboard() {
   const setActiveTab = useStore((s) => s.setActiveTab);
   const lastSessionServiceIds = useStore((s) => s.lastSessionServiceIds);
   const relaunchLastSession = useStore((s) => s.relaunchLastSession);
-  const presets = useStore((s) => s.presets);
-  const launchPreset = useStore((s) => s.launchPreset);
 
   if (isFirstLoginOfSession) {
     return <WelcomeOnboarding />;

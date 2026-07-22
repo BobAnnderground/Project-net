@@ -1,12 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { LayoutDashboard, Library, ListChecks, Settings, HelpCircle, ChevronRight, LogOut, Bell } from 'lucide-react';
+import { LayoutDashboard, Library, Settings, HelpCircle, ChevronRight, LogOut } from 'lucide-react';
 import { useStore, type TabId } from '../../store/useStore';
-import { NotificationCenter } from './NotificationCenter';
 
 const NAV: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
   { id: 'library', label: 'Library', icon: Library },
-  { id: 'presets', label: 'Presets', icon: ListChecks },
   { id: 'settings', label: 'Settings', icon: Settings },
   { id: 'help', label: 'Help', icon: HelpCircle },
 ];
@@ -16,22 +14,14 @@ export function Sidebar() {
   const setActiveTab = useStore((s) => s.setActiveTab);
   const user = useStore((s) => s.user);
   const logout = useStore((s) => s.logout);
-  const notifications = useStore((s) => s.notifications);
 
   const [popupOpen, setPopupOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
-
-  const unread = notifications.filter((n) => !n.read).length;
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
         setPopupOpen(false);
-      }
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotifOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClick);
@@ -70,20 +60,6 @@ export function Sidebar() {
       </div>
 
       <div className="sidebar__footer-wrapper">
-        <div ref={notifRef} className="sidebar__bell-wrapper">
-          <button
-            className="sidebar__bell"
-            onClick={() => {
-              setNotifOpen((v) => !v);
-              setPopupOpen(false);
-            }}
-          >
-            <Bell size={16} />
-            {unread > 0 && <span className="bell__badge">{unread > 9 ? '9+' : unread}</span>}
-          </button>
-          {notifOpen && <NotificationCenter onNavigate={() => setNotifOpen(false)} />}
-        </div>
-
         <div ref={accountRef} className="sidebar__account-wrapper">
           {popupOpen && (
             <div className="account-popup">
@@ -100,10 +76,7 @@ export function Sidebar() {
           )}
           <button
             className={`sidebar__footer ${popupOpen ? 'sidebar__footer--open' : ''}`}
-            onClick={() => {
-              setPopupOpen((v) => !v);
-              setNotifOpen(false);
-            }}
+            onClick={() => setPopupOpen((v) => !v)}
           >
             <div className="sidebar__footer-text">
               <span className="sidebar__footer-name">{user.name}</span>
