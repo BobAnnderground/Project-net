@@ -1,9 +1,7 @@
-import { Play } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { ServiceDetailModal } from './ServiceDetailModal';
 import { WelcomeOnboarding } from './WelcomeOnboarding';
 import { RoutingDiagram } from './RoutingDiagram';
-import { ServiceIcon } from '../common/ServiceIcon';
 import { HeroBanner } from './HeroBanner';
 
 export function Dashboard() {
@@ -39,30 +37,7 @@ export function Dashboard() {
         <HeroBanner />
       )}
 
-      {isRoutingLive ? (
-        <RoutingDiagram />
-      ) : (
-        <div>
-          {lastSessionServices.length > 0 && (
-            <div className="quick-launch-card" style={{ marginBottom: 'var(--space-16)' }}>
-              <div className="quick-launch-card__info">
-                <div className="quick-launch-card__title">Last session</div>
-                <div className="quick-launch-card__icons">
-                  {lastSessionServices.map((s) => (
-                    <span key={s.id} className="quick-launch-card__icon" title={s.name}>
-                      <ServiceIcon name={s.name} fallback={s.icon} size={16} />
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <button className="btn btn--primary" onClick={relaunchLastSession}>
-                <Play size={14} />
-                Launch again
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+      {isRoutingLive && <RoutingDiagram />}
 
       {activeServiceId && <ServiceDetailModal serviceId={activeServiceId} onClose={closeServiceDetail} />}
     </div>

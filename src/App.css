@@ -417,21 +417,13 @@
 }
 
 /* Skip-onboarding state (empty library) and last-session state (stopped,
-   has history) are both the "tall" hero treatment: the banner grows to
-   hold extra content, and the key-visual anchors to the bottom at its
-   natural aspect ratio instead of stretching to fill the whole panel. */
+   has history) are both the "tall" hero treatment: the banner fills the
+   content row exactly, landing its bottom edge 24px above the window's
+   bottom edge (measured empirically at 1200x800 — .shell's own 1px
+   border eats into the naive 800 - 32 - 24*2 = 720px estimate). */
 .hero-banner--cta,
 .hero-banner--session {
-  min-height: 620px;
-}
-
-.hero-banner--cta .hero-banner__art,
-.hero-banner--session .hero-banner__art {
-  inset: auto 0 0 0;
-  top: auto;
-  height: auto;
-  object-fit: contain;
-  object-position: bottom;
+  height: 719px;
 }
 
 .hero-banner__content {
@@ -451,6 +443,10 @@
 
 .hero-banner__title {
   font-family: var(--font-display);
+  /* Explicit — h1 defaults to bold in the UA stylesheet, and since Panama
+     only has a Regular (400) face registered, an inherited "bold" causes
+     the browser to synthesize a fake-bold instead of just rendering 400. */
+  font-weight: 400;
   font-size: 60px;
   line-height: 64px;
   /* Figma letter-spacing of -1.4% is relative to font-size: 60px * -0.014 */
@@ -546,6 +542,56 @@
 .hero-banner__btn--tertiary {
   background: rgba(var(--on-accent-rgb), 0.08);
   cursor: default;
+}
+
+/* Last-session state: service icon row + Start button */
+.hero-banner__session-icons {
+  display: flex;
+  gap: var(--space-8);
+  margin-top: var(--space-40);
+}
+
+.hero-banner__session-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius);
+  background: var(--icon-swatch-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero-banner__session-icon--overflow {
+  background: rgba(var(--on-accent-rgb), 0.08);
+  box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24);
+  color: var(--on-accent);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.hero-banner__session-start {
+  margin-top: var(--space-48);
+}
+
+/* Floating "Full mode" panel, positioned relative to the hero card itself
+   (not the padded content column) to match Figma's bottom:24/right:14.
+   Figma's key-visual there is soft blur-glow shapes; our stand-in art has
+   sharp graphics in that corner, so the panel needs its own backdrop to
+   stay legible — not present in the source design. */
+.hero-banner__fullmode-panel {
+  position: absolute;
+  bottom: var(--space-24);
+  right: 14px;
+  width: 312px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  padding: var(--space-16);
+  border-radius: var(--radius);
+  background: rgba(var(--frames-bg-rgb), 0.72);
+  backdrop-filter: blur(8px);
 }
 
 /* Quick launch: last session */
