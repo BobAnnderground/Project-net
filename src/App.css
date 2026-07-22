@@ -417,21 +417,13 @@
 }
 
 /* Skip-onboarding state (empty library) and last-session state (stopped,
-   has history) are both the "tall" hero treatment: the banner grows to
-   hold extra content, and the key-visual anchors to the bottom at its
-   natural aspect ratio instead of stretching to fill the whole panel. */
+   has history) are both the "tall" hero treatment: the banner fills the
+   content row exactly, landing its bottom edge 24px above the window's
+   bottom edge (measured empirically at 1200x800 — .shell's own 1px
+   border eats into the naive 800 - 32 - 24*2 = 720px estimate). */
 .hero-banner--cta,
 .hero-banner--session {
-  min-height: 620px;
-}
-
-.hero-banner--cta .hero-banner__art,
-.hero-banner--session .hero-banner__art {
-  inset: auto 0 0 0;
-  top: auto;
-  height: auto;
-  object-fit: contain;
-  object-position: bottom;
+  height: 719px;
 }
 
 .hero-banner__content {
@@ -451,6 +443,10 @@
 
 .hero-banner__title {
   font-family: var(--font-display);
+  /* Explicit — h1 defaults to bold in the UA stylesheet, and since Panama
+     only has a Regular (400) face registered, an inherited "bold" causes
+     the browser to synthesize a fake-bold instead of just rendering 400. */
+  font-weight: 400;
   font-size: 60px;
   line-height: 64px;
   /* Figma letter-spacing of -1.4% is relative to font-size: 60px * -0.014 */
