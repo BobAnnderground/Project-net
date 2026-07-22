@@ -1357,28 +1357,6 @@
   gap: var(--space-12);
 }
 
-.library-popular {
-  margin-bottom: var(--space-24);
-}
-
-.library-popular__title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-1);
-  margin-bottom: var(--space-12);
-}
-
-.service-card-row {
-  display: flex;
-  gap: var(--space-12);
-  overflow-x: auto;
-  padding-bottom: var(--space-4);
-}
-
-.service-card-row__item {
-  flex: 0 0 200px;
-}
-
 .service-card {
   position: relative;
   overflow: visible;

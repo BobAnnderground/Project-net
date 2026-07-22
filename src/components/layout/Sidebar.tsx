@@ -4,7 +4,7 @@ import { useStore, type TabId } from '../../store/useStore';
 
 const NAV: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
-  { id: 'library', label: 'Library', icon: Library },
+  { id: 'services', label: 'Services', icon: Library },
   { id: 'settings', label: 'Settings', icon: Settings },
   { id: 'help', label: 'Help', icon: HelpCircle },
 ];
