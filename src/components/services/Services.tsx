@@ -1,42 +1,35 @@
 import { useState } from 'react';
-import { Wrench, Plus, Play, MapPin, Waypoints } from 'lucide-react';
+import { Wrench, Play } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { LibraryPickerGrid } from '../common/LibraryPickerGrid';
-import { ServiceCard } from '../common/ServiceCard';
 import { ServiceDetailModal } from '../dashboard/ServiceDetailModal';
 import { CreateCustomServiceModal } from './CreateCustomServiceModal';
 import { ManualServiceIntroModal } from './ManualServiceIntroModal';
-import { SavePresetModal } from '../presets/SavePresetModal';
 import { useServiceSelection } from '../../lib/useServiceSelection';
 import {
   buildCatalogDisplayItems,
   buildCustomDisplayItems,
   filterItemsByTab,
-  getPopularDisplayItems,
   resolveServiceIds,
   resolveDisplayItemServiceId,
   type LibraryTab,
 } from '../../lib/libraryItems';
 
-export function Library() {
+export function Services() {
   const library = useStore((s) => s.library);
   const getOrCreateServiceForEntry = useStore((s) => s.getOrCreateServiceForEntry);
-  const enableServices = useStore((s) => s.enableServices);
   const startWithOnly = useStore((s) => s.startWithOnly);
   const activeServiceId = useStore((s) => s.activeServiceId);
   const openServiceDetail = useStore((s) => s.openServiceDetail);
   const closeServiceDetail = useStore((s) => s.closeServiceDetail);
   const setActiveTab = useStore((s) => s.setActiveTab);
   const [manualAddStep, setManualAddStep] = useState<'closed' | 'intro' | 'form'>('closed');
-  const [showSaveModal, setShowSaveModal] = useState(false);
   const [tab, setTab] = useState<LibraryTab>('all');
-  const [presetServiceIds, setPresetServiceIds] = useState<string[]>([]);
-  const { selectedIds, setSelectedIds, toggleSelected, handleSelectAllToggle } = useServiceSelection();
+  const { selectedIds, toggleSelected, handleSelectAllToggle } = useServiceSelection();
 
   const catalogItems = buildCatalogDisplayItems();
   const customItems = buildCustomDisplayItems(library);
   const visibleItems = filterItemsByTab(tab, catalogItems, customItems);
-  const popularItems = getPopularDisplayItems(catalogItems);
 
   function handleStart() {
     const serviceIds = resolveServiceIds(selectedIds, getOrCreateServiceForEntry);
@@ -44,18 +37,11 @@ export function Library() {
     setActiveTab('dashboard');
   }
 
-  function handleAddToPreset() {
-    const serviceIds = resolveServiceIds(selectedIds, getOrCreateServiceForEntry);
-    enableServices(serviceIds);
-    setPresetServiceIds(serviceIds);
-    setShowSaveModal(true);
-  }
-
   return (
     <div>
       <div className="page-header">
         <div>
-          <div className="page-title">Service library</div>
+          <div className="page-title">Services</div>
           <div className="page-subtitle">Preset catalog — FR-1, FR-2 SRS</div>
         </div>
         <button className="btn btn--primary" onClick={() => setManualAddStep('intro')}>
@@ -70,39 +56,10 @@ export function Library() {
             {selectedIds.size} service{selectedIds.size > 1 ? 's' : ''} selected
           </div>
           <div className="selection-bar__actions">
-            <button className="btn btn--sm" onClick={handleAddToPreset}>
-              <Plus size={12} />
-              Add to preset
-            </button>
             <button className="btn btn--sm btn--primary" onClick={handleStart}>
               <Play size={12} />
               Start
             </button>
-          </div>
-        </div>
-      )}
-
-      {popularItems.length > 0 && (
-        <div className="library-popular">
-          <div className="library-popular__title">Popular services</div>
-          <div className="service-card-row">
-            {popularItems.map((item) => (
-              <div key={item.id} className="service-card-row__item">
-                <ServiceCard
-                  icon={item.icon}
-                  name={item.name}
-                  chips={[
-                    { icon: MapPin, label: item.regionLabel },
-                    { icon: Waypoints, label: item.transportLabel },
-                  ]}
-                  selected={selectedIds.has(item.id)}
-                  onClick={() => toggleSelected(item.id)}
-                  onSettingsClick={() =>
-                    openServiceDetail(resolveDisplayItemServiceId(item, getOrCreateServiceForEntry))
-                  }
-                />
-              </div>
-            ))}
           </div>
         </div>
       )}
@@ -116,7 +73,7 @@ export function Library() {
         onSelectAllToggle={handleSelectAllToggle}
         onSettingsClick={(item) => openServiceDetail(resolveDisplayItemServiceId(item, getOrCreateServiceForEntry))}
         emptyTitle="No custom services yet"
-        emptyText='Use "Create service manually" to add your own service to the library.'
+        emptyText='Use "Create service manually" to add your own service.'
       />
 
       {activeServiceId && (
@@ -136,15 +93,6 @@ export function Library() {
           onCreated={() => {
             setManualAddStep('closed');
             setTab('custom');
-          }}
-        />
-      )}
-      {showSaveModal && (
-        <SavePresetModal
-          serviceIds={presetServiceIds}
-          onClose={() => {
-            setShowSaveModal(false);
-            setSelectedIds(new Set());
           }}
         />
       )}

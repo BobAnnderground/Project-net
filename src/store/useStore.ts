@@ -6,10 +6,8 @@ import type {
   RouteStatus,
   ServiceStatus,
   Connection,
-  Preset,
   Bridge,
   BridgeStatus,
-  AppNotification,
   AppSettings,
   User,
 } from '../types';
@@ -23,7 +21,7 @@ import {
   type CustomServiceInput,
 } from '../data/factory';
 
-export type TabId = 'dashboard' | 'library' | 'presets' | 'settings' | 'help';
+export type TabId = 'dashboard' | 'services' | 'settings' | 'help';
 
 interface RoutePatch {
   latencyMs?: number;
@@ -52,8 +50,6 @@ interface StoreState {
   routes: Record<string, Route>;
   connections: Record<string, Connection>;
   bridges: Bridge[];
-  presets: Preset[];
-  notifications: AppNotification[];
   isRunning: boolean;
   lastSessionServiceIds: string[];
   activeTab: TabId;
@@ -84,17 +80,6 @@ interface StoreState {
   setRouteStatus: (serviceId: string, status: RouteStatus, patch?: RoutePatch) => void;
   ensureBridge: (serviceId: string, isAuto: boolean) => string;
   setBridgeStatus: (bridgeId: string, status: BridgeStatus) => void;
-  pushNotification: (n: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) => void;
-  markNotificationRead: (id: string) => void;
-  markAllNotificationsRead: () => void;
-  performNotificationAction: (notificationId: string, actionType: string) => void;
-
-  // presets
-  createPreset: (name: string, serviceIds: string[]) => void;
-  launchPreset: (presetId: string) => void;
-  deletePreset: (presetId: string) => void;
-  removeServiceFromPreset: (presetId: string, serviceId: string) => void;
-  addServicesToPreset: (presetId: string, serviceIds: string[]) => void;
 
   // settings
   updateAppSettings: (patch: Partial<AppSettings>) => void;
@@ -116,12 +101,7 @@ interface StoreState {
   addEmergencyBridge: (code: string) => void;
 }
 
-const MAX_NOTIFICATIONS = 60;
 const MAX_QUALITY_SAMPLES = 40;
-
-function clearPresetActivity(presets: Preset[]): Preset[] {
-  return presets.map((p) => (p.isActive ? { ...p, isActive: false } : p));
-}
 
 export const useStore = create<StoreState>((set, get) => ({
   isAuthenticated: false,
@@ -133,8 +113,6 @@ export const useStore = create<StoreState>((set, get) => ({
   routes: {},
   connections: {},
   bridges: [],
-  presets: [],
-  notifications: [],
   isRunning: false,
   lastSessionServiceIds: [],
   activeTab: 'dashboard',
@@ -154,7 +132,6 @@ export const useStore = create<StoreState>((set, get) => ({
     set((state) => ({
       library: [...state.library, service],
       routes: { ...state.routes, [service.id]: route },
-      presets: clearPresetActivity(state.presets),
     }));
   },
 
@@ -164,7 +141,6 @@ export const useStore = create<StoreState>((set, get) => ({
     set((state) => ({
       library: [...state.library, service],
       routes: { ...state.routes, [service.id]: route },
-      presets: clearPresetActivity(state.presets),
     }));
     get().showToast('Service added to library');
   },
@@ -180,7 +156,6 @@ export const useStore = create<StoreState>((set, get) => ({
         library: state.library.filter((s) => s.id !== serviceId),
         routes,
         connections,
-        presets: clearPresetActivity(state.presets),
         activeServiceId: state.activeServiceId === serviceId ? null : state.activeServiceId,
       };
     });
@@ -196,7 +171,6 @@ export const useStore = create<StoreState>((set, get) => ({
               [serviceId]: { ...state.routes[serviceId], regionId: patch.region },
             }
           : state.routes,
-      presets: clearPresetActivity(state.presets),
     }));
   },
 
@@ -207,7 +181,6 @@ export const useStore = create<StoreState>((set, get) => ({
     const nextEnabled = !service.enabled;
     set((s) => ({
       library: s.library.map((sv) => (sv.id === serviceId ? { ...sv, enabled: nextEnabled } : sv)),
-      presets: clearPresetActivity(s.presets),
     }));
     if (state.isRunning) {
       import('../sim/engine').then(({ beginConnect, stopService }) => {
@@ -227,7 +200,6 @@ export const useStore = create<StoreState>((set, get) => ({
     const idsSet = new Set(idsToEnable);
     set((s) => ({
       library: s.library.map((sv) => (idsSet.has(sv.id) ? { ...sv, enabled: true } : sv)),
-      presets: clearPresetActivity(s.presets),
     }));
     if (state.isRunning) {
       import('../sim/engine').then(({ beginConnect }) => {
@@ -245,7 +217,6 @@ export const useStore = create<StoreState>((set, get) => ({
     function applyAndStart() {
       set((s) => ({
         library: s.library.map((sv) => ({ ...sv, enabled: idsSet.has(sv.id) })),
-        presets: clearPresetActivity(s.presets),
       }));
       get().startAll();
     }
@@ -273,7 +244,6 @@ export const useStore = create<StoreState>((set, get) => ({
         library: s.library.map((sv) =>
           sv.id === existing.id ? { ...sv, enabled: nextEnabled } : sv
         ),
-        presets: clearPresetActivity(s.presets),
       }));
       if (state.isRunning) {
         import('../sim/engine').then(({ beginConnect, stopService }) => {
@@ -287,7 +257,6 @@ export const useStore = create<StoreState>((set, get) => ({
       set((s) => ({
         library: [...s.library, service],
         routes: { ...s.routes, [service.id]: route },
-        presets: clearPresetActivity(s.presets),
       }));
       if (state.isRunning) {
         import('../sim/engine').then(({ beginConnect }) => {
@@ -310,7 +279,6 @@ export const useStore = create<StoreState>((set, get) => ({
     set((s) => ({
       library: [...s.library, service],
       routes: { ...s.routes, [service.id]: route },
-      presets: clearPresetActivity(s.presets),
     }));
     return service.id;
   },
@@ -337,7 +305,6 @@ export const useStore = create<StoreState>((set, get) => ({
       library: s.library.map((sv) =>
         toEnable.includes(sv.id) ? { ...sv, enabled: true } : sv
       ),
-      presets: clearPresetActivity(s.presets),
     }));
     get().startAll();
   },
@@ -427,152 +394,6 @@ export const useStore = create<StoreState>((set, get) => ({
     }));
   },
 
-  pushNotification: (n) => {
-    const notification: AppNotification = {
-      ...n,
-      id: nanoid(),
-      createdAt: Date.now(),
-      read: false,
-    };
-    set((state) => ({
-      notifications: [notification, ...state.notifications].slice(0, MAX_NOTIFICATIONS),
-    }));
-  },
-
-  markNotificationRead: (id) => {
-    set((state) => ({
-      notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    }));
-  },
-
-  markAllNotificationsRead: () => {
-    set((state) => ({ notifications: state.notifications.map((n) => ({ ...n, read: true })) }));
-  },
-
-  performNotificationAction: (notificationId, actionType) => {
-    const state = get();
-    const notification = state.notifications.find((n) => n.id === notificationId);
-    get().markNotificationRead(notificationId);
-    if (!notification || !notification.relatedServiceId) return;
-    const serviceId = notification.relatedServiceId;
-
-    import('../sim/engine').then(({ connectBridgeFor, retryService }) => {
-      if (actionType === 'connect_bridge') {
-        connectBridgeFor(serviceId, false);
-      } else if (actionType === 'switch_route') {
-        retryService(serviceId);
-      } else if (actionType === 'go_to_service') {
-        set({ activeTab: 'dashboard', activeServiceId: serviceId });
-      }
-    });
-  },
-
-  createPreset: (name, serviceIds) => {
-    const state = get();
-    const serviceConfigs = serviceIds
-      .map((id) => state.library.find((s) => s.id === id))
-      .filter((s): s is Service => Boolean(s))
-      .map((s) => ({
-        serviceId: s.id,
-        region: s.region,
-        enabled: true,
-        encryption: s.encryption,
-        transportType: s.transportType,
-      }));
-    const preset: Preset = {
-      id: nanoid(),
-      name,
-      serviceConfigs,
-      isActive: true,
-      createdAt: Date.now(),
-    };
-    set((s) => ({ presets: [...clearPresetActivity(s.presets), preset] }));
-    get().showToast(`Preset "${name}" created`);
-  },
-
-  removeServiceFromPreset: (presetId, serviceId) => {
-    set((s) => ({
-      presets: s.presets.map((p) =>
-        p.id === presetId
-          ? { ...p, serviceConfigs: p.serviceConfigs.filter((c) => c.serviceId !== serviceId) }
-          : p
-      ),
-    }));
-  },
-
-  addServicesToPreset: (presetId, serviceIds) => {
-    const state = get();
-    const preset = state.presets.find((p) => p.id === presetId);
-    if (!preset) return;
-    set((s) => ({
-      presets: s.presets.map((p) => {
-        if (p.id !== presetId) return p;
-        const existingIds = new Set(p.serviceConfigs.map((c) => c.serviceId));
-        const newConfigs = serviceIds
-          .filter((id) => !existingIds.has(id))
-          .map((id) => state.library.find((sv) => sv.id === id))
-          .filter((sv): sv is Service => Boolean(sv))
-          .map((sv) => ({
-            serviceId: sv.id,
-            region: sv.region,
-            enabled: true,
-            encryption: sv.encryption,
-            transportType: sv.transportType,
-          }));
-        return { ...p, serviceConfigs: [...p.serviceConfigs, ...newConfigs] };
-      }),
-    }));
-    get().showToast(`Services added to preset "${preset.name}"`);
-  },
-
-  // Launches a preset immediately: applies its members' saved settings, turns
-  // off any other running service (fresh session — only the preset's
-  // services), and starts. No confirmation step.
-  launchPreset: (presetId) => {
-    const state = get();
-    const preset = state.presets.find((p) => p.id === presetId);
-    if (!preset) return;
-
-    function applyAndStart() {
-      set((s) => ({
-        library: s.library.map((service) => {
-          const cfg = preset!.serviceConfigs.find((c) => c.serviceId === service.id);
-          if (cfg) {
-            return {
-              ...service,
-              region: cfg.region,
-              enabled: true,
-              encryption: cfg.encryption,
-              transportType: cfg.transportType,
-            };
-          }
-          return service.enabled ? { ...service, enabled: false } : service;
-        }),
-        routes: Object.fromEntries(
-          Object.entries(s.routes).map(([sid, route]) => {
-            const cfg = preset!.serviceConfigs.find((c) => c.serviceId === sid);
-            return [sid, cfg ? { ...route, regionId: cfg.region } : route];
-          })
-        ),
-        presets: s.presets.map((p) => ({ ...p, isActive: p.id === presetId })),
-      }));
-      get().startAll();
-    }
-
-    if (state.isRunning) {
-      import('../sim/engine').then(({ stopSimulation }) => {
-        stopSimulation();
-        applyAndStart();
-      });
-    } else {
-      applyAndStart();
-    }
-  },
-
-  deletePreset: (presetId) => {
-    set((state) => ({ presets: state.presets.filter((p) => p.id !== presetId) }));
-  },
-
   updateAppSettings: (patch) => {
     set((state) => ({ appSettings: { ...state.appSettings, ...patch } }));
   },
@@ -658,41 +479,9 @@ export const useStore = create<StoreState>((set, get) => ({
         ...newServices,
       ],
       routes: { ...s.routes, ...newRoutes },
-      presets: clearPresetActivity(s.presets),
       isFirstLoginOfSession: false,
       user: userCountry !== null ? { ...s.user, country: userCountry } : s.user,
     }));
-
-    // Auto-save the onboarding selection as a preset so it can be quickly relaunched later
-    const afterState = get();
-    const selectedNames = new Set(
-      entryIds.map((id) => catalogById(id)).filter((e): e is NonNullable<typeof e> => !!e).map((e) => e.name)
-    );
-    const onboardingConfigs = afterState.library
-      .filter((sv) => selectedNames.has(sv.name))
-      .map((sv) => ({
-        serviceId: sv.id,
-        region: sv.region,
-        enabled: sv.enabled,
-        encryption: sv.encryption,
-        transportType: sv.transportType,
-      }));
-
-    set((s) => {
-      const existingIdx = s.presets.findIndex((p) => p.name === 'Onboarding preset');
-      const preset: Preset = {
-        id: existingIdx >= 0 ? s.presets[existingIdx].id : nanoid(),
-        name: 'Onboarding preset',
-        serviceConfigs: onboardingConfigs,
-        isActive: false,
-        createdAt: Date.now(),
-      };
-      const presets =
-        existingIdx >= 0
-          ? s.presets.map((p, i) => (i === existingIdx ? preset : p))
-          : [...s.presets, preset];
-      return { presets };
-    });
 
     get().startAll();
   },

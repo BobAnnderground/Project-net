@@ -37,10 +37,6 @@ export function buildCatalogDisplayItems(): LibraryDisplayItem[] {
   });
 }
 
-export function getPopularDisplayItems(catalogItems: LibraryDisplayItem[]): LibraryDisplayItem[] {
-  return catalogItems.filter((item) => catalogById(item.id)?.popular);
-}
-
 export function buildCustomDisplayItems(library: Service[]): LibraryDisplayItem[] {
   return library
     .filter((s) => s.isCustom)

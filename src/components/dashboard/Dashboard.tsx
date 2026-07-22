@@ -15,8 +15,6 @@ export function Dashboard() {
   const setActiveTab = useStore((s) => s.setActiveTab);
   const lastSessionServiceIds = useStore((s) => s.lastSessionServiceIds);
   const relaunchLastSession = useStore((s) => s.relaunchLastSession);
-  const presets = useStore((s) => s.presets);
-  const launchPreset = useStore((s) => s.launchPreset);
 
   if (isFirstLoginOfSession) {
     return <WelcomeOnboarding />;
@@ -27,7 +25,7 @@ export function Dashboard() {
     .filter((s): s is NonNullable<typeof s> => !!s);
 
   if (library.length === 0) {
-    return <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('library')} />;
+    return <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('services')} />;
   }
 
   const isRoutingLive = isRunning && library.some((s) => s.enabled);
@@ -45,29 +43,22 @@ export function Dashboard() {
         <RoutingDiagram />
       ) : (
         <div>
-          {presets.length > 0 && (
-            <div className="preset-preview-row">
-              {presets.map((preset) => {
-                const presetServices = preset.serviceConfigs
-                  .map((c) => library.find((s) => s.id === c.serviceId))
-                  .filter((s): s is NonNullable<typeof s> => !!s);
-                return (
-                  <div key={preset.id} className="preset-preview-card">
-                    <div className="preset-preview-card__name">{preset.name}</div>
-                    <div className="quick-launch-card__icons">
-                      {presetServices.map((s) => (
-                        <span key={s.id} className="quick-launch-card__icon" title={s.name}>
-                          <ServiceIcon name={s.name} fallback={s.icon} size={16} />
-                        </span>
-                      ))}
-                    </div>
-                    <button className="btn btn--sm btn--primary" onClick={() => launchPreset(preset.id)}>
-                      <Play size={12} />
-                      Launch
-                    </button>
-                  </div>
-                );
-              })}
+          {lastSessionServices.length > 0 && (
+            <div className="quick-launch-card" style={{ marginBottom: 'var(--space-16)' }}>
+              <div className="quick-launch-card__info">
+                <div className="quick-launch-card__title">Last session</div>
+                <div className="quick-launch-card__icons">
+                  {lastSessionServices.map((s) => (
+                    <span key={s.id} className="quick-launch-card__icon" title={s.name}>
+                      <ServiceIcon name={s.name} fallback={s.icon} size={16} />
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <button className="btn btn--primary" onClick={relaunchLastSession}>
+                <Play size={14} />
+                Launch again
+              </button>
             </div>
           )}
         </div>
