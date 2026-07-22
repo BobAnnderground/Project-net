@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { SlidersHorizontal, Check } from 'lucide-react';
 import clsx from 'clsx';
+import { ServiceIcon } from './ServiceIcon';
 
 interface ServiceCardProps {
   icon: string;
@@ -39,7 +40,9 @@ export function ServiceCard({ icon, name, chips, selected, onClick, onSettingsCl
       )}
 
       <div className="service-card__header">
-        <div className="service-card__icon-swatch">{icon}</div>
+        <div className="service-card__icon-swatch">
+          <ServiceIcon name={name} fallback={icon} size={18} />
+        </div>
         <span className="service-card__name">{name}</span>
         <div className="service-card__actions">
           <button

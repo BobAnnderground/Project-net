@@ -3,26 +3,8 @@ import { useStore } from '../../store/useStore';
 import { ServiceDetailModal } from './ServiceDetailModal';
 import { WelcomeOnboarding } from './WelcomeOnboarding';
 import { RoutingDiagram } from './RoutingDiagram';
-
-function DashboardHero({
-  variant,
-  onSelectServices,
-}: {
-  variant: 'full' | 'compact';
-  onSelectServices?: () => void;
-}) {
-  return (
-    <div className={`dashboard-hero dashboard-hero--${variant}`}>
-      <div className="dashboard-hero__title">Welcome to Fixnet</div>
-      <p className="dashboard-hero__subtitle">Faster, smarter, and more reliable connections</p>
-      {variant === 'full' && onSelectServices && (
-        <button className="btn btn--primary dashboard-hero__cta" onClick={onSelectServices}>
-          Select services
-        </button>
-      )}
-    </div>
-  );
-}
+import { ServiceIcon } from '../common/ServiceIcon';
+import { HeroBanner } from './HeroBanner';
 
 export function Dashboard() {
   const isFirstLoginOfSession = useStore((s) => s.isFirstLoginOfSession);
@@ -42,18 +24,18 @@ export function Dashboard() {
     .map((id) => library.find((s) => s.id === id))
     .filter((s): s is NonNullable<typeof s> => !!s);
 
+  if (library.length === 0) {
+    return <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('library')} />;
+  }
+
   return (
     <div>
-      {library.length === 0 ? (
-        <DashboardHero variant="full" onSelectServices={() => setActiveTab('library')} />
-      ) : isRunning && library.some((s) => s.enabled) ? (
-        <>
-          <DashboardHero variant="compact" />
-          <RoutingDiagram />
-        </>
+      <HeroBanner />
+
+      {isRunning && library.some((s) => s.enabled) ? (
+        <RoutingDiagram />
       ) : (
         <div>
-          <DashboardHero variant="compact" />
           {lastSessionServices.length > 0 && (
             <div className="quick-launch-card" style={{ marginBottom: 'var(--space-16)' }}>
               <div className="quick-launch-card__info">
@@ -61,7 +43,7 @@ export function Dashboard() {
                 <div className="quick-launch-card__icons">
                   {lastSessionServices.map((s) => (
                     <span key={s.id} className="quick-launch-card__icon" title={s.name}>
-                      {s.icon}
+                      <ServiceIcon name={s.name} fallback={s.icon} size={16} />
                     </span>
                   ))}
                 </div>
@@ -70,6 +52,32 @@ export function Dashboard() {
                 <Play size={14} />
                 Launch again
               </button>
+            </div>
+          )}
+
+          {presets.length > 0 && (
+            <div className="preset-preview-row">
+              {presets.map((preset) => {
+                const presetServices = preset.serviceConfigs
+                  .map((c) => library.find((s) => s.id === c.serviceId))
+                  .filter((s): s is NonNullable<typeof s> => !!s);
+                return (
+                  <div key={preset.id} className="preset-preview-card">
+                    <div className="preset-preview-card__name">{preset.name}</div>
+                    <div className="quick-launch-card__icons">
+                      {presetServices.map((s) => (
+                        <span key={s.id} className="quick-launch-card__icon" title={s.name}>
+                          <ServiceIcon name={s.name} fallback={s.icon} size={16} />
+                        </span>
+                      ))}
+                    </div>
+                    <button className="btn btn--sm btn--primary" onClick={() => launchPreset(preset.id)}>
+                      <Play size={12} />
+                      Launch
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

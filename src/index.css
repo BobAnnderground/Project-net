@@ -38,6 +38,7 @@
   --accent-gradient-2: #390075;
   --panel-gradient-1: #251930;
   --panel-gradient-2: #1b1521;
+  --panel-gradient-3: #141116;
   --ok: #18b363;
   --ok-dim: #152d23;
   --warn: #f0db1a;
@@ -57,6 +58,7 @@
      surfaces, shadows, overlays, and the hero banner's baked-in dark art). */
   --on-accent: #ffffff;
   --on-accent-rgb: 255, 255, 255;
+  --icon-swatch-bg: #ffffff;
   --shadow-color-rgb: 0, 0, 0;
   --overlay-rgb: 2, 5, 10;
   --frames-bg-rgb: 20, 17, 22;

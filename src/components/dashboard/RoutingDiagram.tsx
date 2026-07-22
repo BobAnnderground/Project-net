@@ -3,6 +3,7 @@ import { Server, Gamepad2, Clock, Square } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { REGIONS } from '../../data/regions';
 import { ServiceSessionModal } from './ServiceSessionModal';
+import { ServiceIcon } from '../common/ServiceIcon';
 import type { ServiceStatus } from '../../types';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -401,7 +402,9 @@ export function RoutingDiagram() {
                 }}
               >
                 <div className="routing-node-leaf__row1">
-                  <span className="routing-node-leaf__emoji">{svc.icon}</span>
+                  <span className="routing-node-leaf__emoji">
+                    <ServiceIcon name={svc.name} fallback={svc.icon} size={13} />
+                  </span>
                   <span className="routing-node-leaf__name">{svc.name}</span>
                 </div>
                 <div className="routing-node-leaf__row2">
