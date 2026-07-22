@@ -4,7 +4,7 @@ import { useStore } from './store/useStore';
 import { Sidebar } from './components/layout/Sidebar';
 import { WindowTitleBar } from './components/layout/WindowTitleBar';
 import { Dashboard } from './components/dashboard/Dashboard';
-import { Library } from './components/library/Library';
+import { Services } from './components/services/Services';
 import { Settings } from './components/settings/Settings';
 import { Help } from './components/help/Help';
 import { AuthScreen } from './components/auth/AuthScreen';
@@ -62,7 +62,7 @@ function App() {
         <Sidebar />
         <div className="content">
           {activeTab === 'dashboard' && <Dashboard />}
-          {activeTab === 'library' && <Library />}
+          {activeTab === 'services' && <Services />}
           {activeTab === 'settings' && <Settings />}
           {activeTab === 'help' && <Help />}
         </div>
@@ -83,7 +83,7 @@ function App() {
             <Sidebar />
             <div className="content">
               {activeTab === 'dashboard' && <Dashboard />}
-              {activeTab === 'library' && <Library />}
+              {activeTab === 'services' && <Services />}
               {activeTab === 'settings' && <Settings />}
           {activeTab === 'help' && <Help />}
             </div>

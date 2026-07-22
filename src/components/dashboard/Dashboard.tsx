@@ -25,7 +25,7 @@ export function Dashboard() {
     .filter((s): s is NonNullable<typeof s> => !!s);
 
   if (library.length === 0) {
-    return <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('library')} />;
+    return <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('services')} />;
   }
 
   return (

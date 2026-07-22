@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Wrench, Play, MapPin, Waypoints } from 'lucide-react';
+import { Wrench, Play } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { LibraryPickerGrid } from '../common/LibraryPickerGrid';
-import { ServiceCard } from '../common/ServiceCard';
 import { ServiceDetailModal } from '../dashboard/ServiceDetailModal';
 import { CreateCustomServiceModal } from './CreateCustomServiceModal';
 import { ManualServiceIntroModal } from './ManualServiceIntroModal';
@@ -11,13 +10,12 @@ import {
   buildCatalogDisplayItems,
   buildCustomDisplayItems,
   filterItemsByTab,
-  getPopularDisplayItems,
   resolveServiceIds,
   resolveDisplayItemServiceId,
   type LibraryTab,
 } from '../../lib/libraryItems';
 
-export function Library() {
+export function Services() {
   const library = useStore((s) => s.library);
   const getOrCreateServiceForEntry = useStore((s) => s.getOrCreateServiceForEntry);
   const startWithOnly = useStore((s) => s.startWithOnly);
@@ -32,7 +30,6 @@ export function Library() {
   const catalogItems = buildCatalogDisplayItems();
   const customItems = buildCustomDisplayItems(library);
   const visibleItems = filterItemsByTab(tab, catalogItems, customItems);
-  const popularItems = getPopularDisplayItems(catalogItems);
 
   function handleStart() {
     const serviceIds = resolveServiceIds(selectedIds, getOrCreateServiceForEntry);
@@ -44,7 +41,7 @@ export function Library() {
     <div>
       <div className="page-header">
         <div>
-          <div className="page-title">Service library</div>
+          <div className="page-title">Services</div>
           <div className="page-subtitle">Preset catalog — FR-1, FR-2 SRS</div>
         </div>
         <button className="btn btn--primary" onClick={() => setManualAddStep('intro')}>
@@ -67,31 +64,6 @@ export function Library() {
         </div>
       )}
 
-      {popularItems.length > 0 && (
-        <div className="library-popular">
-          <div className="library-popular__title">Popular services</div>
-          <div className="service-card-row">
-            {popularItems.map((item) => (
-              <div key={item.id} className="service-card-row__item">
-                <ServiceCard
-                  icon={item.icon}
-                  name={item.name}
-                  chips={[
-                    { icon: MapPin, label: item.regionLabel },
-                    { icon: Waypoints, label: item.transportLabel },
-                  ]}
-                  selected={selectedIds.has(item.id)}
-                  onClick={() => toggleSelected(item.id)}
-                  onSettingsClick={() =>
-                    openServiceDetail(resolveDisplayItemServiceId(item, getOrCreateServiceForEntry))
-                  }
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <LibraryPickerGrid
         tab={tab}
         onTabChange={setTab}
@@ -101,7 +73,7 @@ export function Library() {
         onSelectAllToggle={handleSelectAllToggle}
         onSettingsClick={(item) => openServiceDetail(resolveDisplayItemServiceId(item, getOrCreateServiceForEntry))}
         emptyTitle="No custom services yet"
-        emptyText='Use "Create service manually" to add your own service to the library.'
+        emptyText='Use "Create service manually" to add your own service.'
       />
 
       {activeServiceId && (
