@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { SlidersHorizontal, Check, X } from 'lucide-react';
+import { SlidersHorizontal, Check } from 'lucide-react';
 import clsx from 'clsx';
 
 interface ServiceCardProps {
@@ -9,10 +9,9 @@ interface ServiceCardProps {
   selected: boolean;
   onClick: () => void;
   onSettingsClick: () => void;
-  onRemoveClick?: () => void;
 }
 
-export function ServiceCard({ icon, name, chips, selected, onClick, onSettingsClick, onRemoveClick }: ServiceCardProps) {
+export function ServiceCard({ icon, name, chips, selected, onClick, onSettingsClick }: ServiceCardProps) {
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -23,11 +22,6 @@ export function ServiceCard({ icon, name, chips, selected, onClick, onSettingsCl
   function handleSettingsClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.stopPropagation();
     onSettingsClick();
-  }
-
-  function handleRemoveClick(e: React.MouseEvent<HTMLButtonElement>) {
-    e.stopPropagation();
-    onRemoveClick?.();
   }
 
   return (
@@ -56,16 +50,6 @@ export function ServiceCard({ icon, name, chips, selected, onClick, onSettingsCl
           >
             <SlidersHorizontal size={14} />
           </button>
-          {onRemoveClick && (
-            <button
-              className="service-card__remove-btn"
-              onClick={handleRemoveClick}
-              tabIndex={-1}
-              aria-label="Remove from preset"
-            >
-              <X size={14} />
-            </button>
-          )}
         </div>
       </div>
 

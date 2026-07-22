@@ -5,17 +5,14 @@ import { Modal } from '../common/Modal';
 import { useStore } from '../../store/useStore';
 import { REGIONS } from '../../data/regions';
 import { TRANSPORT_TYPE_LABELS, CONNECTION_MODE_LABELS } from '../../lib/labels';
-import { SavePresetModal } from '../presets/SavePresetModal';
 import type { Encryption, NetworkRule, TransportType, ConnectionMode } from '../../types';
 
 export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; onClose: () => void }) {
   const service = useStore((s) => s.library.find((sv) => sv.id === serviceId));
   const showAdvancedSettings = useStore((s) => s.appSettings.showAdvancedSettings);
   const updateService = useStore((s) => s.updateService);
-  const enableServices = useStore((s) => s.enableServices);
   const startWithOnly = useStore((s) => s.startWithOnly);
   const setActiveTab = useStore((s) => s.setActiveTab);
-  const [showSaveModal, setShowSaveModal] = useState(false);
   const [regionSearch, setRegionSearch] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -34,12 +31,6 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
     } else {
       onClose();
     }
-  }
-
-  function handleAddToPreset() {
-    if (!service) return;
-    enableServices([service.id]);
-    setShowSaveModal(true);
   }
 
   function handleStart() {
@@ -250,19 +241,11 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
       )}
 
       <div style={{ display: 'flex', gap: 'var(--space-8)', marginTop: 'var(--space-8)' }}>
-        <button className="btn" style={{ flex: 1, justifyContent: 'center' }} onClick={handleAddToPreset}>
-          <Plus size={14} />
-          Add to preset
-        </button>
         <button className="btn btn--primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handleStart}>
           <Play size={14} />
           Start
         </button>
       </div>
-
-      {showSaveModal && (
-        <SavePresetModal serviceIds={[service.id]} onClose={() => setShowSaveModal(false)} />
-      )}
 
       {showCloseConfirm && (
         <Modal

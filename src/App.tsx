@@ -5,7 +5,6 @@ import { Sidebar } from './components/layout/Sidebar';
 import { WindowTitleBar } from './components/layout/WindowTitleBar';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { Library } from './components/library/Library';
-import { Presets } from './components/presets/Presets';
 import { Settings } from './components/settings/Settings';
 import { Help } from './components/help/Help';
 import { AuthScreen } from './components/auth/AuthScreen';
@@ -64,7 +63,6 @@ function App() {
         <div className="content">
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'library' && <Library />}
-          {activeTab === 'presets' && <Presets />}
           {activeTab === 'settings' && <Settings />}
           {activeTab === 'help' && <Help />}
         </div>
@@ -86,7 +84,6 @@ function App() {
             <div className="content">
               {activeTab === 'dashboard' && <Dashboard />}
               {activeTab === 'library' && <Library />}
-              {activeTab === 'presets' && <Presets />}
               {activeTab === 'settings' && <Settings />}
           {activeTab === 'help' && <Help />}
             </div>

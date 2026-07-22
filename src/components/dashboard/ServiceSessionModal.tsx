@@ -11,7 +11,6 @@ export function ServiceSessionModal({ serviceId, onClose }: { serviceId: string;
   const connection = useStore((s) => s.connections[serviceId]);
   const bridges = useStore((s) => s.bridges);
   const toggleServiceEnabled = useStore((s) => s.toggleServiceEnabled);
-  const performNotificationAction = useStore((s) => s.performNotificationAction);
 
   if (!service || !route) return null;
 
@@ -56,9 +55,7 @@ export function ServiceSessionModal({ serviceId, onClose }: { serviceId: string;
           className="btn btn--primary"
           style={{ width: '100%', justifyContent: 'center' }}
           onClick={() => {
-            const notif = useStore.getState().notifications.find((n) => n.relatedServiceId === serviceId && !n.read);
-            if (notif) performNotificationAction(notif.id, 'switch_route');
-            else import('../../sim/engine').then(({ retryService }) => retryService(serviceId));
+            import('../../sim/engine').then(({ retryService }) => retryService(serviceId));
           }}
         >
           Retry connection

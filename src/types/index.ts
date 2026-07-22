@@ -78,22 +78,6 @@ export interface Connection {
   qualityHistory: QualitySample[];
 }
 
-export interface ServiceConfigSnapshot {
-  serviceId: string;
-  region: string;
-  enabled: boolean;
-  encryption: Encryption;
-  transportType: TransportType;
-}
-
-export interface Preset {
-  id: string;
-  name: string;
-  serviceConfigs: ServiceConfigSnapshot[];
-  isActive: boolean;
-  createdAt: number;
-}
-
 export type BridgeStatus = 'available' | 'connecting' | 'connected' | 'failed';
 
 export interface Bridge {
@@ -102,33 +86,6 @@ export interface Bridge {
   status: BridgeStatus;
   triggeredBy: string | null;
   isAuto: boolean;
-}
-
-export type NotificationType =
-  | 'route_unavailable'
-  | 'server_overload'
-  | 'quality_degraded'
-  | 'service_unresponsive'
-  | 'bridge_suggested'
-  | 'bridge_connected'
-  | 'subscription_expiring';
-
-export type NotificationSeverity = 'info' | 'warning' | 'critical';
-
-export interface NotificationAction {
-  label: string;
-  actionType: 'switch_route' | 'connect_bridge' | 'go_to_service' | 'dismiss';
-}
-
-export interface AppNotification {
-  id: string;
-  type: NotificationType;
-  relatedServiceId: string | null;
-  severity: NotificationSeverity;
-  message: string;
-  createdAt: number;
-  read: boolean;
-  actions: NotificationAction[];
 }
 
 export type Theme = 'light' | 'dark' | 'system';

@@ -48,13 +48,6 @@ export function beginConnect(serviceId: string) {
     if (failed) {
       s.setServiceStatus(serviceId, 'error');
       s.setRouteStatus(serviceId, 'unavailable');
-      s.pushNotification({
-        type: 'service_unresponsive',
-        relatedServiceId: serviceId,
-        severity: 'critical',
-        message: `${service.name}: failed to establish a connection.`,
-        actions: [{ label: 'Retry connection', actionType: 'switch_route' }],
-      });
       scheduleAutoRetry(serviceId);
     } else {
       s.setServiceStatus(serviceId, 'connected');
@@ -160,16 +153,6 @@ function degradeService(serviceId: string) {
   if (!service) return;
   state.setServiceStatus(serviceId, 'degraded');
   state.setRouteStatus(serviceId, 'degraded');
-  const isOverload = Math.random() < 0.5;
-  state.pushNotification({
-    type: isOverload ? 'server_overload' : 'quality_degraded',
-    relatedServiceId: serviceId,
-    severity: 'warning',
-    message: isOverload
-      ? `${service.name}: the region server is overloaded, connection quality has dropped.`
-      : `${service.name}: connection quality has degraded.`,
-    actions: [{ label: 'Go to service', actionType: 'go_to_service' }],
-  });
 }
 
 function recoverService(serviceId: string) {
@@ -186,16 +169,6 @@ function loseRoute(serviceId: string) {
   if (!service) return;
   state.setServiceStatus(serviceId, 'error');
   state.setRouteStatus(serviceId, 'unavailable');
-  state.pushNotification({
-    type: 'route_unavailable',
-    relatedServiceId: serviceId,
-    severity: 'critical',
-    message: `${service.name}: route unavailable.`,
-    actions: [
-      { label: 'Connect bridge', actionType: 'connect_bridge' },
-      { label: 'Go to service', actionType: 'go_to_service' },
-    ],
-  });
   attemptRestoreMainRoute(serviceId);
 }
 
@@ -212,17 +185,8 @@ function attemptRestoreMainRoute(serviceId: string) {
       beginConnect(serviceId);
       return;
     }
-    const auto = state.appSettings.advancedNetwork.autoBridge;
-    if (auto) {
+    if (state.appSettings.advancedNetwork.autoBridge) {
       connectBridgeFor(serviceId, true);
-    } else {
-      state.pushNotification({
-        type: 'bridge_suggested',
-        relatedServiceId: serviceId,
-        severity: 'warning',
-        message: `${service.name}: the primary route is unavailable. Connect the emergency bridge?`,
-        actions: [{ label: 'Connect bridge', actionType: 'connect_bridge' }],
-      });
     }
   }, randRange(2500, 4000));
   recoveryTimers.set(serviceId, t);
@@ -246,12 +210,5 @@ export function connectBridgeFor(serviceId: string, isAuto = false) {
       latencyMs: randRange(60, 180),
     });
     s2.setServiceStatus(serviceId, 'connected');
-    s2.pushNotification({
-      type: 'bridge_connected',
-      relatedServiceId: serviceId,
-      severity: 'info',
-      message: `${svc.name}: connection restored via the emergency bridge.`,
-      actions: [],
-    });
   }, randRange(1200, 2200));
 }
