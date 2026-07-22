@@ -551,14 +551,17 @@
   object-fit: fill;
 }
 
-/* Skip-onboarding state (empty library): banner grows to hold the routing
-   CTA row, and the key-visual anchors to the bottom at its natural aspect
-   ratio instead of stretching to fill the whole panel. */
-.hero-banner--cta {
+/* Skip-onboarding state (empty library) and last-session state (stopped,
+   has history) are both the "tall" hero treatment: the banner grows to
+   hold extra content, and the key-visual anchors to the bottom at its
+   natural aspect ratio instead of stretching to fill the whole panel. */
+.hero-banner--cta,
+.hero-banner--session {
   min-height: 620px;
 }
 
-.hero-banner--cta .hero-banner__art {
+.hero-banner--cta .hero-banner__art,
+.hero-banner--session .hero-banner__art {
   inset: auto 0 0 0;
   top: auto;
   height: auto;
@@ -571,9 +574,10 @@
   padding: var(--space-40) var(--space-48);
 }
 
-/* The CTA (skip-onboarding) state is centered per Figma; the compact
-   subtitle state stays left-aligned, matching the other mockup. */
-.hero-banner--cta .hero-banner__content {
+/* Both tall states are centered per Figma; the compact subtitle state
+   stays left-aligned, matching the other mockup. */
+.hero-banner--cta .hero-banner__content,
+.hero-banner--session .hero-banner__content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -591,6 +595,15 @@
      stay dark regardless of app theme, so its text must too. */
   color: var(--on-accent);
   margin: 0;
+}
+
+/* Last-session state uses Figma's smaller H2 style, not the H1 used by
+   the welcome/CTA states. */
+.hero-banner--session .hero-banner__title {
+  font-size: 46px;
+  line-height: 52px;
+  /* -1.4% of 46px */
+  letter-spacing: -0.644px;
 }
 
 .hero-banner__subtitle {
@@ -644,6 +657,9 @@
 }
 
 .hero-banner__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
   border: none;
   border-radius: var(--radius-sm);
   padding: var(--space-8) var(--space-12);
@@ -665,6 +681,56 @@
 .hero-banner__btn--tertiary {
   background: rgba(var(--on-accent-rgb), 0.08);
   cursor: default;
+}
+
+/* Last-session state: service icon row + Start button */
+.hero-banner__session-icons {
+  display: flex;
+  gap: var(--space-8);
+  margin-top: var(--space-40);
+}
+
+.hero-banner__session-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius);
+  background: var(--icon-swatch-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero-banner__session-icon--overflow {
+  background: rgba(var(--on-accent-rgb), 0.08);
+  box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24);
+  color: var(--on-accent);
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.hero-banner__session-start {
+  margin-top: var(--space-48);
+}
+
+/* Floating "Full mode" panel, positioned relative to the hero card itself
+   (not the padded content column) to match Figma's bottom:24/right:14.
+   Figma's key-visual there is soft blur-glow shapes; our stand-in art has
+   sharp graphics (the "FIX" keycap) in that corner, so the panel needs its
+   own backdrop to stay legible — not present in the source design. */
+.hero-banner__fullmode-panel {
+  position: absolute;
+  bottom: var(--space-24);
+  right: 14px;
+  width: 312px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  padding: var(--space-16);
+  border-radius: var(--radius);
+  background: rgba(var(--frames-bg-rgb), 0.72);
+  backdrop-filter: blur(8px);
 }
 
 /* Quick launch: last session + preset previews */

@@ -30,33 +30,21 @@ export function Dashboard() {
     return <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('library')} />;
   }
 
+  const isRoutingLive = isRunning && library.some((s) => s.enabled);
+  const hasLastSession = !isRoutingLive && lastSessionServices.length > 0;
+
   return (
     <div>
-      <HeroBanner />
+      {hasLastSession ? (
+        <HeroBanner lastSession={{ services: lastSessionServices, onStart: relaunchLastSession }} />
+      ) : (
+        <HeroBanner />
+      )}
 
-      {isRunning && library.some((s) => s.enabled) ? (
+      {isRoutingLive ? (
         <RoutingDiagram />
       ) : (
         <div>
-          {lastSessionServices.length > 0 && (
-            <div className="quick-launch-card" style={{ marginBottom: 'var(--space-16)' }}>
-              <div className="quick-launch-card__info">
-                <div className="quick-launch-card__title">Last session</div>
-                <div className="quick-launch-card__icons">
-                  {lastSessionServices.map((s) => (
-                    <span key={s.id} className="quick-launch-card__icon" title={s.name}>
-                      <ServiceIcon name={s.name} fallback={s.icon} size={16} />
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <button className="btn btn--primary" onClick={relaunchLastSession}>
-                <Play size={14} />
-                Launch again
-              </button>
-            </div>
-          )}
-
           {presets.length > 0 && (
             <div className="preset-preview-row">
               {presets.map((preset) => {
