@@ -3,26 +3,8 @@ import { useStore } from '../../store/useStore';
 import { ServiceDetailModal } from './ServiceDetailModal';
 import { WelcomeOnboarding } from './WelcomeOnboarding';
 import { RoutingDiagram } from './RoutingDiagram';
-
-function DashboardHero({
-  variant,
-  onSelectServices,
-}: {
-  variant: 'full' | 'compact';
-  onSelectServices?: () => void;
-}) {
-  return (
-    <div className={`dashboard-hero dashboard-hero--${variant}`}>
-      <div className="dashboard-hero__title">Welcome to Fixnet</div>
-      <p className="dashboard-hero__subtitle">Faster, smarter, and more reliable connections</p>
-      {variant === 'full' && onSelectServices && (
-        <button className="btn btn--primary dashboard-hero__cta" onClick={onSelectServices}>
-          Select services
-        </button>
-      )}
-    </div>
-  );
-}
+import { ServiceIcon } from '../common/ServiceIcon';
+import { HeroBanner } from './HeroBanner';
 
 export function Dashboard() {
   const isFirstLoginOfSession = useStore((s) => s.isFirstLoginOfSession);
@@ -44,18 +26,18 @@ export function Dashboard() {
     .map((id) => library.find((s) => s.id === id))
     .filter((s): s is NonNullable<typeof s> => !!s);
 
+  if (library.length === 0) {
+    return <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('library')} />;
+  }
+
   return (
     <div>
-      {library.length === 0 ? (
-        <DashboardHero variant="full" onSelectServices={() => setActiveTab('library')} />
-      ) : isRunning && library.some((s) => s.enabled) ? (
-        <>
-          <DashboardHero variant="compact" />
-          <RoutingDiagram />
-        </>
+      <HeroBanner />
+
+      {isRunning && library.some((s) => s.enabled) ? (
+        <RoutingDiagram />
       ) : (
         <div>
-          <DashboardHero variant="compact" />
           {lastSessionServices.length > 0 && (
             <div className="quick-launch-card" style={{ marginBottom: 'var(--space-16)' }}>
               <div className="quick-launch-card__info">
@@ -63,7 +45,7 @@ export function Dashboard() {
                 <div className="quick-launch-card__icons">
                   {lastSessionServices.map((s) => (
                     <span key={s.id} className="quick-launch-card__icon" title={s.name}>
-                      {s.icon}
+                      <ServiceIcon name={s.name} fallback={s.icon} size={16} />
                     </span>
                   ))}
                 </div>
@@ -87,7 +69,7 @@ export function Dashboard() {
                     <div className="quick-launch-card__icons">
                       {presetServices.map((s) => (
                         <span key={s.id} className="quick-launch-card__icon" title={s.name}>
-                          {s.icon}
+                          <ServiceIcon name={s.name} fallback={s.icon} size={16} />
                         </span>
                       ))}
                     </div>
