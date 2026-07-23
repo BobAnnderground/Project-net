@@ -79,6 +79,15 @@ Run through all three categories for every file in scope.
 
 ### 1. Type consistency
 
+- [ ] Every store member (state or action) referenced in a component
+  exists verbatim in the "Store contract" list above. Grep the component
+  for `useStore(` destructuring and property access, then verify each
+  name against the canonical action/state list. Flag any name that
+  doesn't match exactly (typos, renamed/removed actions, made-up names)
+  as FAIL — this is a build-breaking error, not a style issue.
+- [ ] Same check for every type/interface field referenced from
+  `src/types/index.ts` — flag access to fields that don't exist on
+  the canonical interface.
 - [ ] All props interfaces use types from `src/types/index.ts` — no inline re-definitions of `ServiceStatus`, `RouteStatus`, etc.
 - [ ] No string literals used where a union type exists (e.g., `status === 'activ'` typo, or `category: 'AI'` wrong case)
 - [ ] No `any` — flag every occurrence with exact line

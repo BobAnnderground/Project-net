@@ -44,6 +44,28 @@ export function LibraryPickerGrid({
         </div>
       ) : (
         <div className="service-card-grid">
+          {showSelectAll && (
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={handleSelectAllClick}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSelectAllClick();
+                }
+              }}
+              className={`service-card service-card--select-all ${allVisibleSelected ? 'service-card--selected' : ''}`}
+            >
+              <div className="service-card__header">
+                <div className="service-card__icon-swatch">
+                  <ListChecks size={22} />
+                </div>
+                <span className="service-card__name">Select all</span>
+              </div>
+            </div>
+          )}
+
           {visibleItems.map((item) => (
             <ServiceCard
               key={item.id}

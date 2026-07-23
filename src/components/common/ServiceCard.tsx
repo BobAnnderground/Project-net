@@ -35,37 +35,39 @@ export function ServiceCard({ icon, name, chips, selected, onClick, onSettingsCl
     >
       {selected && (
         <div className="service-card__check">
-          <Check size={10} color="var(--on-accent)" />
+          <div className="service-card__check-icon">
+            <Check size={10} strokeWidth={3} />
+          </div>
         </div>
       )}
 
       <div className="service-card__header">
         <div className="service-card__icon-swatch">
-          <ServiceIcon name={name} fallback={icon} size={18} />
+          <ServiceIcon name={name} fallback={icon} size={26} />
         </div>
         <span className="service-card__name">{name}</span>
-        <div className="service-card__actions">
-          <button
-            className="service-card__settings-btn"
-            onClick={handleSettingsClick}
-            tabIndex={-1}
-            aria-label="Settings"
-          >
-            <SlidersHorizontal size={14} />
-          </button>
-        </div>
       </div>
 
-      <div className="service-card__chips">
-        {chips.map((chip, i) => {
-          const Icon = chip.icon;
-          return (
-            <span key={i} className="service-chip">
-              <Icon size={12} className="service-chip__icon" />
-              <span className="service-chip__label">{chip.label}</span>
-            </span>
-          );
-        })}
+      <div className="service-card__bottom-row">
+        <div className="service-card__chips">
+          {chips.map((chip, i) => {
+            const Icon = chip.icon;
+            return (
+              <span key={i} className="service-chip">
+                <Icon size={12} className="service-chip__icon" />
+                <span className="service-chip__label">{chip.label}</span>
+              </span>
+            );
+          })}
+        </div>
+        <button
+          className="service-card__settings-btn"
+          onClick={handleSettingsClick}
+          tabIndex={-1}
+          aria-label="Settings"
+        >
+          <SlidersHorizontal size={16} />
+        </button>
       </div>
     </div>
   );
