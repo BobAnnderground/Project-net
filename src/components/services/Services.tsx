@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wrench, Play } from 'lucide-react';
+import { Plus, Play } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { LibraryPickerGrid } from '../common/LibraryPickerGrid';
 import { ServiceDetailModal } from '../dashboard/ServiceDetailModal';
@@ -25,11 +25,14 @@ export function Services() {
   const setActiveTab = useStore((s) => s.setActiveTab);
   const [manualAddStep, setManualAddStep] = useState<'closed' | 'intro' | 'form'>('closed');
   const [tab, setTab] = useState<LibraryTab>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const { selectedIds, toggleSelected } = useServiceSelection();
 
   const catalogItems = buildCatalogDisplayItems();
   const customItems = buildCustomDisplayItems(library);
-  const visibleItems = filterItemsByTab(tab, catalogItems, customItems);
+  const visibleItems = filterItemsByTab(tab, catalogItems, customItems).filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+  );
 
   function handleStart() {
     const serviceIds = resolveServiceIds(selectedIds, getOrCreateServiceForEntry);
@@ -39,10 +42,11 @@ export function Services() {
 
   return (
     <div>
-      <div className="page-header page-header--end">
+      <div className="page-header">
+        <div className="page-subtitle">Select the services you want to save to a preset</div>
         <button className="btn btn--primary" onClick={() => setManualAddStep('intro')}>
-          <Wrench size={14} />
-          Create service manually
+          <Plus size={14} />
+          Add service
         </button>
       </div>
 
@@ -68,7 +72,10 @@ export function Services() {
         onToggle={toggleSelected}
         onSettingsClick={(item) => openServiceDetail(resolveDisplayItemServiceId(item, getOrCreateServiceForEntry))}
         emptyTitle="No custom services yet"
-        emptyText='Use "Create service manually" to add your own service.'
+        emptyText='Use "Add service" to add your own service.'
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by services"
       />
 
       {activeServiceId && (
