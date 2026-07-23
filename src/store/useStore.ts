@@ -40,6 +40,13 @@ interface EmergencyBridge {
   status: 'active' | 'failed';
 }
 
+interface BackupBridge {
+  id: string;
+  code: string;
+  addedAt: number;
+  status: 'connected' | 'disconnected';
+}
+
 interface StoreState {
   isAuthenticated: boolean;
   isFirstLoginOfSession: boolean;
@@ -56,6 +63,7 @@ interface StoreState {
   activeServiceId: string | null;
   toast: ToastState | null;
   emergencyBridge: EmergencyBridge | null;
+  backupBridges: BackupBridge[];
 
   // library / service management
   addServiceFromLibrary: (entryId: string) => void;
@@ -102,6 +110,8 @@ interface StoreState {
   closeServiceDetail: () => void;
   showToast: (message: string) => void;
   addEmergencyBridge: (code: string) => void;
+  addBackupBridge: (code: string) => void;
+  removeBackupBridge: (id: string) => void;
 }
 
 const MAX_QUALITY_SAMPLES = 40;
@@ -126,6 +136,7 @@ export const useStore = create<StoreState>((set, get) => ({
     addedAt: Date.now() - 1000 * 60 * 60 * 24 * 3,
     status: 'failed',
   },
+  backupBridges: [],
 
   addServiceFromLibrary: (entryId) => {
     const entry = catalogById(entryId);
@@ -539,5 +550,19 @@ export const useStore = create<StoreState>((set, get) => ({
   addEmergencyBridge: (code) => {
     set({ emergencyBridge: { code, addedAt: Date.now(), status: 'active' } });
     get().showToast('Emergency bridge added successfully. It will stay active until the next configuration update.');
+  },
+
+  addBackupBridge: (code) => {
+    const bridge: BackupBridge = {
+      id: nanoid(),
+      code,
+      addedAt: Date.now(),
+      status: 'connected',
+    };
+    set((state) => ({ backupBridges: [...state.backupBridges, bridge] }));
+  },
+
+  removeBackupBridge: (id) => {
+    set((state) => ({ backupBridges: state.backupBridges.filter((b) => b.id !== id) }));
   },
 }));
