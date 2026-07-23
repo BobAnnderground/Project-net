@@ -3,12 +3,15 @@ import { REGIONS } from '../data/regions';
 import { TRANSPORT_TYPE_CHIP_LABELS } from './labels';
 import type { Service, ServiceCategory } from '../types';
 
-export type LibraryTab = 'all' | 'games' | 'programs' | 'custom';
+export type LibraryTab = 'all' | 'games' | 'social' | 'ai' | 'entertainment' | 'other' | 'custom';
 
 export const LIBRARY_TABS: { id: LibraryTab; label: string }[] = [
   { id: 'all', label: 'All' },
   { id: 'games', label: 'Games' },
-  { id: 'programs', label: 'Programs' },
+  { id: 'social', label: 'Social' },
+  { id: 'ai', label: 'AI' },
+  { id: 'entertainment', label: 'Entertainment' },
+  { id: 'other', label: 'Other' },
   { id: 'custom', label: 'Custom' },
 ];
 
@@ -64,8 +67,14 @@ export function filterItemsByTab(
       return [...catalogItems, ...customItems];
     case 'games':
       return catalogItems.filter((i) => i.category === 'game');
-    case 'programs':
-      return catalogItems.filter((i) => i.category !== 'game');
+    case 'social':
+      return catalogItems.filter((i) => i.category === 'messenger');
+    case 'ai':
+      return catalogItems.filter((i) => i.category === 'ai');
+    case 'entertainment':
+      return catalogItems.filter((i) => i.category === 'streaming');
+    case 'other':
+      return catalogItems.filter((i) => i.category === 'other' || i.category === 'browser');
     case 'custom':
       return customItems;
   }
