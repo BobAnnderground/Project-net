@@ -1421,37 +1421,36 @@
 
 .service-card {
   position: relative;
-  overflow: visible;
-  height: 108px;
+  overflow: hidden;
+  height: 148px;
   width: 100%;
   border-radius: var(--radius);
-  padding: var(--space-12);
+  padding: var(--space-16);
   cursor: pointer;
-  background: var(--bg-1);
-  border: 1px solid var(--border);
-  transition: background 120ms ease, border-color 120ms ease;
+  background: var(--frames-neutral-m);
+  border: 1px solid transparent;
+  box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24);
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   box-sizing: border-box;
 }
 
 .service-card:hover:not(.service-card--selected) {
-  background: var(--bg-2);
-  border-color: var(--text-2);
+  background: rgb(var(--frames-bg-rgb));
+  border-color: rgba(var(--on-accent-rgb), 0.16);
+  box-shadow: none;
 }
 
 .service-card--selected {
-  background: var(--accent-dim);
-  border-color: var(--accent);
+  background: rgb(var(--frames-bg-rgb));
+  border-color: rgba(var(--on-accent-rgb), 0.16);
 }
 
 .service-card--select-all {
   border-style: dashed;
   justify-content: center;
-}
-
-.service-card--select-all .service-card__header {
-  margin-bottom: 0;
 }
 
 .service-card--select-all .service-card__icon-swatch {
@@ -1467,64 +1466,78 @@
 .service-card__header {
   display: flex;
   align-items: center;
-  gap: var(--space-8);
-  margin-bottom: var(--space-8);
+  gap: var(--space-12);
 }
 
 .service-card__icon-swatch {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
   background: var(--icon-swatch-bg);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 24px;
 }
 
 .service-card__name {
   flex: 1;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-0);
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: -0.198px;
+  font-weight: 400;
+  color: var(--on-accent);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
 }
 
-.service-card__actions {
+.service-card__bottom-row {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  align-items: flex-end;
+  gap: var(--space-8);
+  width: 100%;
 }
 
 .service-card__settings-btn {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
-  color: var(--text-2);
+  color: var(--on-accent);
   cursor: pointer;
   padding: 0;
-  transition: color 150ms ease, background 150ms ease;
+  opacity: 0;
+  transition: opacity 150ms ease, background 150ms ease;
+}
+
+.service-card:hover .service-card__settings-btn {
+  opacity: 1;
+  background: rgba(var(--on-accent-rgb), 0.08);
+}
+
+.service-card--selected .service-card__settings-btn {
+  opacity: 1;
 }
 
 .service-card__settings-btn:hover {
-  color: var(--text-1);
-  background: var(--bg-3);
+  background: rgba(var(--on-accent-rgb), 0.08);
 }
 
 .service-card__chips {
   display: flex;
-  gap: var(--space-8);
-  flex-wrap: nowrap;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 4px 16px;
+  min-width: 0;
 }
 
 .service-chip {
@@ -1532,22 +1545,19 @@
   align-items: center;
   gap: var(--space-4);
   min-width: 0;
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4) var(--space-8);
 }
 
 .service-chip__icon {
-  color: var(--text-2);
+  color: rgba(var(--on-accent-rgb), 0.64);
   flex-shrink: 0;
 }
 
 .service-chip__label {
   font-size: 11px;
+  line-height: 16px;
   font-weight: 400;
-  color: var(--text-1);
-  letter-spacing: 0.01em;
+  color: var(--on-accent);
+  letter-spacing: -0.121px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1561,17 +1571,28 @@
 
 .service-card__check {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius);
+  background: rgb(var(--frames-bg-rgb));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.service-card__check-icon {
   width: 16px;
   height: 16px;
-  border-radius: 50%;
-  background: var(--accent);
+  border-radius: 4px;
+  background: var(--on-accent);
+  color: rgb(var(--frames-bg-rgb));
   display: flex;
   align-items: center;
   justify-content: center;
   animation: service-card-badge-in 150ms ease-out both;
-  z-index: 1;
 }
 
 /* ── Routing Diagram ─────────────────────────────────────────────────────── */

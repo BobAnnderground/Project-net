@@ -69,7 +69,7 @@ export function LibraryPickerGrid({
             >
               <div className="service-card__header">
                 <div className="service-card__icon-swatch">
-                  <ListChecks size={16} />
+                  <ListChecks size={22} />
                 </div>
                 <span className="service-card__name">Select all</span>
               </div>
