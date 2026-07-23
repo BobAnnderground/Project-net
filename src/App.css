@@ -1052,6 +1052,28 @@
   position: relative;
 }
 
+.auth-theme-toggle {
+  position: absolute;
+  bottom: var(--space-16);
+  right: var(--space-16);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text-1);
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+}
+
+.auth-theme-toggle:hover {
+  color: var(--text-0);
+  background: var(--bg-3);
+}
+
 .auth-card {
   width: 440px;
   background: var(--bg-1);
