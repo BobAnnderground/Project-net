@@ -83,7 +83,6 @@ interface StoreState {
 
   // settings
   updateAppSettings: (patch: Partial<AppSettings>) => void;
-  updateAdvancedNetwork: (patch: Partial<AppSettings['advancedNetwork']>) => void;
   updateDns: (patch: Partial<AppSettings['dns']>) => void;
   addBackupDns: () => void;
   updateBackupDns: (index: number, value: string) => void;
@@ -400,18 +399,6 @@ export const useStore = create<StoreState>((set, get) => ({
 
   updateAppSettings: (patch) => {
     set((state) => ({ appSettings: { ...state.appSettings, ...patch } }));
-  },
-
-  updateAdvancedNetwork: (patch) => {
-    set((state) => ({
-      appSettings: {
-        ...state.appSettings,
-        advancedNetwork: { ...state.appSettings.advancedNetwork, ...patch },
-      },
-    }));
-    if (patch.tickIntervalMs !== undefined) {
-      import('../sim/engine').then(({ updateTickInterval }) => updateTickInterval());
-    }
   },
 
   updateDns: (patch) => {
