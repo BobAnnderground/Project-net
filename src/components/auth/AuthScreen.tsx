@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import type { KeyboardEvent, ClipboardEvent } from 'react';
-import { X } from 'lucide-react';
+import { X, Sun, Moon } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 type AuthState = 'idle' | 'checking' | 'error' | 'success';
@@ -11,6 +11,9 @@ interface Props {
 
 export function AuthScreen({ onAuthenticated }: Props) {
   const login = useStore((s) => s.login);
+  const theme = useStore((s) => s.appSettings.theme);
+  const updateAppSettings = useStore((s) => s.updateAppSettings);
+  const isDarkTheme = theme !== 'light';
 
   const [cells, setCells] = useState<[string, string, string, string]>(['', '', '', '']);
   const [authState, setAuthState] = useState<AuthState>('idle');
@@ -133,6 +136,16 @@ export function AuthScreen({ onAuthenticated }: Props) {
 
   return (
     <div className="auth-bg">
+      <button
+        type="button"
+        className="auth-theme-toggle"
+        onClick={() => updateAppSettings({ theme: isDarkTheme ? 'light' : 'dark' })}
+        aria-label="Toggle theme"
+        title="Toggle theme (test)"
+      >
+        {isDarkTheme ? <Sun size={14} /> : <Moon size={14} />}
+      </button>
+
       <div className="auth-card">
         {/* Wordmark */}
         <div className="auth-wordmark">
