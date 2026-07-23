@@ -1,4 +1,4 @@
-import { MapPin, Waypoints, ListChecks } from 'lucide-react';
+import { MapPin, Waypoints } from 'lucide-react';
 import { ServiceCard } from './ServiceCard';
 import { LIBRARY_TABS, type LibraryTab, type LibraryDisplayItem } from '../../lib/libraryItems';
 
@@ -8,7 +8,6 @@ interface LibraryPickerGridProps {
   visibleItems: LibraryDisplayItem[];
   selectedIds: Set<string>;
   onToggle: (id: string) => void;
-  onSelectAllToggle: (ids: string[], selectAll: boolean) => void;
   onSettingsClick: (item: LibraryDisplayItem) => void;
   emptyTitle: string;
   emptyText: string;
@@ -20,19 +19,10 @@ export function LibraryPickerGrid({
   visibleItems,
   selectedIds,
   onToggle,
-  onSelectAllToggle,
   onSettingsClick,
   emptyTitle,
   emptyText,
 }: LibraryPickerGridProps) {
-  const allVisibleSelected = visibleItems.length > 0 && visibleItems.every((i) => selectedIds.has(i.id));
-  const visibleIds = visibleItems.map((i) => i.id);
-  const showSelectAll = visibleItems.length > 2;
-
-  function handleSelectAllClick() {
-    onSelectAllToggle(visibleIds, !allVisibleSelected);
-  }
-
   return (
     <>
       <div className="segmented library-tabs">

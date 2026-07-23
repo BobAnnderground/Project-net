@@ -12,13 +12,5 @@ export function useServiceSelection() {
     });
   }
 
-  function handleSelectAllToggle(ids: string[], selectAll: boolean) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      ids.forEach((id) => (selectAll ? next.add(id) : next.delete(id)));
-      return next;
-    });
-  }
-
-  return { selectedIds, setSelectedIds, toggleSelected, handleSelectAllToggle };
+  return { selectedIds, setSelectedIds, toggleSelected };
 }

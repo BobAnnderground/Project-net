@@ -302,6 +302,10 @@
   margin-bottom: var(--space-16);
 }
 
+.page-header--end {
+  justify-content: flex-end;
+}
+
 .page-title {
   font-size: 19px;
   font-weight: 700;
