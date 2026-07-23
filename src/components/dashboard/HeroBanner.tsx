@@ -18,11 +18,7 @@ const MAX_SESSION_ICONS = 6;
 export function HeroBanner({ showRoutingCta, onSelectServices, lastSession }: HeroBannerProps) {
   const visibleSessionServices = lastSession?.services.slice(0, MAX_SESSION_ICONS) ?? [];
   const overflowCount = lastSession ? lastSession.services.length - visibleSessionServices.length : 0;
-  // The CTA and last-session states use Figma's blurred glow-shape key-visual,
-  // which we don't have an asset for yet — showing the compact banner's
-  // keycap art there would be actively wrong, not just imprecise, so we
-  // show nothing rather than a mismatched image.
-  const showKeyVisual = !showRoutingCta && !lastSession;
+  const showCompactArt = !showRoutingCta && !lastSession;
 
   return (
     <div
@@ -31,7 +27,13 @@ export function HeroBanner({ showRoutingCta, onSelectServices, lastSession }: He
         'hero-banner--session': !!lastSession,
       })}
     >
-      {showKeyVisual && <img src="/images/hero-keyvisual.png" alt="" className="hero-banner__art" />}
+      {showCompactArt && <img src="/images/hero-keyvisual.png" alt="" className="hero-banner__art" />}
+      {showRoutingCta && (
+        <img src="/images/Key-visual-Welcome.webp" alt="" className="hero-banner__keyvisual" />
+      )}
+      {lastSession && (
+        <img src="/images/Key-visual-last-session.webp" alt="" className="hero-banner__keyvisual" />
+      )}
       <div className="hero-banner__content">
         <h1 className="hero-banner__title">{lastSession ? 'Last session' : 'Welcome to Fixnet'}</h1>
 
