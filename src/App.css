@@ -302,6 +302,10 @@
   margin-bottom: var(--space-16);
 }
 
+.page-header--end {
+  justify-content: flex-end;
+}
+
 .page-title {
   font-size: 19px;
   font-weight: 700;
@@ -1403,20 +1407,6 @@
 .service-card--selected {
   background: var(--accent-dim);
   border-color: var(--accent);
-}
-
-.service-card--select-all {
-  border-style: dashed;
-  justify-content: center;
-}
-
-.service-card--select-all .service-card__header {
-  margin-bottom: 0;
-}
-
-.service-card--select-all .service-card__icon-swatch {
-  background: var(--accent-dim);
-  color: var(--accent);
 }
 
 .service-card:focus-visible {

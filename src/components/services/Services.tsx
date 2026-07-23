@@ -25,7 +25,7 @@ export function Services() {
   const setActiveTab = useStore((s) => s.setActiveTab);
   const [manualAddStep, setManualAddStep] = useState<'closed' | 'intro' | 'form'>('closed');
   const [tab, setTab] = useState<LibraryTab>('all');
-  const { selectedIds, toggleSelected, handleSelectAllToggle } = useServiceSelection();
+  const { selectedIds, toggleSelected } = useServiceSelection();
 
   const catalogItems = buildCatalogDisplayItems();
   const customItems = buildCustomDisplayItems(library);
@@ -39,11 +39,7 @@ export function Services() {
 
   return (
     <div>
-      <div className="page-header">
-        <div>
-          <div className="page-title">Services</div>
-          <div className="page-subtitle">Preset catalog — FR-1, FR-2 SRS</div>
-        </div>
+      <div className="page-header page-header--end">
         <button className="btn btn--primary" onClick={() => setManualAddStep('intro')}>
           <Wrench size={14} />
           Create service manually
@@ -70,7 +66,6 @@ export function Services() {
         visibleItems={visibleItems}
         selectedIds={selectedIds}
         onToggle={toggleSelected}
-        onSelectAllToggle={handleSelectAllToggle}
         onSettingsClick={(item) => openServiceDetail(resolveDisplayItemServiceId(item, getOrCreateServiceForEntry))}
         emptyTitle="No custom services yet"
         emptyText='Use "Create service manually" to add your own service.'
