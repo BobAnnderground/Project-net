@@ -420,6 +420,19 @@
   object-fit: fill;
 }
 
+/* Tall states' key-visual: scaled to the banner's full height, keeping its
+   own aspect ratio, and centered horizontally — overflow is clipped by
+   .hero-banner's own overflow: hidden. */
+.hero-banner__keyvisual {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: auto;
+  max-width: none;
+}
+
 /* Skip-onboarding state (empty library) and last-session state (stopped,
    has history) are both the "tall" hero treatment: the banner fills the
    content row exactly, landing its bottom edge 24px above the window's
