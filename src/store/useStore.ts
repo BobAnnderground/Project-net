@@ -84,7 +84,11 @@ interface StoreState {
   // settings
   updateAppSettings: (patch: Partial<AppSettings>) => void;
   updateAdvancedNetwork: (patch: Partial<AppSettings['advancedNetwork']>) => void;
-  updateConnectionDefaults: (patch: Partial<AppSettings['connectionDefaults']>) => void;
+  updateDns: (patch: Partial<AppSettings['dns']>) => void;
+  addBackupDns: () => void;
+  updateBackupDns: (index: number, value: string) => void;
+  removeBackupDns: (index: number) => void;
+  resetAppSettings: () => void;
 
   // auth
   login: (code: string) => boolean;
@@ -410,13 +414,56 @@ export const useStore = create<StoreState>((set, get) => ({
     }
   },
 
-  updateConnectionDefaults: (patch) => {
+  updateDns: (patch) => {
     set((state) => ({
       appSettings: {
         ...state.appSettings,
-        connectionDefaults: { ...state.appSettings.connectionDefaults, ...patch },
+        dns: { ...state.appSettings.dns, ...patch },
       },
     }));
+  },
+
+  addBackupDns: () => {
+    set((state) => ({
+      appSettings: {
+        ...state.appSettings,
+        dns: { ...state.appSettings.dns, backups: [...state.appSettings.dns.backups, ''] },
+      },
+    }));
+  },
+
+  updateBackupDns: (index, value) => {
+    set((state) => ({
+      appSettings: {
+        ...state.appSettings,
+        dns: {
+          ...state.appSettings.dns,
+          backups: state.appSettings.dns.backups.map((b, i) => (i === index ? value : b)),
+        },
+      },
+    }));
+  },
+
+  removeBackupDns: (index) => {
+    set((state) => ({
+      appSettings: {
+        ...state.appSettings,
+        dns: {
+          ...state.appSettings.dns,
+          backups: state.appSettings.dns.backups.filter((_, i) => i !== index),
+        },
+      },
+    }));
+  },
+
+  resetAppSettings: () => {
+    set({
+      appSettings: {
+        ...defaultAppSettings,
+        dns: { ...defaultAppSettings.dns, backups: [...defaultAppSettings.dns.backups] },
+        advancedNetwork: { ...defaultAppSettings.advancedNetwork },
+      },
+    });
   },
 
   login: (code) => {

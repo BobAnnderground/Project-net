@@ -89,23 +89,22 @@ export interface Bridge {
 }
 
 export type Theme = 'light' | 'dark' | 'system';
-export type WindowBehavior = 'tray' | 'taskbar';
 export type Language = 'en' | 'ru';
-export type UpdateMode = 'automatic' | 'manual';
+
+export interface DnsSettings {
+  current: string;
+  backups: string[];
+}
 
 export interface AppSettings {
   autoLaunch: boolean;
+  launchInTray: boolean;
+  reconnectOnStartup: boolean;
+  closeToTray: boolean;
   theme: Theme;
-  dnsMode: 'system' | 'custom';
-  windowBehavior: WindowBehavior;
   language: Language;
-  updateMode: UpdateMode;
-  connectionDefaults: {
-    transportType: TransportType;
-    region: string;
-    encryption: Encryption;
-    ipv6: boolean;
-  };
+  region: string;
+  dns: DnsSettings;
   showAdvancedSettings: boolean;
   advancedNetwork: {
     degradationChance: number;
