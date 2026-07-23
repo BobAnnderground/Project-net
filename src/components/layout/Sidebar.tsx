@@ -64,9 +64,16 @@ export function Sidebar() {
             >
               <span className="nav-item__icon">
                 <img
-                  src={isActive ? active : inactive}
+                  src={inactive}
                   alt=""
-                  className={isActive ? 'nav-item__icon-img--active' : 'nav-item__icon-img--inactive'}
+                  className="nav-item__icon-img--inactive"
+                  style={{ opacity: isActive ? 0 : 1 }}
+                />
+                <img
+                  src={active}
+                  alt=""
+                  className="nav-item__icon-img--active"
+                  style={{ opacity: isActive ? 1 : 0 }}
                 />
               </span>
               {label}
