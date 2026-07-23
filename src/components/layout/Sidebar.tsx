@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { LayoutDashboard, Library, Settings, HelpCircle, ChevronRight, LogOut } from 'lucide-react';
+import { LayoutDashboard, Library, Settings, ChevronRight, LogOut } from 'lucide-react';
 import { useStore, type TabId } from '../../store/useStore';
 
 const NAV: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
   { id: 'services', label: 'Services', icon: Library },
   { id: 'settings', label: 'Settings', icon: Settings },
-  { id: 'help', label: 'Help', icon: HelpCircle },
 ];
 
 export function Sidebar() {
