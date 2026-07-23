@@ -63,6 +63,7 @@
   --overlay-rgb: 2, 5, 10;
   --frames-bg-rgb: 20, 17, 22;
   --frames-neutral-m: #1f1827;
+  --text-green: #00ff7b;
   --window-bg: #0a0810;
 
   /* Legacy values with no equivalent in design/tokens.json — kept at their
