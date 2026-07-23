@@ -700,19 +700,12 @@
 }
 
 /* Settings extras */
-.settings-subheading {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-1);
-  margin: var(--space-16) 0 var(--space-4);
-  padding-top: var(--space-12);
-  border-top: 1px solid var(--border);
-}
-
-.settings-subheading:first-child {
-  margin-top: var(--space-4);
-  padding-top: 0;
-  border-top: none;
+.settings-tabbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  margin-bottom: var(--space-16);
 }
 
 .settings-key-box {
