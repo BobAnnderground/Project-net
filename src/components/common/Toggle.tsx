@@ -1,8 +1,16 @@
-export function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
+export function Toggle({
+  on,
+  onClick,
+  className = '',
+}: {
+  on: boolean;
+  onClick: () => void;
+  className?: string;
+}) {
   return (
     <button
       type="button"
-      className={`toggle ${on ? 'toggle--on' : ''}`}
+      className={`toggle ${on ? 'toggle--on' : ''} ${className}`}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
