@@ -29,10 +29,10 @@ export function HeroBanner({ showRoutingCta, onSelectServices, lastSession }: He
     >
       {showCompactArt && <img src="/images/hero-keyvisual.png" alt="" className="hero-banner__art" />}
       {showRoutingCta && (
-        <img src="/images/Key-visual-Welcome.png" alt="" className="hero-banner__keyvisual" />
+        <img src="/images/Key-visual-Welcome.webp" alt="" className="hero-banner__keyvisual" />
       )}
       {lastSession && (
-        <img src="/images/Key-visual-last-session.png" alt="" className="hero-banner__keyvisual" />
+        <img src="/images/Key-visual-last-session.webp" alt="" className="hero-banner__keyvisual" />
       )}
       <div className="hero-banner__content">
         <h1 className="hero-banner__title">{lastSession ? 'Last session' : 'Welcome to Fixnet'}</h1>
