@@ -341,65 +341,20 @@ function ConnectionSection() {
 function AdvancedSection() {
   const appSettings = useStore((s) => s.appSettings);
   const updateAppSettings = useStore((s) => s.updateAppSettings);
-  const updateAdvancedNetwork = useStore((s) => s.updateAdvancedNetwork);
 
   return (
-    <>
-      <div className="settings-advanced-toggle">
-        <div>
-          <div className="settings-row__label">Enable advanced settings</div>
-          <div className="settings-row__desc">
-            Reveals additional advanced options here, and when configuring individual services
-          </div>
+    <div className="settings-advanced-toggle">
+      <div>
+        <div className="settings-row__label">Enable advanced settings</div>
+        <div className="settings-row__desc">
+          Reveals additional advanced options when configuring an individual service
         </div>
-        <Toggle
-          on={appSettings.showAdvancedSettings}
-          onClick={() => updateAppSettings({ showAdvancedSettings: !appSettings.showAdvancedSettings })}
-        />
       </div>
-
-      {appSettings.showAdvancedSettings && (
-        <div className="settings-section" style={{ marginTop: 'var(--space-12)' }}>
-          <div className="settings-section__title">Network simulation (mock parameters)</div>
-          <div className="settings-row__desc" style={{ marginBottom: 'var(--space-12)' }}>
-            NFR-3: frequency and probability of route degradation are configurable for testing the flow.
-          </div>
-
-          <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)' }}>
-            <div className="settings-row__label">
-              Degradation chance per tick: {appSettings.advancedNetwork.degradationChance}%
-            </div>
-            <div className="slider-row">
-              <input
-                type="range"
-                min={0}
-                max={60}
-                value={appSettings.advancedNetwork.degradationChance}
-                onChange={(e) => updateAdvancedNetwork({ degradationChance: Number(e.target.value) })}
-              />
-              <span className="slider-row__value">{appSettings.advancedNetwork.degradationChance}%</span>
-            </div>
-          </div>
-
-          <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)', borderBottom: 'none' }}>
-            <div className="settings-row__label">Route check interval</div>
-            <div className="slider-row">
-              <input
-                type="range"
-                min={1000}
-                max={10000}
-                step={500}
-                value={appSettings.advancedNetwork.tickIntervalMs}
-                onChange={(e) => updateAdvancedNetwork({ tickIntervalMs: Number(e.target.value) })}
-              />
-              <span className="slider-row__value">
-                {(appSettings.advancedNetwork.tickIntervalMs / 1000).toFixed(1)}s
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+      <Toggle
+        on={appSettings.showAdvancedSettings}
+        onClick={() => updateAppSettings({ showAdvancedSettings: !appSettings.showAdvancedSettings })}
+      />
+    </div>
   );
 }
 

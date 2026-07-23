@@ -112,10 +112,6 @@ export function restartTick() {
   tickInterval = setInterval(tick, interval);
 }
 
-export function updateTickInterval() {
-  if (tickInterval) restartTick();
-}
-
 function tick() {
   const state = useStore.getState();
   if (!state.isRunning) return;
