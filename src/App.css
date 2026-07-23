@@ -1474,16 +1474,6 @@
   border-color: rgba(var(--on-accent-rgb), 0.16);
 }
 
-.service-card--select-all {
-  border-style: dashed;
-  justify-content: center;
-}
-
-.service-card--select-all .service-card__icon-swatch {
-  background: var(--accent-dim);
-  color: var(--accent);
-}
-
 .service-card:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
