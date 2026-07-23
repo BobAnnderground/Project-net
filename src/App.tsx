@@ -6,7 +6,6 @@ import { WindowTitleBar } from './components/layout/WindowTitleBar';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { Services } from './components/services/Services';
 import { Settings } from './components/settings/Settings';
-import { Help } from './components/help/Help';
 import { AuthScreen } from './components/auth/AuthScreen';
 import { Toast } from './components/common/Toast';
 
@@ -64,7 +63,6 @@ function App() {
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'services' && <Services />}
           {activeTab === 'settings' && <Settings />}
-          {activeTab === 'help' && <Help />}
         </div>
         <Toast />
       </div>
@@ -85,7 +83,6 @@ function App() {
               {activeTab === 'dashboard' && <Dashboard />}
               {activeTab === 'services' && <Services />}
               {activeTab === 'settings' && <Settings />}
-          {activeTab === 'help' && <Help />}
             </div>
           </div>
         </div>
