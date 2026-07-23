@@ -51,7 +51,7 @@ export function Sidebar() {
 
   return (
     <div className="sidebar">
-      <img src="/images/sidebar/fixnet-logo.png" alt="Fixnet" className="sidebar__logo" />
+      <img src="/images/sidebar/fixnet-logo.svg" alt="Fixnet" className="sidebar__logo" />
 
       <div className="sidebar__nav">
         {NAV.map(({ id, label, active, inactive }) => {
