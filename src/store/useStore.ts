@@ -65,6 +65,7 @@ interface StoreState {
   toast: ToastState | null;
   emergencyBridge: EmergencyBridge | null;
   backupBridges: BackupBridge[];
+  pendingServiceSelection: string[] | null;
 
   // library / service management
   addServiceFromLibrary: (entryId: string) => void;
@@ -113,6 +114,8 @@ interface StoreState {
   addEmergencyBridge: (code: string) => void;
   addBackupBridge: (code: string) => void;
   removeBackupBridge: (id: string) => void;
+  editLastSession: () => void;
+  clearPendingServiceSelection: () => void;
 }
 
 const MAX_QUALITY_SAMPLES = 40;
@@ -138,6 +141,7 @@ export const useStore = create<StoreState>((set, get) => ({
     status: 'failed',
   },
   backupBridges: [],
+  pendingServiceSelection: null,
 
   addServiceFromLibrary: (entryId) => {
     const entry = catalogById(entryId);
@@ -566,4 +570,17 @@ export const useStore = create<StoreState>((set, get) => ({
   removeBackupBridge: (id) => {
     set((state) => ({ backupBridges: state.backupBridges.filter((b) => b.id !== id) }));
   },
+
+  editLastSession: () => {
+    const state = get();
+    const services = state.lastSessionServiceIds
+      .map((id) => state.library.find((s) => s.id === id))
+      .filter((s): s is Service => Boolean(s));
+    set({
+      pendingServiceSelection: displayIdsForServices(services),
+      activeTab: 'services',
+    });
+  },
+
+  clearPendingServiceSelection: () => set({ pendingServiceSelection: null }),
 }));
