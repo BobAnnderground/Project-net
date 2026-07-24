@@ -32,15 +32,15 @@ export function Dashboard() {
 
   return (
     <div>
-      {hasLastSession ? (
+      {isRoutingLive ? (
+        <RoutingDiagram />
+      ) : hasLastSession ? (
         <HeroBanner
           lastSession={{ services: lastSessionServices, onStart: relaunchLastSession, onEdit: editLastSession }}
         />
       ) : (
         <HeroBanner />
       )}
-
-      {isRoutingLive && <RoutingDiagram />}
 
       {activeServiceId && <ServiceDetailModal serviceId={activeServiceId} onClose={closeServiceDetail} />}
     </div>
