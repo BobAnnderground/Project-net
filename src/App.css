@@ -525,6 +525,14 @@
   cursor: default;
 }
 
+.hero-banner__btn--secondary {
+  background: rgba(var(--on-accent-rgb), 0.08);
+}
+
+.hero-banner__btn--secondary:hover {
+  background: rgba(var(--on-accent-rgb), 0.16);
+}
+
 /* Last-session state: service icon row + Start button */
 .hero-banner__session-icons {
   display: flex;
@@ -552,7 +560,9 @@
   font-size: 14px;
 }
 
-.hero-banner__session-start {
+.hero-banner__session-actions {
+  display: flex;
+  gap: var(--space-12);
   margin-top: var(--space-48);
 }
 

@@ -20,6 +20,7 @@ import {
   defaultUser,
   type CustomServiceInput,
 } from '../data/factory';
+import { displayIdsForServices } from '../lib/libraryItems';
 
 export type TabId = 'dashboard' | 'services' | 'settings';
 
@@ -101,7 +102,7 @@ interface StoreState {
   login: (code: string) => boolean;
   logout: () => void;
   regenerateAuthKey: () => void;
-  commitOnboardingSelection: (entryIds: string[], userCountry: string | null) => void;
+  commitOnboardingSelection: (entryIds: string[], userHomeRegion: string | null) => void;
   skipOnboarding: () => void;
 
   // ui
@@ -484,7 +485,7 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ isAuthenticated: false });
   },
 
-  commitOnboardingSelection: (entryIds, userCountry) => {
+  commitOnboardingSelection: (entryIds, userHomeRegion) => {
     const state = get();
     const addedNames = new Set(
       state.library.filter((s) => s.addedFromLibrary).map((s) => s.name)
@@ -525,7 +526,7 @@ export const useStore = create<StoreState>((set, get) => ({
       ],
       routes: { ...s.routes, ...newRoutes },
       isFirstLoginOfSession: false,
-      user: userCountry !== null ? { ...s.user, country: userCountry } : s.user,
+      user: userHomeRegion !== null ? { ...s.user, homeRegion: userHomeRegion } : s.user,
     }));
 
     get().startAll();

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Play } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { LibraryPickerGrid } from '../common/LibraryPickerGrid';
@@ -23,10 +23,21 @@ export function Services() {
   const openServiceDetail = useStore((s) => s.openServiceDetail);
   const closeServiceDetail = useStore((s) => s.closeServiceDetail);
   const setActiveTab = useStore((s) => s.setActiveTab);
+  const pendingServiceSelection = useStore((s) => s.pendingServiceSelection);
+  const clearPendingServiceSelection = useStore((s) => s.clearPendingServiceSelection);
   const [manualAddStep, setManualAddStep] = useState<'closed' | 'intro' | 'form'>('closed');
   const [tab, setTab] = useState<LibraryTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const { selectedIds, toggleSelected } = useServiceSelection();
+  const { selectedIds, setSelectedIds, toggleSelected } = useServiceSelection();
+
+  // Seed the selection once when arriving via "Edit" from the last-session
+  // card, then clear the pending value so it isn't reapplied later.
+  useEffect(() => {
+    if (pendingServiceSelection) {
+      setSelectedIds(new Set(pendingServiceSelection));
+      clearPendingServiceSelection();
+    }
+  }, [pendingServiceSelection, setSelectedIds, clearPendingServiceSelection]);
 
   const catalogItems = buildCatalogDisplayItems();
   const customItems = buildCustomDisplayItems(library);

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Search, MapPin, Waypoints } from 'lucide-react';
+import { MapPin, Waypoints } from 'lucide-react';
 import { LIBRARY_CATALOG } from '../../data/catalog';
 import { REGIONS } from '../../data/regions';
-import { WORLD_COUNTRIES } from '../../data/worldCountries';
+import { WORLD_REGIONS } from '../../data/worldRegions';
 import { useStore } from '../../store/useStore';
 import type { LibraryEntry, ServiceCategory } from '../../types';
 import { ServiceCard } from '../common/ServiceCard';
@@ -31,8 +31,7 @@ export function WelcomeOnboarding() {
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<ServiceCategory>>(new Set());
-  const [homeCountry, setHomeCountry] = useState<string | null>(null);
-  const [countrySearch, setCountrySearch] = useState('');
+  const [homeRegion, setHomeRegion] = useState<string | null>(null);
 
   function toggleId(id: string) {
     setSelectedIds((prev) => {
@@ -53,54 +52,33 @@ export function WelcomeOnboarding() {
     }
   }
 
-  function handleFinalize(countryId: string | null) {
-    const countryName = countryId ? WORLD_COUNTRIES.find((c) => c.id === countryId)?.name ?? null : null;
-    commitOnboardingSelection([...selectedIds], countryName);
+  function handleFinalize(regionId: string | null) {
+    const regionName = regionId ? WORLD_REGIONS.find((r) => r.id === regionId)?.name ?? null : null;
+    commitOnboardingSelection([...selectedIds], regionName);
   }
 
   const visibleEntries = buildVisibleEntries(LIBRARY_CATALOG, expandedCategories);
 
   if (step === 2) {
-    const query = countrySearch.trim().toLowerCase();
-    const filteredCountries = query
-      ? WORLD_COUNTRIES.filter((c) => c.name.toLowerCase().includes(query))
-      : WORLD_COUNTRIES;
-
     return (
       <div>
         <h1 className="onboard-heading">Where are you located?</h1>
         <p className="settings-row__desc" style={{ marginBottom: 'var(--space-16)' }}>
-          Step 2 of 2 — this is only used to personalize your experience. Each service is still routed through
-          whichever proxy region works best for it.
+          Step 2 of 2 — pick a broad region, not your exact country, so nothing here can identify you. This only
+          personalizes your experience; each service is still routed through whichever proxy region works best for
+          it.
         </p>
 
-        <div className="search-input-wrap">
-          <Search size={14} className="search-input-wrap__icon" />
-          <input
-            className="form-input search-input-wrap__input"
-            placeholder="Search countries and regions..."
-            value={countrySearch}
-            onChange={(e) => setCountrySearch(e.target.value)}
-            autoFocus
-          />
-        </div>
-
-        <div className="region-grid region-grid--scroll">
-          {filteredCountries.map((country) => (
+        <div className="region-grid">
+          {WORLD_REGIONS.map((region) => (
             <button
-              key={country.id}
-              className={`region-tile${homeCountry === country.id ? ' region-tile--selected' : ''}`}
-              onClick={() => setHomeCountry((prev) => (prev === country.id ? null : country.id))}
+              key={region.id}
+              className={`region-tile${homeRegion === region.id ? ' region-tile--selected' : ''}`}
+              onClick={() => setHomeRegion((prev) => (prev === region.id ? null : region.id))}
             >
-              <div className="region-tile__name">{country.name}</div>
-              <div className="region-tile__meta">{country.continent}</div>
+              <div className="region-tile__name">{region.name}</div>
             </button>
           ))}
-          {filteredCountries.length === 0 && (
-            <div className="onboard-empty" style={{ gridColumn: '1 / -1' }}>
-              No countries match "{countrySearch}"
-            </div>
-          )}
         </div>
 
         <div className="onboard-footer" style={{ justifyContent: 'space-between' }}>
@@ -111,7 +89,7 @@ export function WelcomeOnboarding() {
             <button className="btn" onClick={() => handleFinalize(null)}>
               Skip
             </button>
-            <button className="btn btn--primary" onClick={() => handleFinalize(homeCountry)}>
+            <button className="btn btn--primary" onClick={() => handleFinalize(homeRegion)}>
               Launch services
             </button>
           </div>
