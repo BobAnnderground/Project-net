@@ -1,10 +1,11 @@
 import clsx from 'clsx';
-import { Play } from 'lucide-react';
+import { Play, Pencil } from 'lucide-react';
 import { ServiceIcon } from '../common/ServiceIcon';
 
 interface LastSessionInfo {
   services: { id: string; name: string; icon: string }[];
   onStart: () => void;
+  onEdit: () => void;
 }
 
 interface HeroBannerProps {
@@ -77,13 +78,22 @@ export function HeroBanner({ showRoutingCta, onSelectServices, lastSession }: He
                 </span>
               )}
             </div>
-            <button
-              className="hero-banner__btn hero-banner__btn--accent hero-banner__session-start"
-              onClick={lastSession.onStart}
-            >
-              <Play size={14} />
-              Start
-            </button>
+            <div className="hero-banner__session-actions">
+              <button
+                className="hero-banner__btn hero-banner__btn--accent"
+                onClick={lastSession.onStart}
+              >
+                <Play size={14} />
+                Start
+              </button>
+              <button
+                className="hero-banner__btn hero-banner__btn--secondary"
+                onClick={lastSession.onEdit}
+              >
+                <Pencil size={14} />
+                Edit
+              </button>
+            </div>
           </>
         )}
 

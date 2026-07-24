@@ -13,6 +13,7 @@ export function Dashboard() {
   const setActiveTab = useStore((s) => s.setActiveTab);
   const lastSessionServiceIds = useStore((s) => s.lastSessionServiceIds);
   const relaunchLastSession = useStore((s) => s.relaunchLastSession);
+  const editLastSession = useStore((s) => s.editLastSession);
 
   if (isFirstLoginOfSession) {
     return <WelcomeOnboarding />;
@@ -32,7 +33,9 @@ export function Dashboard() {
   return (
     <div>
       {hasLastSession ? (
-        <HeroBanner lastSession={{ services: lastSessionServices, onStart: relaunchLastSession }} />
+        <HeroBanner
+          lastSession={{ services: lastSessionServices, onStart: relaunchLastSession, onEdit: editLastSession }}
+        />
       ) : (
         <HeroBanner />
       )}

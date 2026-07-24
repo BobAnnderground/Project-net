@@ -99,3 +99,15 @@ export function resolveDisplayItemServiceId(
 ): string {
   return item.isCustom ? item.id : getOrCreateServiceForEntry(item.id);
 }
+
+// Inverse of resolveServiceIds: given real services, find the ids the picker
+// grid actually selects against — the catalog entry id for catalog-sourced
+// services (the grid keys those by entry id, not the materialized service
+// id), or the service's own id for custom ones.
+export function displayIdsForServices(services: Service[]): string[] {
+  return services.map((service) => {
+    if (!service.addedFromLibrary) return service.id;
+    const entry = LIBRARY_CATALOG.find((e) => e.name === service.name);
+    return entry ? entry.id : service.id;
+  });
+}

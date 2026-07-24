@@ -121,7 +121,7 @@ export interface User {
   email: string;
   subscriptionStatus: SubscriptionStatus;
   subscriptionExpiresAt: number;
-  country: string | null;
+  homeRegion: string | null;
 }
 
 export interface LibraryEntry {

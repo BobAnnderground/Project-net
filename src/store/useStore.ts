@@ -20,6 +20,7 @@ import {
   defaultUser,
   type CustomServiceInput,
 } from '../data/factory';
+import { displayIdsForServices } from '../lib/libraryItems';
 
 export type TabId = 'dashboard' | 'services' | 'settings';
 
@@ -56,6 +57,7 @@ interface StoreState {
   activeServiceId: string | null;
   toast: ToastState | null;
   emergencyBridge: EmergencyBridge | null;
+  pendingServiceSelection: string[] | null;
 
   // library / service management
   addServiceFromLibrary: (entryId: string) => void;
@@ -93,7 +95,7 @@ interface StoreState {
   login: (code: string) => boolean;
   logout: () => void;
   regenerateAuthKey: () => void;
-  commitOnboardingSelection: (entryIds: string[], userCountry: string | null) => void;
+  commitOnboardingSelection: (entryIds: string[], userHomeRegion: string | null) => void;
   skipOnboarding: () => void;
 
   // ui
@@ -102,6 +104,8 @@ interface StoreState {
   closeServiceDetail: () => void;
   showToast: (message: string) => void;
   addEmergencyBridge: (code: string) => void;
+  editLastSession: () => void;
+  clearPendingServiceSelection: () => void;
 }
 
 const MAX_QUALITY_SAMPLES = 40;
@@ -126,6 +130,7 @@ export const useStore = create<StoreState>((set, get) => ({
     addedAt: Date.now() - 1000 * 60 * 60 * 24 * 3,
     status: 'failed',
   },
+  pendingServiceSelection: null,
 
   addServiceFromLibrary: (entryId) => {
     const entry = catalogById(entryId);
@@ -473,7 +478,7 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ isAuthenticated: false });
   },
 
-  commitOnboardingSelection: (entryIds, userCountry) => {
+  commitOnboardingSelection: (entryIds, userHomeRegion) => {
     const state = get();
     const addedNames = new Set(
       state.library.filter((s) => s.addedFromLibrary).map((s) => s.name)
@@ -514,7 +519,7 @@ export const useStore = create<StoreState>((set, get) => ({
       ],
       routes: { ...s.routes, ...newRoutes },
       isFirstLoginOfSession: false,
-      user: userCountry !== null ? { ...s.user, country: userCountry } : s.user,
+      user: userHomeRegion !== null ? { ...s.user, homeRegion: userHomeRegion } : s.user,
     }));
 
     get().startAll();
@@ -540,4 +545,17 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ emergencyBridge: { code, addedAt: Date.now(), status: 'active' } });
     get().showToast('Emergency bridge added successfully. It will stay active until the next configuration update.');
   },
+
+  editLastSession: () => {
+    const state = get();
+    const services = state.lastSessionServiceIds
+      .map((id) => state.library.find((s) => s.id === id))
+      .filter((s): s is Service => Boolean(s));
+    set({
+      pendingServiceSelection: displayIdsForServices(services),
+      activeTab: 'services',
+    });
+  },
+
+  clearPendingServiceSelection: () => set({ pendingServiceSelection: null }),
 }));
