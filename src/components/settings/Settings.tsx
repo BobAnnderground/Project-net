@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Trash2, Check } from 'lucide-react';
+import { nanoid } from 'nanoid';
+import { Plus, Trash2, Copy, LogOut, ChevronDown, RotateCcw } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { Toggle } from '../common/Toggle';
 import { REGIONS } from '../../data/regions';
@@ -14,6 +15,14 @@ const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
   { id: 'advanced', label: 'Advanced' },
 ];
 
+const DNS_PRESETS = [
+  { value: '1.1.1.1', label: 'Cloudflare' },
+  { value: '8.8.8.8', label: 'Google' },
+  { value: '8.8.4.4', label: 'Google (secondary)' },
+  { value: '9.9.9.9', label: 'Quad9' },
+  { value: '208.67.222.222', label: 'OpenDNS' },
+];
+
 function formatDate(ts: number): string {
   return new Date(ts).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
 }
@@ -22,89 +31,123 @@ function formatKey(raw: string): string {
   return raw.replace(/(.{4})/g, '$1 ').trim();
 }
 
+function mockBridgeCode(source: 'account' | 'telegram'): string {
+  const payload = { tag: source === 'account' ? 'from-account' : 'from-telegram-bot', id: nanoid(12) };
+  return `fixnet://import?b=${btoa(JSON.stringify(payload))}`;
+}
+
+function DnsSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="dropdown-select">
+      <select className="dropdown-select__input dropdown-select__input--field" value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="" disabled>
+          Select DNS
+        </option>
+        {DNS_PRESETS.map((p) => (
+          <option key={p.value} value={p.value}>
+            {p.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown size={16} className="dropdown-select__chevron" />
+    </div>
+  );
+}
+
 function GeneralSection() {
   const appSettings = useStore((s) => s.appSettings);
   const updateAppSettings = useStore((s) => s.updateAppSettings);
 
   return (
-    <div className="settings-section">
-      <div className="settings-row">
-        <div>
-          <div className="settings-row__label">Start with Windows</div>
-          <div className="settings-row__desc">Launch Fixnet automatically when Windows starts</div>
+    <div className="settings-stack">
+      <div className="settings-card">
+        <div className="settings-row">
+          <div className="settings-row__text">
+            <div className="settings-row__label">Start with Windows</div>
+            <div className="settings-row__desc">Automatically launch Fixnet when you sign in to Windows</div>
+          </div>
+          <Toggle
+            on={appSettings.autoLaunch}
+            onClick={() => updateAppSettings({ autoLaunch: !appSettings.autoLaunch })}
+            className="toggle--invariant"
+          />
         </div>
-        <Toggle
-          on={appSettings.autoLaunch}
-          onClick={() => updateAppSettings({ autoLaunch: !appSettings.autoLaunch })}
-        />
-      </div>
-
-      <div className="settings-row">
-        <div>
-          <div className="settings-row__label">Launch in system tray</div>
-          <div className="settings-row__desc">Start minimized to the system tray instead of opening a window</div>
+        <div className="settings-divider" />
+        <div className="settings-row">
+          <div className="settings-row__text">
+            <div className="settings-row__label">Launch in system tray</div>
+            <div className="settings-row__desc">Launch Fixnet minimized to the system tray</div>
+          </div>
+          <Toggle
+            on={appSettings.launchInTray}
+            onClick={() => updateAppSettings({ launchInTray: !appSettings.launchInTray })}
+            className="toggle--invariant"
+          />
         </div>
-        <Toggle
-          on={appSettings.launchInTray}
-          onClick={() => updateAppSettings({ launchInTray: !appSettings.launchInTray })}
-        />
-      </div>
-
-      <div className="settings-row">
-        <div>
-          <div className="settings-row__label">Reconnect on startup</div>
-          <div className="settings-row__desc">Automatically relaunch the last session on launch</div>
+        <div className="settings-divider" />
+        <div className="settings-row">
+          <div className="settings-row__text">
+            <div className="settings-row__label">Reconnect on startup</div>
+            <div className="settings-row__desc">
+              Automatically reconnect using the last active configuration when the application starts
+            </div>
+          </div>
+          <Toggle
+            on={appSettings.reconnectOnStartup}
+            onClick={() => updateAppSettings({ reconnectOnStartup: !appSettings.reconnectOnStartup })}
+            className="toggle--invariant"
+          />
         </div>
-        <Toggle
-          on={appSettings.reconnectOnStartup}
-          onClick={() => updateAppSettings({ reconnectOnStartup: !appSettings.reconnectOnStartup })}
-        />
-      </div>
-
-      <div className="settings-row">
-        <div>
-          <div className="settings-row__label">Close to system tray</div>
-          <div className="settings-row__desc">Minimize to the tray instead of closing when the window is closed</div>
-        </div>
-        <Toggle
-          on={appSettings.closeToTray}
-          onClick={() => updateAppSettings({ closeToTray: !appSettings.closeToTray })}
-        />
-      </div>
-
-      <div className="settings-row">
-        <div>
-          <div className="settings-row__label">Theme</div>
-          <div className="settings-row__desc">Interface appearance</div>
-        </div>
-        <div className="segmented">
-          {(['system', 'light', 'dark'] as Theme[]).map((t) => (
-            <button
-              key={t}
-              className={`segmented__option ${appSettings.theme === t ? 'segmented__option--active' : ''}`}
-              onClick={() => updateAppSettings({ theme: t })}
-            >
-              {t === 'system' ? 'System' : t === 'light' ? 'Light' : 'Dark'}
-            </button>
-          ))}
+        <div className="settings-divider" />
+        <div className="settings-row">
+          <div className="settings-row__text">
+            <div className="settings-row__label">Close to system tray</div>
+            <div className="settings-row__desc">Keep Fixnet running in the system tray when the window is closed</div>
+          </div>
+          <Toggle
+            on={appSettings.closeToTray}
+            onClick={() => updateAppSettings({ closeToTray: !appSettings.closeToTray })}
+            className="toggle--invariant"
+          />
         </div>
       </div>
 
-      <div className="settings-row" style={{ borderBottom: 'none' }}>
-        <div>
-          <div className="settings-row__label">Language</div>
-          <div className="settings-row__desc">
-            Changes the app's display language (prototype: interface text is not retranslated)
+      <div className="settings-card">
+        <div className="settings-row">
+          <div className="settings-row__text">
+            <div className="settings-row__label">Theme</div>
+          </div>
+          <div className="segmented segmented--invariant segmented--fill">
+            {(['system', 'light', 'dark'] as Theme[]).map((t) => (
+              <button
+                key={t}
+                className={`segmented__option ${appSettings.theme === t ? 'segmented__option--active' : ''}`}
+                onClick={() => updateAppSettings({ theme: t })}
+              >
+                {t === 'system' ? 'System' : t === 'light' ? 'Light' : 'Dark'}
+              </button>
+            ))}
           </div>
         </div>
-        <select
-          className="form-select"
-          value={appSettings.language}
-          onChange={(e) => updateAppSettings({ language: e.target.value as Language })}
-        >
-          <option value="en">English</option>
-          <option value="ru">Russian</option>
-        </select>
+      </div>
+
+      <div className="settings-card">
+        <div className="settings-row">
+          <div className="settings-row__text">
+            <div className="settings-row__label">Language</div>
+          </div>
+          <div className="dropdown-select">
+            <select
+              className="dropdown-select__input"
+              value={appSettings.language}
+              onChange={(e) => updateAppSettings({ language: e.target.value as Language })}
+            >
+              <option value="en">English</option>
+              <option value="ru">Russian</option>
+            </select>
+            <ChevronDown size={16} className="dropdown-select__chevron" />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -114,12 +157,10 @@ function AccountSection() {
   const appSettings = useStore((s) => s.appSettings);
   const updateAppSettings = useStore((s) => s.updateAppSettings);
   const authKey = useStore((s) => s.authKey);
-  const regenerateAuthKey = useStore((s) => s.regenerateAuthKey);
   const logout = useStore((s) => s.logout);
   const user = useStore((s) => s.user);
 
   const [copied, setCopied] = useState(false);
-  const [pendingRegen, setPendingRegen] = useState(false);
 
   function handleCopy() {
     try {
@@ -136,81 +177,70 @@ function AccountSection() {
     user.subscriptionStatus === 'active'
       ? 'Active'
       : user.subscriptionStatus === 'trial'
-      ? 'Trial'
-      : 'Expired';
+        ? 'Trial'
+        : 'Expired';
 
   return (
-    <div className="settings-section">
-      <div className="settings-row">
-        <div>
-          <div className="settings-row__label">Subscription</div>
-          <div className="settings-row__desc">
-            {subscriptionLabel} · expires {formatDate(user.subscriptionExpiresAt)}
+    <div className="settings-stack">
+      <div className="settings-card">
+        <div className="settings-card__title">Subscription</div>
+        <div className="settings-divider" />
+        <div className="settings-kv">
+          <div className="settings-kv__row">
+            <span className="settings-kv__label">Current plan</span>
+            <span className="settings-kv__value">{subscriptionLabel}</span>
+          </div>
+          <div className="settings-kv__row">
+            <span className="settings-kv__label">Expires</span>
+            <span className="settings-kv__value">{formatDate(user.subscriptionExpiresAt)}</span>
           </div>
         </div>
-        <button className="btn btn--sm">Open Account</button>
-      </div>
-
-      <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)' }}>
-        <div className="settings-row__label">Connection Key</div>
-        <div style={{ display: 'flex', gap: 'var(--space-8)', alignItems: 'center' }}>
-          <div className="settings-key-box">{formatKey(authKey)}</div>
-          {pendingRegen ? (
-            <>
-              <span className="form-hint" style={{ alignSelf: 'center', whiteSpace: 'nowrap' }}>
-                Regenerate key?
-              </span>
-              <button
-                className="btn btn--sm btn--primary"
-                onClick={() => {
-                  regenerateAuthKey();
-                  setPendingRegen(false);
-                }}
-              >
-                Confirm
-              </button>
-              <button className="btn btn--sm" onClick={() => setPendingRegen(false)}>
-                Cancel
-              </button>
-            </>
-          ) : (
-            <>
-              <button className="btn btn--sm" onClick={handleCopy}>
-                {copied ? 'Copied' : 'Copy'}
-              </button>
-              <button className="btn btn--sm" onClick={() => setPendingRegen(true)}>
-                Regenerate
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="settings-row">
-        <div>
-          <div className="settings-row__label">Region</div>
-        </div>
-        <select
-          className="form-select"
-          value={appSettings.region}
-          onChange={(e) => updateAppSettings({ region: e.target.value })}
-        >
-          {REGIONS.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.displayName} (load {r.serverLoad}%)
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="settings-row" style={{ borderBottom: 'none' }}>
-        <div>
-          <div className="settings-row__label">Session</div>
-        </div>
-        <button className="btn btn--sm btn--danger" onClick={() => logout()}>
-          Sign Out
+        <button className="settings-btn settings-btn--pill" style={{ marginTop: 'var(--space-8)' }}>
+          Open Account
         </button>
       </div>
+
+      <div className="settings-card">
+        <div className="settings-row">
+          <div className="settings-row__text">
+            <div className="settings-row__label">Connection Key</div>
+          </div>
+          <div className="settings-field-with-action">
+            <div className="settings-text-field">{formatKey(authKey)}</div>
+            <button className="settings-icon-btn" onClick={handleCopy} aria-label="Copy connection key">
+              <Copy size={16} />
+            </button>
+          </div>
+        </div>
+        {copied && <div className="form-hint" style={{ marginTop: 'var(--space-4)' }}>Copied</div>}
+      </div>
+
+      <div className="settings-card">
+        <div className="settings-row">
+          <div className="settings-row__text">
+            <div className="settings-row__label">Region</div>
+          </div>
+          <div className="dropdown-select dropdown-select--pill">
+            <select
+              className="dropdown-select__input"
+              value={appSettings.region}
+              onChange={(e) => updateAppSettings({ region: e.target.value })}
+            >
+              {REGIONS.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.displayName}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={16} className="dropdown-select__chevron" />
+          </div>
+        </div>
+      </div>
+
+      <button className="settings-card settings-card--button" onClick={() => logout()}>
+        <span className="settings-row__label">Sign Out</span>
+        <LogOut size={16} />
+      </button>
     </div>
   );
 }
@@ -222,119 +252,127 @@ function ConnectionSection() {
   const updateBackupDns = useStore((s) => s.updateBackupDns);
   const removeBackupDns = useStore((s) => s.removeBackupDns);
   const emergencyBridge = useStore((s) => s.emergencyBridge);
-  const addEmergencyBridge = useStore((s) => s.addEmergencyBridge);
+  const backupBridges = useStore((s) => s.backupBridges);
+  const addBackupBridge = useStore((s) => s.addBackupBridge);
+  const removeBackupBridge = useStore((s) => s.removeBackupBridge);
 
   const [addingBridge, setAddingBridge] = useState(false);
   const [bridgeCode, setBridgeCode] = useState('');
 
-  function handleAddBridge() {
+  function handleAddBridgeClick() {
+    if (!addingBridge) {
+      setAddingBridge(true);
+      return;
+    }
     const trimmed = bridgeCode.trim();
-    if (!trimmed) return;
-    addEmergencyBridge(trimmed);
-    setBridgeCode('');
-    setAddingBridge(false);
+    if (trimmed) {
+      addBackupBridge(trimmed);
+      setBridgeCode('');
+      setAddingBridge(false);
+    } else {
+      setAddingBridge(false);
+    }
   }
 
   return (
-    <>
-      <div className="settings-section">
-        <div className="settings-section__title">DNS Server</div>
+    <div className="settings-stack">
+      <div className="settings-card">
+        <div className="settings-card__title">DNS Server</div>
+        <div className="settings-divider" />
 
-        <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)' }}>
-          <div className="settings-row__label">Current DNS</div>
-          <input
-            className="form-input"
-            value={dns.current}
-            onChange={(e) => updateDns({ current: e.target.value })}
-          />
+        <div className="settings-row">
+          <div className="settings-row__text">
+            <div className="settings-row__label">Current DNS</div>
+          </div>
+          <DnsSelect value={dns.current} onChange={(v) => updateDns({ current: v })} />
         </div>
 
         {dns.backups.map((value, i) => (
-          <div
-            key={i}
-            className="settings-row"
-            style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)' }}
-          >
-            <div className="settings-row__label">Backup DNS {i + 1}</div>
-            <div style={{ display: 'flex', gap: 'var(--space-8)' }}>
-              <input
-                className="form-input"
-                style={{ flex: 1 }}
-                value={value}
-                onChange={(e) => updateBackupDns(i, e.target.value)}
-              />
+          <div key={i} className="settings-row">
+            <div className="settings-row__text">
+              <div className="settings-row__label">Backup DNS {i + 1}</div>
+            </div>
+            <div className="settings-field-with-action">
+              <DnsSelect value={value} onChange={(v) => updateBackupDns(i, v)} />
               <button
-                className="btn btn--sm btn--danger"
+                className="settings-icon-btn"
                 onClick={() => removeBackupDns(i)}
                 aria-label={`Remove backup DNS ${i + 1}`}
               >
-                <Trash2 size={12} />
+                <Trash2 size={16} />
               </button>
             </div>
           </div>
         ))}
 
-        <div className="settings-row" style={{ borderBottom: 'none' }}>
-          <button className="btn btn--sm" onClick={addBackupDns}>
-            <Plus size={12} />
-            Add backup DNS
-          </button>
-        </div>
+        <button className="settings-btn settings-btn--ghost" onClick={addBackupDns}>
+          <Plus size={16} />
+          Add backup DNS
+        </button>
       </div>
 
-      <div className="settings-section">
-        <div className="settings-section__title">Bridges</div>
+      <div className="settings-card">
+        <div className="settings-card__title">Bridges</div>
+        <div className="settings-divider" />
 
-        <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)' }}>
-          <div className="settings-row__label">Current fallback bridge</div>
-          {emergencyBridge ? (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-8)' }}>
-                <div className="settings-key-box" style={{ flex: 1 }}>{emergencyBridge.code}</div>
-                <span className={`status-badge status--${emergencyBridge.status === 'active' ? 'connected' : 'error'}`}>
-                  <span className="status-dot" />
-                  {emergencyBridge.status === 'active' ? 'Working' : 'Not working'}
-                </span>
-              </div>
-              <div className="form-hint">Added {formatDate(emergencyBridge.addedAt)}</div>
-            </>
-          ) : (
-            <div className="form-hint">No fallback bridge configured yet.</div>
-          )}
+        <div className="settings-field-labeled">
+          <div className="settings-field-labeled__label">Current fallback bridge</div>
+          <div className="settings-text-field settings-text-field--truncate">
+            {emergencyBridge ? emergencyBridge.code : 'No fallback bridge configured yet'}
+          </div>
         </div>
 
-        <div className="settings-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 'var(--space-8)', borderBottom: 'none' }}>
-          {addingBridge ? (
-            <div style={{ display: 'flex', gap: 'var(--space-8)' }}>
+        {backupBridges.map((bridge, i) => (
+          <div key={bridge.id} className="settings-bridge-row">
+            <div className="settings-field-labeled" style={{ flex: 1, minWidth: 0 }}>
+              <div className="settings-field-labeled__label">Backup bridge {i + 1}</div>
+              <div className="settings-field-with-action">
+                <div className="settings-text-field settings-text-field--truncate">{bridge.code}</div>
+                <button
+                  className="settings-icon-btn"
+                  onClick={() => removeBackupBridge(bridge.id)}
+                  aria-label={`Remove backup bridge ${i + 1}`}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+            <div className={`settings-status settings-status--${bridge.status}`}>
+              <span className="settings-status__dot" />
+              {bridge.status === 'connected' ? 'Connected' : 'Disconnected'}
+            </div>
+          </div>
+        ))}
+
+        {addingBridge && (
+          <>
+            <div className="settings-field-labeled">
+              <div className="settings-field-labeled__label">New bridge</div>
               <input
-                className="form-input"
-                style={{ flex: 1 }}
-                placeholder="Paste bridge code"
+                className="settings-text-field settings-text-field--input"
+                placeholder="Paste bridge configuration"
                 value={bridgeCode}
                 onChange={(e) => setBridgeCode(e.target.value)}
                 autoFocus
               />
-              <button
-                className="btn btn--sm btn--primary"
-                onClick={handleAddBridge}
-                disabled={!bridgeCode.trim()}
-                aria-label="Confirm bridge"
-              >
-                <Check size={14} />
+            </div>
+            <div className="settings-quickfill-row">
+              <button className="settings-btn" onClick={() => setBridgeCode(mockBridgeCode('account'))}>
+                Get from Account
               </button>
-              <button className="btn btn--sm" onClick={() => { setAddingBridge(false); setBridgeCode(''); }}>
-                Cancel
+              <button className="settings-btn" onClick={() => setBridgeCode(mockBridgeCode('telegram'))}>
+                Get from Telegram Bot
               </button>
             </div>
-          ) : (
-            <button className="btn btn--sm" onClick={() => setAddingBridge(true)}>
-              <Plus size={12} />
-              Add fallback bridge
-            </button>
-          )}
-        </div>
+          </>
+        )}
+
+        <button className="settings-btn settings-btn--ghost" onClick={handleAddBridgeClick}>
+          <Plus size={16} />
+          Add fallback bridge
+        </button>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -343,17 +381,20 @@ function AdvancedSection() {
   const updateAppSettings = useStore((s) => s.updateAppSettings);
 
   return (
-    <div className="settings-advanced-toggle">
-      <div>
-        <div className="settings-row__label">Enable advanced settings</div>
-        <div className="settings-row__desc">
-          Reveals additional advanced options when configuring an individual service
+    <div className="settings-card">
+      <div className="settings-row">
+        <div className="settings-row__text">
+          <div className="settings-row__label">Enable advanced settings</div>
+          <div className="settings-row__desc">
+            Unlocks additional options for fine-tuning services. Recommended for advanced users
+          </div>
         </div>
+        <Toggle
+          on={appSettings.showAdvancedSettings}
+          onClick={() => updateAppSettings({ showAdvancedSettings: !appSettings.showAdvancedSettings })}
+          className="toggle--invariant"
+        />
       </div>
-      <Toggle
-        on={appSettings.showAdvancedSettings}
-        onClick={() => updateAppSettings({ showAdvancedSettings: !appSettings.showAdvancedSettings })}
-      />
     </div>
   );
 }
@@ -364,9 +405,9 @@ export function Settings() {
   const [pendingReset, setPendingReset] = useState(false);
 
   return (
-    <div>
+    <div className="settings-page">
       <div className="settings-tabbar">
-        <div className="segmented">
+        <div className="segmented segmented--invariant">
           {SETTINGS_TABS.map((t) => (
             <button
               key={t.id}
@@ -395,7 +436,8 @@ export function Settings() {
             </button>
           </div>
         ) : (
-          <button className="btn btn--sm" onClick={() => setPendingReset(true)}>
+          <button className="settings-btn" onClick={() => setPendingReset(true)}>
+            <RotateCcw size={16} />
             Reset settings
           </button>
         )}

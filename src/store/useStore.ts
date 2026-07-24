@@ -41,6 +41,13 @@ interface EmergencyBridge {
   status: 'active' | 'failed';
 }
 
+interface BackupBridge {
+  id: string;
+  code: string;
+  addedAt: number;
+  status: 'connected' | 'disconnected';
+}
+
 interface StoreState {
   isAuthenticated: boolean;
   isFirstLoginOfSession: boolean;
@@ -57,7 +64,7 @@ interface StoreState {
   activeServiceId: string | null;
   toast: ToastState | null;
   emergencyBridge: EmergencyBridge | null;
-  pendingServiceSelection: string[] | null;
+  backupBridges: BackupBridge[];
 
   // library / service management
   addServiceFromLibrary: (entryId: string) => void;
@@ -104,8 +111,8 @@ interface StoreState {
   closeServiceDetail: () => void;
   showToast: (message: string) => void;
   addEmergencyBridge: (code: string) => void;
-  editLastSession: () => void;
-  clearPendingServiceSelection: () => void;
+  addBackupBridge: (code: string) => void;
+  removeBackupBridge: (id: string) => void;
 }
 
 const MAX_QUALITY_SAMPLES = 40;
@@ -130,7 +137,7 @@ export const useStore = create<StoreState>((set, get) => ({
     addedAt: Date.now() - 1000 * 60 * 60 * 24 * 3,
     status: 'failed',
   },
-  pendingServiceSelection: null,
+  backupBridges: [],
 
   addServiceFromLibrary: (entryId) => {
     const entry = catalogById(entryId);
@@ -546,16 +553,17 @@ export const useStore = create<StoreState>((set, get) => ({
     get().showToast('Emergency bridge added successfully. It will stay active until the next configuration update.');
   },
 
-  editLastSession: () => {
-    const state = get();
-    const services = state.lastSessionServiceIds
-      .map((id) => state.library.find((s) => s.id === id))
-      .filter((s): s is Service => Boolean(s));
-    set({
-      pendingServiceSelection: displayIdsForServices(services),
-      activeTab: 'services',
-    });
+  addBackupBridge: (code) => {
+    const bridge: BackupBridge = {
+      id: nanoid(),
+      code,
+      addedAt: Date.now(),
+      status: 'connected',
+    };
+    set((state) => ({ backupBridges: [...state.backupBridges, bridge] }));
   },
 
-  clearPendingServiceSelection: () => set({ pendingServiceSelection: null }),
+  removeBackupBridge: (id) => {
+    set((state) => ({ backupBridges: state.backupBridges.filter((b) => b.id !== id) }));
+  },
 }));
