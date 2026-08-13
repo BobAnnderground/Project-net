@@ -710,12 +710,14 @@
   background: var(--ok);
 }
 
-/* Invariant (theme-fixed dark) toggle used on the Settings page */
+/* Invariant (theme-fixed dark) toggle used on the Settings page. The
+   handle itself is an elongated 24x16 pill (not a round knob), matching
+   the mockup's Toggle component: grey while off, white while on. */
 .toggle--invariant {
   width: 52px;
   height: 24px;
   border-radius: var(--radius-full);
-  background: rgba(var(--on-accent-rgb), 0.24);
+  background: transparent;
   border: 1px solid rgba(var(--on-accent-rgb), 0.16);
 }
 
@@ -727,13 +729,15 @@
 .toggle--invariant .toggle__knob {
   top: 3px;
   left: 3px;
-  width: 16px;
+  width: 24px;
   height: 16px;
-  background: var(--on-accent);
+  border-radius: var(--radius-full);
+  background: rgba(var(--on-accent-rgb), 0.24);
+  transition: left 0.15s, background 0.15s;
 }
 
 .toggle--invariant.toggle--on .toggle__knob {
-  left: 33px;
+  left: 23px;
   background: var(--on-accent);
 }
 
@@ -956,35 +960,87 @@ input.settings-text-field--input::placeholder {
   flex-shrink: 0;
 }
 
+.dropdown-select--compact {
+  width: auto;
+  flex: 1;
+  min-width: 0;
+}
+
 .dropdown-select__input {
   width: 100%;
   height: 38px;
   box-sizing: border-box;
-  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
   background: transparent;
   border: 1px solid rgba(var(--on-accent-rgb), 0.16);
   border-radius: var(--radius);
   padding: 0 var(--space-16);
-  padding-right: var(--space-32);
   font-family: var(--font);
   font-size: 14px;
   letter-spacing: -0.28px;
   color: var(--on-accent);
+  text-align: left;
   cursor: pointer;
 }
 
-.dropdown-select__input option {
-  background: rgb(var(--frames-bg-rgb));
-  color: var(--on-accent);
+.dropdown-select__input span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.dropdown-select__placeholder {
+  color: rgba(var(--on-accent-rgb), 0.56);
 }
 
 .dropdown-select__chevron {
-  position: absolute;
-  top: 50%;
-  right: var(--space-16);
-  transform: translateY(-50%);
+  flex-shrink: 0;
   color: var(--on-accent);
-  pointer-events: none;
+}
+
+.dropdown-select__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 240px;
+  overflow-y: auto;
+  background: rgb(var(--frames-bg-rgb));
+  border: 1px solid rgba(var(--on-accent-rgb), 0.16);
+  border-radius: var(--radius);
+  padding: 4px;
+  box-shadow: 0 12px 32px rgba(var(--shadow-color-rgb), 0.4);
+}
+
+.dropdown-select__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  width: 100%;
+  padding: var(--space-8) var(--space-12);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 14px;
+  letter-spacing: -0.28px;
+  color: var(--on-accent);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-select__item:hover {
+  background: rgba(var(--on-accent-rgb), 0.08);
+}
+
+.dropdown-select__item--active {
+  background: var(--accent);
 }
 
 .settings-bridge-row {
@@ -1073,7 +1129,7 @@ input.settings-text-field--input::placeholder {
 }
 
 .segmented--invariant .segmented__option {
-  height: 30px;
+  height: 28px;
   padding: 0 var(--space-16);
   border-right: none;
   border-radius: var(--radius-sm);
@@ -1096,6 +1152,8 @@ input.settings-text-field--input::placeholder {
 }
 
 .segmented--sm {
+  width: 320px;
+  flex-shrink: 0;
   height: 36px;
 }
 
