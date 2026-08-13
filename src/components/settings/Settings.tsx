@@ -326,7 +326,7 @@ function ConnectionSection() {
           </div>
         ))}
 
-        <button className="settings-btn settings-btn--ghost" onClick={addBackupDns}>
+        <button className="settings-btn settings-btn--ghost settings-btn--indent" onClick={addBackupDns}>
           Add backup DNS
           <Plus size={14} />
         </button>

@@ -879,7 +879,13 @@
 }
 
 .settings-text-field {
-  flex: 1;
+  /* flex-basis: auto (not the 0% that "flex: 1" implies) so the explicit
+     height below is honored as the flex basis — inside a column flex
+     parent (.settings-field-labeled) a 0% basis would otherwise collapse
+     this to its content's intrinsic height instead of 38px. */
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
   min-width: 0;
   height: 38px;
   box-sizing: border-box;
@@ -952,6 +958,12 @@ input.settings-text-field--input::placeholder {
 .settings-btn--ghost {
   background: transparent;
   align-self: flex-start;
+}
+
+.settings-btn--indent {
+  /* Aligns under the input/dropdown column (328px label column + 24px gap),
+     not the label column, matching the Figma layout. */
+  margin-left: 352px;
 }
 
 .dropdown-select {
