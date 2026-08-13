@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Plus, Trash2, Copy, LogOut, ChevronDown, RotateCcw } from 'lucide-react';
+import { Plus, Trash2, Copy, LogOut, ChevronDown, RotateCcw, ClipboardPaste } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { Toggle } from '../common/Toggle';
 import { REGIONS } from '../../data/regions';
 import type { Theme, Language } from '../../types';
+
+const APP_VERSION = 'v1.2.3';
 
 type SettingsTab = 'general' | 'account' | 'connection' | 'advanced';
 
@@ -16,11 +18,11 @@ const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
 ];
 
 const DNS_PRESETS = [
-  { value: '1.1.1.1', label: 'Cloudflare' },
-  { value: '8.8.8.8', label: 'Google' },
-  { value: '8.8.4.4', label: 'Google (secondary)' },
-  { value: '9.9.9.9', label: 'Quad9' },
-  { value: '208.67.222.222', label: 'OpenDNS' },
+  { value: '1.1.1.1', label: 'Cloudflare (1.1.1.1)' },
+  { value: '8.8.8.8', label: 'Google Public DNS (8.8.8.8)' },
+  { value: '8.8.4.4', label: 'Google Public DNS Secondary (8.8.4.4)' },
+  { value: '9.9.9.9', label: 'Quad9 (9.9.9.9)' },
+  { value: '208.67.222.222', label: 'OpenDNS (208.67.222.222)' },
 ];
 
 function formatDate(ts: number): string {
@@ -36,10 +38,14 @@ function mockBridgeCode(source: 'account' | 'telegram'): string {
   return `fixnet://import?b=${btoa(JSON.stringify(payload))}`;
 }
 
+function bridgeStatusDisplay(status: 'active' | 'failed'): { cls: string; label: string } {
+  return status === 'active' ? { cls: 'connected', label: 'Connected' } : { cls: 'disconnected', label: 'Disconnected' };
+}
+
 function DnsSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="dropdown-select">
-      <select className="dropdown-select__input dropdown-select__input--field" value={value} onChange={(e) => onChange(e.target.value)}>
+      <select className="dropdown-select__input" value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="" disabled>
           Select DNS
         </option>
@@ -49,7 +55,7 @@ function DnsSelect({ value, onChange }: { value: string; onChange: (v: string) =
           </option>
         ))}
       </select>
-      <ChevronDown size={16} className="dropdown-select__chevron" />
+      <ChevronDown size={14} className="dropdown-select__chevron" />
     </div>
   );
 }
@@ -117,7 +123,7 @@ function GeneralSection() {
           <div className="settings-row__text">
             <div className="settings-row__label">Theme</div>
           </div>
-          <div className="segmented segmented--invariant segmented--fill">
+          <div className="segmented segmented--invariant segmented--fill segmented--sm">
             {(['system', 'light', 'dark'] as Theme[]).map((t) => (
               <button
                 key={t}
@@ -145,8 +151,15 @@ function GeneralSection() {
               <option value="en">English</option>
               <option value="ru">Russian</option>
             </select>
-            <ChevronDown size={16} className="dropdown-select__chevron" />
+            <ChevronDown size={14} className="dropdown-select__chevron" />
           </div>
+        </div>
+      </div>
+
+      <div className="settings-card">
+        <div className="settings-kv__row">
+          <span className="settings-kv__label">App version</span>
+          <span className="settings-kv__value">{APP_VERSION}</span>
         </div>
       </div>
     </div>
@@ -159,20 +172,19 @@ function AccountSection() {
   const authKey = useStore((s) => s.authKey);
   const logout = useStore((s) => s.logout);
   const user = useStore((s) => s.user);
-
-  const [copied, setCopied] = useState(false);
+  const showToast = useStore((s) => s.showToast);
 
   function handleCopy() {
     try {
       navigator.clipboard.writeText(authKey).then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        showToast('Connection key copied');
       }).catch(() => {});
     } catch {
       // clipboard API not available — fail silently
     }
   }
 
+  const isExpired = user.subscriptionStatus === 'expired';
   const subscriptionLabel =
     user.subscriptionStatus === 'active'
       ? 'Active'
@@ -189,6 +201,7 @@ function AccountSection() {
           <div className="settings-kv__row">
             <span className="settings-kv__label">Current plan</span>
             <span className="settings-kv__value">{subscriptionLabel}</span>
+            {isExpired && <span className="settings-badge settings-badge--expired">Expired</span>}
           </div>
           <div className="settings-kv__row">
             <span className="settings-kv__label">Expires</span>
@@ -208,11 +221,10 @@ function AccountSection() {
           <div className="settings-field-with-action">
             <div className="settings-text-field">{formatKey(authKey)}</div>
             <button className="settings-icon-btn" onClick={handleCopy} aria-label="Copy connection key">
-              <Copy size={16} />
+              <Copy size={14} />
             </button>
           </div>
         </div>
-        {copied && <div className="form-hint" style={{ marginTop: 'var(--space-4)' }}>Copied</div>}
       </div>
 
       <div className="settings-card">
@@ -220,7 +232,7 @@ function AccountSection() {
           <div className="settings-row__text">
             <div className="settings-row__label">Region</div>
           </div>
-          <div className="dropdown-select dropdown-select--pill">
+          <div className="dropdown-select">
             <select
               className="dropdown-select__input"
               value={appSettings.region}
@@ -232,14 +244,14 @@ function AccountSection() {
                 </option>
               ))}
             </select>
-            <ChevronDown size={16} className="dropdown-select__chevron" />
+            <ChevronDown size={14} className="dropdown-select__chevron" />
           </div>
         </div>
       </div>
 
-      <button className="settings-card settings-card--button" onClick={() => logout()}>
-        <span className="settings-row__label">Sign Out</span>
-        <LogOut size={16} />
+      <button className="settings-btn" style={{ alignSelf: 'flex-start' }} onClick={() => logout()}>
+        Sign Out
+        <LogOut size={14} />
       </button>
     </div>
   );
@@ -274,6 +286,17 @@ function ConnectionSection() {
     }
   }
 
+  async function handlePasteBridgeCode() {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text.trim()) setBridgeCode(text.trim());
+    } catch {
+      // clipboard API not available — fail silently
+    }
+  }
+
+  const currentBridgeStatus = emergencyBridge ? bridgeStatusDisplay(emergencyBridge.status) : null;
+
   return (
     <div className="settings-stack">
       <div className="settings-card">
@@ -292,22 +315,26 @@ function ConnectionSection() {
             <div className="settings-row__text">
               <div className="settings-row__label">Backup DNS {i + 1}</div>
             </div>
-            <div className="settings-field-with-action">
+            {i === 0 ? (
               <DnsSelect value={value} onChange={(v) => updateBackupDns(i, v)} />
-              <button
-                className="settings-icon-btn"
-                onClick={() => removeBackupDns(i)}
-                aria-label={`Remove backup DNS ${i + 1}`}
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
+            ) : (
+              <div className="settings-field-with-action">
+                <DnsSelect value={value} onChange={(v) => updateBackupDns(i, v)} />
+                <button
+                  className="settings-icon-btn"
+                  onClick={() => removeBackupDns(i)}
+                  aria-label={`Remove backup DNS ${i + 1}`}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            )}
           </div>
         ))}
 
         <button className="settings-btn settings-btn--ghost" onClick={addBackupDns}>
-          <Plus size={16} />
           Add backup DNS
+          <Plus size={14} />
         </button>
       </div>
 
@@ -315,11 +342,19 @@ function ConnectionSection() {
         <div className="settings-card__title">Bridges</div>
         <div className="settings-divider" />
 
-        <div className="settings-field-labeled">
-          <div className="settings-field-labeled__label">Current fallback bridge</div>
-          <div className="settings-text-field settings-text-field--truncate">
-            {emergencyBridge ? emergencyBridge.code : 'No fallback bridge configured yet'}
+        <div className="settings-bridge-row">
+          <div className="settings-field-labeled">
+            <div className="settings-field-labeled__label">Current fallback bridge</div>
+            <div className="settings-text-field settings-text-field--truncate">
+              {emergencyBridge ? emergencyBridge.code : 'No fallback bridge configured yet'}
+            </div>
           </div>
+          {currentBridgeStatus && (
+            <div className={`settings-status settings-status--${currentBridgeStatus.cls}`}>
+              <span className="settings-status__dot" />
+              {currentBridgeStatus.label}
+            </div>
+          )}
         </div>
 
         {backupBridges.map((bridge, i) => (
@@ -333,7 +368,7 @@ function ConnectionSection() {
                   onClick={() => removeBackupBridge(bridge.id)}
                   aria-label={`Remove backup bridge ${i + 1}`}
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} />
                 </button>
               </div>
             </div>
@@ -348,13 +383,18 @@ function ConnectionSection() {
           <>
             <div className="settings-field-labeled">
               <div className="settings-field-labeled__label">New bridge</div>
-              <input
-                className="settings-text-field settings-text-field--input"
-                placeholder="Paste bridge configuration"
-                value={bridgeCode}
-                onChange={(e) => setBridgeCode(e.target.value)}
-                autoFocus
-              />
+              <div className="settings-field-with-action">
+                <input
+                  className="settings-text-field settings-text-field--input"
+                  placeholder="Paste bridge configuration"
+                  value={bridgeCode}
+                  onChange={(e) => setBridgeCode(e.target.value)}
+                  autoFocus
+                />
+                <button className="settings-icon-btn" onClick={handlePasteBridgeCode} aria-label="Paste from clipboard">
+                  <ClipboardPaste size={14} />
+                </button>
+              </div>
             </div>
             <div className="settings-quickfill-row">
               <button className="settings-btn" onClick={() => setBridgeCode(mockBridgeCode('account'))}>
@@ -368,8 +408,8 @@ function ConnectionSection() {
         )}
 
         <button className="settings-btn settings-btn--ghost" onClick={handleAddBridgeClick}>
-          <Plus size={16} />
           Add fallback bridge
+          <Plus size={14} />
         </button>
       </div>
     </div>
@@ -437,8 +477,8 @@ export function Settings() {
           </div>
         ) : (
           <button className="settings-btn" onClick={() => setPendingReset(true)}>
-            <RotateCcw size={16} />
             Reset settings
+            <RotateCcw size={14} />
           </button>
         )}
       </div>
