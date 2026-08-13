@@ -73,16 +73,16 @@ export function routeForService(service: Service): Route {
 }
 
 export const defaultAppSettings: AppSettings = {
-  autoLaunch: false,
-  launchInTray: false,
-  reconnectOnStartup: false,
-  closeToTray: true,
+  autoLaunch: true,
+  launchInTray: true,
+  reconnectOnStartup: true,
+  closeToTray: false,
   theme: 'dark',
   language: 'en',
   region: REGIONS[0].id,
   dns: {
     current: '1.1.1.1',
-    backups: ['8.8.8.8', '8.8.4.4', '9.9.9.9'],
+    backups: [''],
   },
   showAdvancedSettings: false,
   advancedNetwork: {

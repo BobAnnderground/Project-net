@@ -715,7 +715,7 @@
   width: 52px;
   height: 24px;
   border-radius: var(--radius-full);
-  background: transparent;
+  background: rgba(var(--on-accent-rgb), 0.24);
   border: 1px solid rgba(var(--on-accent-rgb), 0.16);
 }
 
@@ -767,19 +767,6 @@
   box-sizing: border-box;
 }
 
-.settings-card--button {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  border: none;
-  cursor: pointer;
-  color: var(--on-accent);
-  font-family: inherit;
-  text-align: left;
-}
-
 .settings-card__title {
   font-family: var(--font);
   font-size: 14px;
@@ -820,9 +807,9 @@
 
 .settings-row__desc {
   font-family: var(--font);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 16px;
-  letter-spacing: -0.121px;
+  letter-spacing: -0.132px;
   color: rgba(var(--on-accent-rgb), 0.56);
 }
 
@@ -851,6 +838,19 @@
   color: var(--on-accent);
 }
 
+.settings-badge {
+  padding: 2px var(--space-8);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: -0.121px;
+}
+
+.settings-badge--expired {
+  background: rgba(var(--text-red-rgb), 0.16);
+  color: var(--text-red);
+}
+
 .settings-field-with-action {
   display: flex;
   align-items: center;
@@ -868,21 +868,21 @@
 
 .settings-field-labeled__label {
   font-family: var(--font);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 16px;
-  letter-spacing: -0.121px;
+  letter-spacing: -0.132px;
   color: rgba(var(--on-accent-rgb), 0.56);
 }
 
 .settings-text-field {
   flex: 1;
   min-width: 0;
-  height: 36px;
+  height: 38px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   border: 1px solid rgba(var(--on-accent-rgb), 0.16);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   padding: 0 var(--space-16);
   font-family: var(--font);
   font-size: 14px;
@@ -907,15 +907,15 @@ input.settings-text-field--input::placeholder {
 }
 
 .settings-icon-btn {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(var(--on-accent-rgb), 0.08);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   color: var(--on-accent);
   cursor: pointer;
 }
@@ -923,12 +923,16 @@ input.settings-text-field--input::placeholder {
 .settings-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-8);
-  padding: var(--space-8) var(--space-12);
+  height: 38px;
+  padding: 0 var(--space-16);
+  box-sizing: border-box;
   background: rgba(var(--on-accent-rgb), 0.08);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   font-family: var(--font);
+  font-weight: 500;
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.28px;
@@ -937,9 +941,7 @@ input.settings-text-field--input::placeholder {
 }
 
 .settings-btn--pill {
-  height: 40px;
-  padding: 0 var(--space-16);
-  border-radius: var(--radius);
+  height: 38px;
   justify-content: center;
 }
 
@@ -956,7 +958,7 @@ input.settings-text-field--input::placeholder {
 
 .dropdown-select__input {
   width: 100%;
-  height: 40px;
+  height: 38px;
   box-sizing: border-box;
   appearance: none;
   background: transparent;
@@ -969,11 +971,6 @@ input.settings-text-field--input::placeholder {
   letter-spacing: -0.28px;
   color: var(--on-accent);
   cursor: pointer;
-}
-
-.dropdown-select__input--field {
-  height: 36px;
-  border-radius: var(--radius-sm);
 }
 
 .dropdown-select__input option {
@@ -1006,7 +1003,7 @@ input.settings-text-field--input::placeholder {
   display: flex;
   align-items: center;
   gap: var(--space-8);
-  height: 40px;
+  height: 38px;
   width: 96px;
   flex-shrink: 0;
   font-family: var(--font);
@@ -1068,18 +1065,18 @@ input.settings-text-field--input::placeholder {
 /* Invariant (theme-fixed dark) segmented control used on the Settings page */
 .segmented--invariant {
   border: 1px solid rgba(var(--on-accent-rgb), 0.16);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   padding: 4px;
-  height: 40px;
+  height: 38px;
   box-sizing: border-box;
   gap: 0;
 }
 
 .segmented--invariant .segmented__option {
-  height: 28px;
+  height: 30px;
   padding: 0 var(--space-16);
   border-right: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--on-accent);
   font-family: var(--font);
@@ -1096,6 +1093,10 @@ input.settings-text-field--input::placeholder {
 
 .segmented--fill .segmented__option {
   flex: 1;
+}
+
+.segmented--sm {
+  height: 36px;
 }
 
 .slider-row {
