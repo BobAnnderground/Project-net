@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Plus, Trash2, Copy, LogOut, ChevronDown, RotateCcw, ClipboardPaste } from 'lucide-react';
+import { Plus, Trash2, Copy, LogOut, RotateCcw, ClipboardPaste } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { Toggle } from '../common/Toggle';
+import { Dropdown } from '../common/Dropdown';
 import { REGIONS } from '../../data/regions';
 import type { Theme, Language } from '../../types';
 
@@ -42,21 +43,23 @@ function bridgeStatusDisplay(status: 'active' | 'failed'): { cls: string; label:
   return status === 'active' ? { cls: 'connected', label: 'Connected' } : { cls: 'disconnected', label: 'Disconnected' };
 }
 
-function DnsSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function DnsSelect({
+  value,
+  onChange,
+  compact,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  compact?: boolean;
+}) {
   return (
-    <div className="dropdown-select">
-      <select className="dropdown-select__input" value={value} onChange={(e) => onChange(e.target.value)}>
-        <option value="" disabled>
-          Select DNS
-        </option>
-        {DNS_PRESETS.map((p) => (
-          <option key={p.value} value={p.value}>
-            {p.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown size={14} className="dropdown-select__chevron" />
-    </div>
+    <Dropdown
+      value={value}
+      onChange={onChange}
+      options={DNS_PRESETS}
+      placeholder="Select DNS"
+      className={compact ? 'dropdown-select--compact' : undefined}
+    />
   );
 }
 
@@ -142,17 +145,14 @@ function GeneralSection() {
           <div className="settings-row__text">
             <div className="settings-row__label">Language</div>
           </div>
-          <div className="dropdown-select">
-            <select
-              className="dropdown-select__input"
-              value={appSettings.language}
-              onChange={(e) => updateAppSettings({ language: e.target.value as Language })}
-            >
-              <option value="en">English</option>
-              <option value="ru">Russian</option>
-            </select>
-            <ChevronDown size={14} className="dropdown-select__chevron" />
-          </div>
+          <Dropdown
+            value={appSettings.language}
+            onChange={(v) => updateAppSettings({ language: v as Language })}
+            options={[
+              { value: 'en', label: 'English' },
+              { value: 'ru', label: 'Russian' },
+            ]}
+          />
         </div>
       </div>
 
@@ -208,7 +208,10 @@ function AccountSection() {
             <span className="settings-kv__value">{formatDate(user.subscriptionExpiresAt)}</span>
           </div>
         </div>
-        <button className="settings-btn settings-btn--pill" style={{ marginTop: 'var(--space-8)' }}>
+        <button
+          className="settings-btn settings-btn--pill"
+          style={{ marginTop: 'var(--space-8)', alignSelf: 'flex-start' }}
+        >
           Open Account
         </button>
       </div>
@@ -232,20 +235,11 @@ function AccountSection() {
           <div className="settings-row__text">
             <div className="settings-row__label">Region</div>
           </div>
-          <div className="dropdown-select">
-            <select
-              className="dropdown-select__input"
-              value={appSettings.region}
-              onChange={(e) => updateAppSettings({ region: e.target.value })}
-            >
-              {REGIONS.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.displayName}
-                </option>
-              ))}
-            </select>
-            <ChevronDown size={14} className="dropdown-select__chevron" />
-          </div>
+          <Dropdown
+            value={appSettings.region}
+            onChange={(v) => updateAppSettings({ region: v })}
+            options={REGIONS.map((r) => ({ value: r.id, label: r.displayName }))}
+          />
         </div>
       </div>
 
@@ -319,7 +313,7 @@ function ConnectionSection() {
               <DnsSelect value={value} onChange={(v) => updateBackupDns(i, v)} />
             ) : (
               <div className="settings-field-with-action">
-                <DnsSelect value={value} onChange={(v) => updateBackupDns(i, v)} />
+                <DnsSelect value={value} onChange={(v) => updateBackupDns(i, v)} compact />
                 <button
                   className="settings-icon-btn"
                   onClick={() => removeBackupDns(i)}
