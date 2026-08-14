@@ -124,6 +124,11 @@ export interface User {
   homeRegion: string | null;
 }
 
+// The guided first-run flow: an intro splash, a full-screen region step,
+// then a 3-part coachmark tour (2/4, 3/4, 4/4) layered over the real Home
+// and Services screens. `null` means onboarding is finished or was skipped.
+export type OnboardingStage = 'welcome' | 'region' | 'tour-home' | 'tour-services' | 'tour-selected';
+
 export interface LibraryEntry {
   id: string;
   name: string;

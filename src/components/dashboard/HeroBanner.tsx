@@ -8,28 +8,35 @@ interface LastSessionInfo {
   onEdit: () => void;
 }
 
+interface WelcomeIntroInfo {
+  onGetStarted: () => void;
+  onSkip: () => void;
+}
+
 interface HeroBannerProps {
   showRoutingCta?: boolean;
   onSelectServices?: () => void;
   lastSession?: LastSessionInfo;
+  welcomeIntro?: WelcomeIntroInfo;
 }
 
 const MAX_SESSION_ICONS = 6;
 
-export function HeroBanner({ showRoutingCta, onSelectServices, lastSession }: HeroBannerProps) {
+export function HeroBanner({ showRoutingCta, onSelectServices, lastSession, welcomeIntro }: HeroBannerProps) {
   const visibleSessionServices = lastSession?.services.slice(0, MAX_SESSION_ICONS) ?? [];
   const overflowCount = lastSession ? lastSession.services.length - visibleSessionServices.length : 0;
-  const showCompactArt = !showRoutingCta && !lastSession;
+  const showCompactArt = !showRoutingCta && !lastSession && !welcomeIntro;
 
   return (
     <div
       className={clsx('hero-banner', {
         'hero-banner--cta': showRoutingCta,
         'hero-banner--session': !!lastSession,
+        'hero-banner--welcome': !!welcomeIntro,
       })}
     >
       {showCompactArt && <img src="/images/hero-keyvisual.png" alt="" className="hero-banner__art" />}
-      {showRoutingCta && (
+      {(showRoutingCta || welcomeIntro) && (
         <img src="/images/Key-visual-Welcome.webp" alt="" className="hero-banner__keyvisual" />
       )}
       {lastSession && (
@@ -37,6 +44,22 @@ export function HeroBanner({ showRoutingCta, onSelectServices, lastSession }: He
       )}
       <div className="hero-banner__content">
         <h1 className="hero-banner__title">{lastSession ? 'Last session' : 'Welcome to Fixnet'}</h1>
+
+        {welcomeIntro && (
+          <>
+            <p className="hero-banner__subtitle">
+              Let's set a few things up so Fixnet works exactly the way you need. It only takes a minute
+            </p>
+            <div className="hero-banner__welcome-actions">
+              <button className="hero-banner__btn hero-banner__btn--accent" onClick={welcomeIntro.onGetStarted}>
+                Get started
+              </button>
+              <button className="hero-banner__btn hero-banner__btn--secondary" onClick={welcomeIntro.onSkip}>
+                Skip onboarding
+              </button>
+            </div>
+          </>
+        )}
 
         {showRoutingCta && (
           <div className="hero-banner__routing-row">
@@ -97,7 +120,7 @@ export function HeroBanner({ showRoutingCta, onSelectServices, lastSession }: He
           </>
         )}
 
-        {!showRoutingCta && !lastSession && (
+        {!showRoutingCta && !lastSession && !welcomeIntro && (
           <p className="hero-banner__subtitle">Faster, smarter, and more reliable connections</p>
         )}
       </div>
