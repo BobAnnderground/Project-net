@@ -287,26 +287,110 @@
   margin-bottom: 0;
 }
 
-.selection-bar {
+.services-page {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-16);
+}
+
+.services-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.services-selected-panel {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  position: sticky;
+  top: 0;
+}
+
+.services-selected-panel__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-12) var(--space-16);
-  margin-bottom: var(--space-16);
-  background: var(--bg-2);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
+  gap: var(--space-8);
 }
 
-.selection-bar__count {
+.services-selected-panel__count {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-0);
 }
 
-.selection-bar__actions {
+.services-selected-panel__list {
   display: flex;
+  flex-direction: column;
   gap: var(--space-8);
+}
+
+.services-selected-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12);
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.services-selected-card__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--icon-swatch-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.services-selected-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.services-selected-card__name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.services-selected-card__meta {
+  font-size: 11px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.services-selected-card__remove {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.services-selected-card__remove:hover {
+  background: var(--bg-2);
+  color: var(--err);
 }
 
 /* Buttons */
@@ -403,7 +487,8 @@
    bottom edge (measured empirically at 1200x800 — .shell's own 1px
    border eats into the naive 800 - 32 - 24*2 = 720px estimate). */
 .hero-banner--cta,
-.hero-banner--session {
+.hero-banner--session,
+.hero-banner--welcome {
   height: 719px;
 }
 
@@ -415,7 +500,8 @@
 /* Both tall states are centered per Figma; the compact subtitle state
    stays left-aligned, matching the other mockup. */
 .hero-banner--cta .hero-banner__content,
-.hero-banner--session .hero-banner__content {
+.hero-banner--session .hero-banner__content,
+.hero-banner--welcome .hero-banner__content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -439,13 +525,28 @@
   margin: 0;
 }
 
-/* Last-session state uses Figma's smaller H2 style, not the H1 used by
-   the welcome/CTA states. */
-.hero-banner--session .hero-banner__title {
+/* Last-session and welcome-intro states use Figma's smaller H2 style, not
+   the H1 used by the empty-library routing CTA. */
+.hero-banner--session .hero-banner__title,
+.hero-banner--welcome .hero-banner__title {
   font-size: 46px;
   line-height: 52px;
   /* -1.4% of 46px */
   letter-spacing: -0.644px;
+}
+
+.hero-banner__welcome-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-16);
+  margin-top: var(--space-32);
+  width: 220px;
+}
+
+.hero-banner__welcome-actions .hero-banner__btn {
+  width: 100%;
+  justify-content: center;
 }
 
 .hero-banner__subtitle {
@@ -1194,6 +1295,44 @@ input.settings-text-field--input::placeholder {
   margin-bottom: var(--space-12);
 }
 
+.info-tip {
+  position: relative;
+  display: flex;
+  gap: var(--space-8);
+  align-items: flex-start;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-12);
+  padding-right: var(--space-32);
+  margin-bottom: var(--space-12);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-1);
+}
+
+.info-tip__close {
+  position: absolute;
+  top: var(--space-8);
+  right: var(--space-8);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.info-tip__close:hover {
+  background: var(--bg-3);
+  color: var(--text-0);
+}
+
 .form-label {
   font-size: 11.5px;
   font-weight: 600;
@@ -1652,6 +1791,14 @@ input.settings-text-field--input::placeholder {
 
 /* ── Welcome Onboarding ─────────────────────────────────────────────────── */
 
+.onboard-step {
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: -0.132px;
+  color: var(--text-2);
+  margin-bottom: var(--space-8);
+}
+
 .onboard-heading {
   font-family: var(--font-display);
   font-size: 22px;
@@ -1673,6 +1820,86 @@ input.settings-text-field--input::placeholder {
 .onboard-footer {
   display: flex;
   justify-content: flex-end;
+}
+
+/* ── Onboarding coachmark tour (steps 2-4, layered over Home/Services) ──── */
+
+.coachmark {
+  position: absolute;
+  width: 312px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: var(--space-16);
+  border-radius: var(--radius);
+  border: 1px solid rgba(var(--on-accent-rgb), 0.16);
+  background: rgba(var(--frames-bg-rgb), 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24), 0 12px 32px rgba(var(--shadow-color-rgb), 0.4);
+  z-index: 20;
+}
+
+.coachmark__text {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: var(--on-accent);
+  margin: 0;
+}
+
+.coachmark__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.coachmark__pager {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.coachmark__step {
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: -0.132px;
+  color: rgba(var(--on-accent-rgb), 0.56);
+  white-space: nowrap;
+}
+
+.coachmark__nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--on-accent-rgb), 0.08);
+  color: var(--on-accent);
+  cursor: pointer;
+}
+
+.coachmark__nav-btn:hover {
+  background: rgba(var(--on-accent-rgb), 0.16);
+}
+
+.coachmark--home {
+  bottom: var(--space-24);
+  right: 14px;
+}
+
+.coachmark--services {
+  top: 110px;
+  right: 0;
+}
+
+.coachmark--selected {
+  top: 110px;
+  right: 0;
 }
 
 /* ── Onboarding reveal animation ────────────────────────────────────────── */

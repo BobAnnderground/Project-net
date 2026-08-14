@@ -10,6 +10,7 @@ import type {
   BridgeStatus,
   AppSettings,
   User,
+  OnboardingStage,
 } from '../types';
 import { catalogById } from '../data/catalog';
 import {
@@ -50,7 +51,8 @@ interface BackupBridge {
 
 interface StoreState {
   isAuthenticated: boolean;
-  isFirstLoginOfSession: boolean;
+  onboardingStage: OnboardingStage | null;
+  hasSeenAutomaticTip: boolean;
   authKey: string;
   user: User;
   appSettings: AppSettings;
@@ -103,8 +105,14 @@ interface StoreState {
   login: (code: string) => boolean;
   logout: () => void;
   regenerateAuthKey: () => void;
-  commitOnboardingSelection: (entryIds: string[], userHomeRegion: string | null) => void;
+
+  // onboarding: welcome -> region -> tour-home -> tour-services -> tour-selected -> null
+  beginOnboardingRegionStep: () => void;
+  commitOnboardingRegion: (regionId: string | null) => void;
+  advanceOnboardingTour: () => void;
+  retreatOnboardingTour: () => void;
   skipOnboarding: () => void;
+  dismissAutomaticTip: () => void;
 
   // ui
   setActiveTab: (tab: TabId) => void;
@@ -122,7 +130,8 @@ const MAX_QUALITY_SAMPLES = 40;
 
 export const useStore = create<StoreState>((set, get) => ({
   isAuthenticated: false,
-  isFirstLoginOfSession: false,
+  onboardingStage: null,
+  hasSeenAutomaticTip: false,
   authKey: '1111111111111111',
   user: defaultUser,
   appSettings: defaultAppSettings,
@@ -471,7 +480,7 @@ export const useStore = create<StoreState>((set, get) => ({
 
   login: (code) => {
     if (code === get().authKey) {
-      set({ isAuthenticated: true, isFirstLoginOfSession: true });
+      set({ isAuthenticated: true, onboardingStage: 'welcome' });
       return true;
     }
     return false;
@@ -489,55 +498,43 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ isAuthenticated: false });
   },
 
-  commitOnboardingSelection: (entryIds, userHomeRegion) => {
-    const state = get();
-    const addedNames = new Set(
-      state.library.filter((s) => s.addedFromLibrary).map((s) => s.name)
-    );
+  beginOnboardingRegionStep: () => {
+    set({ onboardingStage: 'region' });
+  },
 
-    const newServices: Service[] = [];
-    const newRoutes: Record<string, Route> = {};
-    const libraryUpdates: Record<string, { enabled: boolean }> = {};
-
-    for (const id of entryIds) {
-      const entry = catalogById(id);
-      if (!entry) continue;
-
-      if (addedNames.has(entry.name)) {
-        // Service already exists — ensure enabled
-        const existing = state.library.find(
-          (s) => s.addedFromLibrary === true && s.name === entry.name
-        );
-        if (existing) {
-          libraryUpdates[existing.id] = { enabled: true };
-        }
-      } else {
-        // Create new service with enabled: true, routed via its recommended proxy region
-        const service = { ...serviceFromLibraryEntry(entry), enabled: true };
-        const route = routeForService(service);
-        newServices.push(service);
-        newRoutes[service.id] = route;
-      }
-    }
-
+  commitOnboardingRegion: (regionId) => {
     set((s) => ({
-      library: [
-        ...s.library.map((sv) => {
-          const upd = libraryUpdates[sv.id];
-          return upd !== undefined ? { ...sv, ...upd } : sv;
-        }),
-        ...newServices,
-      ],
-      routes: { ...s.routes, ...newRoutes },
-      isFirstLoginOfSession: false,
-      user: userHomeRegion !== null ? { ...s.user, homeRegion: userHomeRegion } : s.user,
+      onboardingStage: 'tour-home',
+      user: regionId !== null ? { ...s.user, homeRegion: regionId } : s.user,
     }));
+  },
 
-    get().startAll();
+  advanceOnboardingTour: () => {
+    const stage = get().onboardingStage;
+    if (stage === 'tour-home') {
+      set({ onboardingStage: 'tour-services', activeTab: 'services' });
+    } else if (stage === 'tour-services') {
+      set({ onboardingStage: 'tour-selected' });
+    } else if (stage === 'tour-selected') {
+      set({ onboardingStage: null });
+    }
+  },
+
+  retreatOnboardingTour: () => {
+    const stage = get().onboardingStage;
+    if (stage === 'tour-services') {
+      set({ onboardingStage: 'tour-home', activeTab: 'dashboard' });
+    } else if (stage === 'tour-selected') {
+      set({ onboardingStage: 'tour-services' });
+    }
   },
 
   skipOnboarding: () => {
-    set({ isFirstLoginOfSession: false });
+    set({ onboardingStage: null });
+  },
+
+  dismissAutomaticTip: () => {
+    set({ hasSeenAutomaticTip: true });
   },
 
   setActiveTab: (tab) => set({ activeTab: tab }),

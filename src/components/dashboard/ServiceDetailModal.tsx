@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Plus, Trash2, Play, Search } from 'lucide-react';
+import { Plus, Trash2, Play, Search, X } from 'lucide-react';
 import { Modal } from '../common/Modal';
 import { useStore } from '../../store/useStore';
 import { REGIONS } from '../../data/regions';
@@ -13,6 +13,8 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
   const updateService = useStore((s) => s.updateService);
   const startWithOnly = useStore((s) => s.startWithOnly);
   const setActiveTab = useStore((s) => s.setActiveTab);
+  const hasSeenAutomaticTip = useStore((s) => s.hasSeenAutomaticTip);
+  const dismissAutomaticTip = useStore((s) => s.dismissAutomaticTip);
   const [regionSearch, setRegionSearch] = useState('');
   const [hasChanges, setHasChanges] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
@@ -60,6 +62,18 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
 
   return (
     <Modal title={service.name} onClose={handleCloseAttempt}>
+      {!hasSeenAutomaticTip && (
+        <div className="info-tip">
+          <span>
+            You can set server and connection type manually, but we recommend leaving them on automatic —
+            it's the most stable option
+          </span>
+          <button className="info-tip__close" onClick={dismissAutomaticTip} aria-label="Dismiss tip">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       <div className="form-group">
         <label className="form-label">Region</label>
         <div className="search-input-wrap">
