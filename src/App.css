@@ -1714,6 +1714,7 @@ input.settings-text-field--input::placeholder {
 }
 
 .auth-cell--error {
+  border-width: 2px;
   border-color: transparent;
   border-bottom-color: var(--auth-error);
 }
