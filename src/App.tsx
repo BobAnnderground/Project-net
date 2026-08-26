@@ -88,7 +88,7 @@ function App() {
         </div>
       )}
       <div className={view === 'crossfade' ? 'auth-fade-wrapper auth-fade-wrapper--hidden' : ''}>
-        <AuthScreen onAuthenticated={handleAuthenticated} />
+        <AuthScreen onAuthenticated={handleAuthenticated} onMinimize={() => setMinimized(true)} />
       </div>
     </div>
   );
