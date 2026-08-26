@@ -1808,7 +1808,7 @@ input.settings-text-field--input::placeholder {
 .auth-error-icon {
   flex-shrink: 0;
   margin-top: 2px;
-  color: var(--auth-error);
+  line-height: 0;
 }
 
 .auth-error-text {

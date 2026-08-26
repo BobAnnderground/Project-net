@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import type { KeyboardEvent, ClipboardEvent } from 'react';
-import { Minus, X, Sun, Moon, ClipboardPaste, AlertTriangle, Check } from 'lucide-react';
+import { Minus, X, Sun, Moon, ClipboardPaste, Check } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 type AuthState = 'idle' | 'checking' | 'error' | 'success';
@@ -8,6 +8,16 @@ type AuthState = 'idle' | 'checking' | 'error' | 'success';
 interface Props {
   onAuthenticated: () => void;
   onMinimize: () => void;
+}
+
+function AuthErrorIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="8" fill="var(--auth-text-primary)" />
+      <rect x="7" y="3.5" width="2" height="6.5" rx="1" fill="var(--auth-bg)" />
+      <circle cx="8" cy="12" r="1.1" fill="var(--auth-bg)" />
+    </svg>
+  );
 }
 
 function AuthLogo() {
@@ -247,7 +257,9 @@ export function AuthScreen({ onAuthenticated, onMinimize }: Props) {
 
           {isError && (
             <div className="auth-error-row">
-              <AlertTriangle size={16} className="auth-error-icon" />
+              <span className="auth-error-icon">
+                <AuthErrorIcon />
+              </span>
               <p className="auth-error-text">
                 Invalid access key. Check your access key in your account dashboard or contact{' '}
                 <span className="auth-link-text">Support</span>.
