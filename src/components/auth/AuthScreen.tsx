@@ -137,8 +137,8 @@ export function AuthScreen({ onAuthenticated, onMinimize }: Props) {
 
     setAuthState('checking');
 
-    // Brief loading delay (~200ms)
-    await new Promise((res) => setTimeout(res, 200));
+    // Loading delay so the checking state is actually visible (~1s)
+    await new Promise((res) => setTimeout(res, 1000));
 
     const ok = login(fullCode);
 
@@ -170,6 +170,10 @@ export function AuthScreen({ onAuthenticated, onMinimize }: Props) {
     <div className="auth-bg">
       <div className="auth-header">
         <span className="auth-header__brand">Fixnet</span>
+        {/* TEST-ONLY: remove together with .auth-theme-toggle below */}
+        <span className="auth-header__test-code auth-test-only">
+          Prototype mode · Test code: <span className="auth-footer__code">1111 1111 1111 1111</span>
+        </span>
         <div className="auth-header__actions">
           <button type="button" className="auth-header__btn" onClick={onMinimize} aria-label="Minimize">
             <Minus size={16} />
@@ -178,6 +182,7 @@ export function AuthScreen({ onAuthenticated, onMinimize }: Props) {
             <X size={16} />
           </button>
         </div>
+        <div className="auth-header__divider" />
       </div>
 
       <div className="auth-logo-mark">
@@ -230,7 +235,11 @@ export function AuthScreen({ onAuthenticated, onMinimize }: Props) {
           </div>
 
           {!hasAnyDigits && !isChecking && (
-            <button type="button" className="auth-paste-btn" onClick={() => { void handlePasteFromClipboard(); }}>
+            <button
+              type="button"
+              className="auth-paste-btn auth-paste-btn--floating"
+              onClick={() => { void handlePasteFromClipboard(); }}
+            >
               <ClipboardPaste size={16} />
               Paste from clipboard
             </button>
@@ -245,15 +254,6 @@ export function AuthScreen({ onAuthenticated, onMinimize }: Props) {
               </p>
             </div>
           )}
-
-          {/* TEST-ONLY: remove together with .auth-theme-toggle below */}
-          <div className="auth-test-only">
-            <hr className="auth-divider" />
-            <p className="auth-footer">
-              Prototype mode · Test code:{' '}
-              <span className="auth-footer__code">1111 1111 1111 1111</span>
-            </p>
-          </div>
         </div>
       </div>
 

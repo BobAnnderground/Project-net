@@ -1533,13 +1533,22 @@ input.settings-text-field--input::placeholder {
 
 /* System header */
 .auth-header {
+  position: relative;
   box-sizing: border-box;
   height: 49px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-24);
-  border-bottom: 1px solid var(--auth-field-border-subtle);
+}
+
+.auth-header__divider {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 1px;
+  background: var(--auth-field-border-subtle);
 }
 
 .auth-header__brand {
@@ -1548,6 +1557,17 @@ input.settings-text-field--input::placeholder {
   line-height: 20px;
   letter-spacing: -0.28px;
   color: var(--auth-text-secondary);
+}
+
+.auth-header__test-code {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--auth-text-secondary);
+  white-space: nowrap;
 }
 
 .auth-header__actions {
@@ -1572,18 +1592,23 @@ input.settings-text-field--input::placeholder {
   color: var(--auth-text-primary);
 }
 
-/* Logo mark */
+/* Logo mark — 107px from the top of the window (not from below the header),
+   matching the Figma frame where the logo is a sibling of the header, not
+   nested inside a "below header" container. */
 .auth-logo-mark {
   position: absolute;
-  top: 58px;
+  top: 107px;
   left: 50%;
   transform: translateX(-50%);
+  line-height: 0;
 }
 
-/* Centered content column */
+/* Centered content column — vertically centered on the full 800px window
+   (top: calc(50% + 8px) in the Figma frame), same coordinate space as the
+   logo above. */
 .auth-content {
   position: absolute;
-  top: 359px;
+  top: 408px;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -1620,6 +1645,7 @@ input.settings-text-field--input::placeholder {
 }
 
 .auth-form {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1732,9 +1758,9 @@ input.settings-text-field--input::placeholder {
   color: var(--auth-text-secondary);
 }
 
-/* Paste from clipboard */
+/* Paste from clipboard — positioned out of flow so its mount/unmount never
+   changes .auth-form's height and shifts the centered cells. */
 .auth-paste-btn {
-  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: var(--space-8);
@@ -1752,6 +1778,12 @@ input.settings-text-field--input::placeholder {
 
 .auth-paste-btn:hover {
   background: var(--auth-field-border-subtle);
+}
+
+.auth-paste-btn--floating {
+  position: absolute;
+  top: 56px;
+  left: 0;
 }
 
 /* Error message */
@@ -1777,30 +1809,9 @@ input.settings-text-field--input::placeholder {
   color: var(--auth-text-primary);
 }
 
-/* Test-only helpers — remove auth-theme-toggle and this block together
-   once real theme detection / a real access key backend lands. */
-.auth-test-only {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-8);
-  width: 308px;
-}
-
-.auth-divider {
-  width: 100%;
-  border: none;
-  border-top: 1px solid var(--auth-field-border-subtle);
-  margin: 0;
-}
-
-.auth-footer {
-  margin: 0;
-  font-size: 11px;
-  color: var(--auth-text-secondary);
-  text-align: center;
-}
-
+/* Test-only helpers — .auth-test-only marks elements (the header test-code
+   hint and .auth-theme-toggle below) meant to be removed together once real
+   theme detection / a real access key backend lands. */
 .auth-footer__code {
   font-family: var(--font-mono);
 }
@@ -1836,7 +1847,7 @@ input.settings-text-field--input::placeholder {
   margin: 0;
   text-align: center;
   font-family: var(--font);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 120px;
   line-height: 128px;
   letter-spacing: -2.88px;
