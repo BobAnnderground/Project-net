@@ -1,15 +1,31 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import type { KeyboardEvent, ClipboardEvent } from 'react';
-import { X, Sun, Moon } from 'lucide-react';
+import { Minus, X, Sun, Moon, ClipboardPaste, AlertTriangle, Check } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 type AuthState = 'idle' | 'checking' | 'error' | 'success';
 
 interface Props {
   onAuthenticated: () => void;
+  onMinimize: () => void;
 }
 
-export function AuthScreen({ onAuthenticated }: Props) {
+function AuthLogo() {
+  return (
+    <svg width="56" height="56" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+      <path
+        d="M26.7245 0H9.2755C4.15368 0 0 4.15342 0 9.27492V26.7228C0 31.8466 4.15368 36 9.2755 36H26.7245C31.8486 36 36 31.8466 36 26.7228V9.27492C36 4.15342 31.8486 0 26.7245 0Z"
+        fill="var(--auth-logo-bg)"
+      />
+      <path
+        d="M27.193 28.3847H22.4816V20.8808C22.4816 19.8525 21.8994 19.2815 20.8844 19.2815L15.1179 19.3038C14.1029 19.3038 13.5206 19.8748 13.5206 20.9009V28.3847H8.80704V19.0718H13.5206V15.0678H8.80704V11.8201C8.80704 9.06301 10.8861 6.95285 13.6656 6.95285L26.6263 6.93054V11.5078L15.1179 11.5301C14.1029 11.5301 13.5206 12.206 13.5206 13.232V15.0678L22.7627 15.0455C25.2098 15.0455 27.193 17.0286 27.193 19.4756V28.3847Z"
+        fill="var(--auth-logo-fg)"
+      />
+    </svg>
+  );
+}
+
+export function AuthScreen({ onAuthenticated, onMinimize }: Props) {
   const login = useStore((s) => s.login);
   const theme = useStore((s) => s.appSettings.theme);
   const updateAppSettings = useStore((s) => s.updateAppSettings);
@@ -71,27 +87,36 @@ export function AuthScreen({ onAuthenticated }: Props) {
           return next;
         });
       }
-    } else if (e.key === 'Enter') {
-      if (isComplete) {
-        void handleSubmit();
-      }
     }
-  }, [cells, isComplete]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cells]);
 
-  const handlePaste = useCallback((e: ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 16);
-    if (pasted.length === 0) return;
+  const applyDigits = useCallback((pasted: string) => {
+    const digits = pasted.replace(/\D/g, '').slice(0, 16);
+    if (digits.length === 0) return;
     const next: [string, string, string, string] = ['', '', '', ''];
     for (let i = 0; i < 4; i++) {
-      next[i] = pasted.slice(i * 4, i * 4 + 4);
+      next[i] = digits.slice(i * 4, i * 4 + 4);
     }
     setCells(next);
     // Focus the last filled cell or next empty
-    const lastFilledCell = Math.min(Math.floor((pasted.length - 1) / 4), 3);
-    const focusIndex = pasted.length >= 16 ? 3 : lastFilledCell;
+    const lastFilledCell = Math.min(Math.floor((digits.length - 1) / 4), 3);
+    const focusIndex = digits.length >= 16 ? 3 : lastFilledCell;
     setTimeout(() => inputRefs[focusIndex].current?.focus(), 0);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePaste = useCallback((e: ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    applyDigits(e.clipboardData.getData('text'));
+  }, [applyDigits]);
+
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      applyDigits(text);
+    } catch {
+      // clipboard API not available — fail silently
+    }
+  }, [applyDigits]);
 
   // Clear error state as soon as user types a new digit
   const handleChange = useCallback((index: number, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +133,7 @@ export function AuthScreen({ onAuthenticated }: Props) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = useCallback(async () => {
-    if (!isComplete || authState === 'checking' || authState === 'success') return;
+    if (!isComplete || authState !== 'idle') return;
 
     setAuthState('checking');
 
@@ -119,7 +144,7 @@ export function AuthScreen({ onAuthenticated }: Props) {
 
     if (ok) {
       setAuthState('success');
-      // Flash ok border for 300ms, then start crossfade
+      // Flash success icon for 300ms, then start crossfade
       setTimeout(() => {
         onAuthenticated();
       }, 300);
@@ -129,13 +154,115 @@ export function AuthScreen({ onAuthenticated }: Props) {
     }
   }, [isComplete, authState, fullCode, login, onAuthenticated]);
 
+  // Auto-submit as soon as all 4 cells are filled
+  useEffect(() => {
+    if (isComplete && authState === 'idle') {
+      void handleSubmit();
+    }
+  }, [isComplete, authState, handleSubmit]);
+
   const isError = authState === 'error';
   const isSuccess = authState === 'success';
   const isChecking = authState === 'checking';
-  const isDisabled = !isComplete || isChecking || isSuccess;
+  const isCellsDisabled = isChecking || isSuccess;
 
   return (
     <div className="auth-bg">
+      <div className="auth-header">
+        <span className="auth-header__brand">Fixnet</span>
+        <div className="auth-header__actions">
+          <button type="button" className="auth-header__btn" onClick={onMinimize} aria-label="Minimize">
+            <Minus size={16} />
+          </button>
+          <button type="button" className="auth-header__btn" onClick={onMinimize} aria-label="Close">
+            <X size={16} />
+          </button>
+        </div>
+      </div>
+
+      <div className="auth-logo-mark">
+        <AuthLogo />
+      </div>
+
+      <div className="auth-content">
+        <p className="auth-copy">
+          Sign in with the access key from your{' '}
+          <button type="button" className="auth-link" onClick={() => window.location.reload()}>
+            Fixnet account
+          </button>{' '}
+          dashboard or{' '}
+          <button type="button" className="auth-link" onClick={() => window.location.reload()}>
+            Telegram bot
+          </button>
+        </p>
+
+        <div className="auth-form">
+          <div
+            className={`auth-cells-row${isError ? ' auth-cells-row--error' : ''}`}
+            key={shakeKey}
+          >
+            {([0, 1, 2, 3] as const).map((i) => (
+              <input
+                key={i}
+                ref={inputRefs[i]}
+                className={`auth-cell${isError ? ' auth-cell--error' : ''}`}
+                type="text"
+                inputMode="numeric"
+                maxLength={4}
+                value={cells[i]}
+                onChange={(e) => handleChange(i, e)}
+                onKeyDown={(e) => handleKeyDown(i, e)}
+                onPaste={handlePaste}
+                disabled={isCellsDisabled}
+                aria-label={`Code segment ${i + 1}`}
+              />
+            ))}
+            <div className="auth-trailing">
+              {isChecking && <span className="auth-spinner" />}
+              {isSuccess && <Check size={16} className="auth-success-icon" />}
+              {!isChecking && !isSuccess && hasAnyDigits && (
+                <button type="button" className="auth-clear-btn" onClick={handleClear}>
+                  <X size={12} />
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
+          {!hasAnyDigits && !isChecking && (
+            <button type="button" className="auth-paste-btn" onClick={() => { void handlePasteFromClipboard(); }}>
+              <ClipboardPaste size={16} />
+              Paste from clipboard
+            </button>
+          )}
+
+          {isError && (
+            <div className="auth-error-row">
+              <AlertTriangle size={16} className="auth-error-icon" />
+              <p className="auth-error-text">
+                Invalid access key. Check your access key in your account dashboard or contact{' '}
+                <span className="auth-link-text">Support</span>.
+              </p>
+            </div>
+          )}
+
+          {/* TEST-ONLY: remove together with .auth-theme-toggle below */}
+          <div className="auth-test-only">
+            <hr className="auth-divider" />
+            <p className="auth-footer">
+              Prototype mode · Test code:{' '}
+              <span className="auth-footer__code">1111 1111 1111 1111</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <p className="auth-headline">
+        {`Let's get`}
+        <span className="auth-headline__accent">{` started`}</span>
+      </p>
+
+      {/* TEST-ONLY: remove together with the block above */}
       <button
         type="button"
         className="auth-theme-toggle"
@@ -145,78 +272,6 @@ export function AuthScreen({ onAuthenticated }: Props) {
       >
         {isDarkTheme ? <Sun size={14} /> : <Moon size={14} />}
       </button>
-
-      <div className="auth-card">
-        {/* Wordmark */}
-        <div className="auth-wordmark">
-          <div className="auth-wordmark__glyph" aria-hidden="true" />
-          <span className="auth-wordmark__text">FIXNET</span>
-        </div>
-
-        {/* Label */}
-        <div className="auth-label-gap" />
-        <div className="auth-label-row">
-          <label className="auth-label">Enter the authorization key</label>
-          {hasAnyDigits && !isChecking && !isSuccess && (
-            <button type="button" className="auth-clear-btn" onClick={handleClear}>
-              <X size={12} />
-              Clear
-            </button>
-          )}
-        </div>
-
-        {/* 4-cell input group */}
-        <div className="auth-input-gap-sm" />
-        <div
-          className={`auth-cells${isError ? ' auth-cells--error' : ''}${isSuccess ? ' auth-cells--success' : ''}`}
-          key={shakeKey}
-        >
-          {([0, 1, 2, 3] as const).map((i) => (
-            <input
-              key={i}
-              ref={inputRefs[i]}
-              className={`auth-cell${isError ? ' auth-cell--error' : ''}${isSuccess ? ' auth-cell--success' : ''}`}
-              type="text"
-              inputMode="numeric"
-              maxLength={4}
-              value={cells[i]}
-              placeholder="· · · ·"
-              onChange={(e) => handleChange(i, e)}
-              onKeyDown={(e) => handleKeyDown(i, e)}
-              onPaste={handlePaste}
-              disabled={isChecking || isSuccess}
-              aria-label={`Code segment ${i + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Log in button */}
-        <div className="auth-btn-gap" />
-        <button
-          className={`auth-login-btn${isDisabled ? ' auth-login-btn--disabled' : ' auth-login-btn--enabled'}`}
-          onClick={() => { void handleSubmit(); }}
-          disabled={isDisabled}
-          type="button"
-        >
-          {isChecking ? '···' : 'Log in'}
-        </button>
-
-        {/* Error message area — always reserves height */}
-        <div className="auth-error-gap" />
-        <div className={`auth-error-msg${isError ? ' auth-error-msg--visible' : ''}`}>
-          Invalid authorization key. Check that it's up to date in your account on the website, or contact{' '}
-          <span className="auth-error-msg__link">support</span>.
-        </div>
-
-        {/* Divider */}
-        <div className="auth-divider-gap" />
-        <hr className="auth-divider" />
-        <div className="auth-footer-gap" />
-        <p className="auth-footer">
-          Prototype mode · Test code:{' '}
-          <span className="auth-footer__code">1111 1111 1111 1111</span>
-        </p>
-      </div>
     </div>
   );
 }

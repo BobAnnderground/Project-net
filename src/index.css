@@ -73,8 +73,22 @@
      literal. --btn-accent-text in particular predates the purple accent
      and may want revisiting for contrast now that --accent is dark. */
   --btn-accent-text: #051826;
-  --auth-cell-hover-border: #2e4a60;
-  --auth-btn-disabled-border: #253850;
+
+  /* Auth screen — exact values from the Figma authorization flow (node
+     1213:309823), not derived from the general token set above since that
+     screen uses its own dedicated color scheme. */
+  --auth-bg: #141117;
+  --auth-text-primary: #ffffff;
+  --auth-text-secondary: rgba(255, 255, 255, 0.56);
+  --auth-field-bg: rgba(255, 255, 255, 0.16);
+  --auth-field-border: rgba(255, 255, 255, 0.56);
+  --auth-field-border-subtle: rgba(255, 255, 255, 0.16);
+  --auth-caret: #ffffff;
+  --auth-error: #fe3838;
+  --auth-paste-bg: rgba(255, 255, 255, 0.08);
+  --auth-headline-accent: #854dd1;
+  --auth-logo-bg: #ffffff;
+  --auth-logo-fg: #141117;
 
   --space-4: 4px;
   --space-8: 8px;
@@ -111,6 +125,21 @@
   --err-dim: #fbe2e2;
   --info: #5768d6;
   --info-rgb: 87, 104, 214;
+
+  /* Auth screen — exact values from the Figma authorization flow (light
+     theme frames). */
+  --auth-bg: #f6f5f8;
+  --auth-text-primary: #130026;
+  --auth-text-secondary: rgba(20, 17, 23, 0.44);
+  --auth-field-bg: rgba(91, 34, 153, 0.24);
+  --auth-field-border: rgba(91, 34, 153, 0.6);
+  --auth-field-border-subtle: rgba(20, 17, 23, 0.12);
+  --auth-caret: #141117;
+  --auth-error: #ec1313;
+  --auth-paste-bg: rgba(20, 17, 23, 0.08);
+  --auth-headline-accent: #8e65c2;
+  --auth-logo-bg: #5b2299;
+  --auth-logo-fg: #ffffff;
 }
 
 * {
