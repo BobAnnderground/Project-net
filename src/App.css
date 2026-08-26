@@ -1603,14 +1603,14 @@ input.settings-text-field--input::placeholder {
   line-height: 0;
 }
 
-/* Centered content column — vertically centered on the full 800px window
-   (top: calc(50% + 8px) in the Figma frame), same coordinate space as the
-   logo above. */
+/* Content column — top-anchored (not vertically centered) so that content
+   growing below the cells (e.g. the error row) never moves the cells
+   themselves; only horizontally centered via translateX. */
 .auth-content {
   position: absolute;
-  top: 408px;
+  top: 310px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
