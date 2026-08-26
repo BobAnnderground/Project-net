@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import './App.css';
-import { useStore } from './store/useStore';
+import { useStore, type TabId } from './store/useStore';
 import { Sidebar } from './components/layout/Sidebar';
 import { WindowTitleBar } from './components/layout/WindowTitleBar';
 import { Dashboard } from './components/dashboard/Dashboard';
@@ -8,6 +8,11 @@ import { Services } from './components/services/Services';
 import { Settings } from './components/settings/Settings';
 import { AuthScreen } from './components/auth/AuthScreen';
 import { Toast } from './components/common/Toast';
+
+const SECTION_LABELS: Partial<Record<TabId, string>> = {
+  services: 'Services',
+  settings: 'Settings',
+};
 
 function App() {
   const activeTab = useStore((s) => s.activeTab);
@@ -57,7 +62,11 @@ function App() {
     }
     return (
       <div className="shell">
-        <WindowTitleBar onMinimize={() => setMinimized(true)} onClose={() => setMinimized(true)} />
+        <WindowTitleBar
+          section={SECTION_LABELS[activeTab]}
+          onMinimize={() => setMinimized(true)}
+          onClose={() => setMinimized(true)}
+        />
         <Sidebar />
         <div className="content">
           {activeTab === 'dashboard' && <Dashboard />}
@@ -77,7 +86,11 @@ function App() {
       {view === 'crossfade' && (
         <div className="auth-fade-wrapper auth-fade-wrapper--visible">
           <div className="shell">
-            <WindowTitleBar onMinimize={() => setMinimized(true)} onClose={() => setMinimized(true)} />
+            <WindowTitleBar
+              section={SECTION_LABELS[activeTab]}
+              onMinimize={() => setMinimized(true)}
+              onClose={() => setMinimized(true)}
+            />
             <Sidebar />
             <div className="content">
               {activeTab === 'dashboard' && <Dashboard />}
