@@ -124,8 +124,9 @@
 }
 
 /* Sidebar — no background/border of its own; it sits directly on the
-   shell's --bg-0, so all colors below are theme-aware (not the invariant
-   --on-accent tokens used by dark-only surfaces elsewhere). */
+   shell's --bg-0. Text/notification colors use the theme-aware --text-*
+   tokens; the nav icons and avatar are separate light/dark PNG assets
+   (picked in Sidebar.tsx) since they're pre-rendered art, not flat icons. */
 .sidebar {
   grid-row: 2;
   grid-column: 1;
@@ -166,6 +167,28 @@
   color: var(--accent);
 }
 
+.nav-item__icon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.nav-item__icon-img--inactive {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 28px;
+  height: 28px;
+}
+
+.nav-item__icon-img--active {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 44px;
+  height: 37px;
+}
+
 .sidebar__footer {
   display: flex;
   flex-direction: column;
@@ -185,7 +208,7 @@
   color: var(--ok);
 }
 
-/* Circular swatch shared by the notification bell and the avatar */
+/* Circular swatch behind the notification bell */
 .sidebar__swatch {
   position: relative;
   flex-shrink: 0;
@@ -215,6 +238,12 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-12);
+}
+
+.sidebar__avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
 }
 
 .sidebar__footer-text {

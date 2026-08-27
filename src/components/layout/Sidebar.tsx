@@ -1,11 +1,30 @@
-import { Home, LayoutGrid, Settings, Bell, User, Wifi } from 'lucide-react';
+import { Wifi, Bell } from 'lucide-react';
 import { useStore, type TabId } from '../../store/useStore';
+import { useResolvedTheme } from '../../lib/useResolvedTheme';
 import { BrandLogo } from '../common/BrandLogo';
 
-const NAV: { id: TabId; label: string; icon: typeof Home }[] = [
-  { id: 'dashboard', label: 'Home', icon: Home },
-  { id: 'services', label: 'Services', icon: LayoutGrid },
-  { id: 'settings', label: 'Settings', icon: Settings },
+const NAV: { id: TabId; label: string; active: string; inactiveDark: string; inactiveLight: string }[] = [
+  {
+    id: 'dashboard',
+    label: 'Home',
+    active: '/images/sidebar/nav-home-active.png',
+    inactiveDark: '/images/sidebar/nav-home-inactive.png',
+    inactiveLight: '/images/sidebar/nav-home-inactive-light.png',
+  },
+  {
+    id: 'services',
+    label: 'Services',
+    active: '/images/sidebar/nav-services-active.png',
+    inactiveDark: '/images/sidebar/nav-services-inactive.png',
+    inactiveLight: '/images/sidebar/nav-services-inactive-light.png',
+  },
+  {
+    id: 'settings',
+    label: 'Settings',
+    active: '/images/sidebar/nav-settings-active.png',
+    inactiveDark: '/images/sidebar/nav-settings-inactive.png',
+    inactiveLight: '/images/sidebar/nav-settings-inactive-light.png',
+  },
 ];
 
 function daysLeftLabel(expiresAt: number): string {
@@ -20,6 +39,7 @@ export function Sidebar() {
   const user = useStore((s) => s.user);
   const isRunning = useStore((s) => s.isRunning);
   const library = useStore((s) => s.library);
+  const resolvedTheme = useResolvedTheme();
 
   const subscriptionLabel =
     user.subscriptionStatus === 'trial'
@@ -29,21 +49,37 @@ export function Sidebar() {
         : 'Subscription expired';
 
   const isConnected = isRunning && library.some((s) => s.enabled && s.status === 'connected');
+  const avatarSrc =
+    resolvedTheme === 'light' ? '/images/sidebar/user-avatar-light.png' : '/images/sidebar/user-avatar.png';
 
   return (
     <div className="sidebar">
       <BrandLogo size={36} />
 
       <div className="sidebar__nav">
-        {NAV.map(({ id, label, icon: Icon }) => {
+        {NAV.map(({ id, label, active, inactiveDark, inactiveLight }) => {
           const isActive = activeTab === id;
+          const inactiveSrc = resolvedTheme === 'light' ? inactiveLight : inactiveDark;
           return (
             <button
               key={id}
               className={`nav-item ${isActive ? 'nav-item--active' : ''}`}
               onClick={() => setActiveTab(id)}
             >
-              <Icon size={24} strokeWidth={isActive ? 2.25 : 2} />
+              <span className="nav-item__icon">
+                <img
+                  src={inactiveSrc}
+                  alt=""
+                  className="nav-item__icon-img--inactive"
+                  style={{ opacity: isActive ? 0 : 1 }}
+                />
+                <img
+                  src={active}
+                  alt=""
+                  className="nav-item__icon-img--active"
+                  style={{ opacity: isActive ? 1 : 0 }}
+                />
+              </span>
               {label}
             </button>
           );
@@ -62,9 +98,7 @@ export function Sidebar() {
           <span className="sidebar__notif-dot" />
         </div>
         <div className="sidebar__user">
-          <div className="sidebar__swatch">
-            <User size={16} fill="currentColor" stroke="none" />
-          </div>
+          <img src={avatarSrc} alt="" className="sidebar__avatar" />
           <div className="sidebar__footer-text">
             <span className="sidebar__footer-name">{subscriptionLabel}</span>
             <span className="sidebar__footer-sub">{daysLeftLabel(user.subscriptionExpiresAt)}</span>
