@@ -225,12 +225,11 @@
 .sidebar__notif-dot {
   position: absolute;
   top: 1px;
-  right: 1px;
-  width: 8px;
-  height: 8px;
+  right: 0;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: var(--err);
-  border: 2px solid var(--bg-0);
+  background: var(--text-red);
 }
 
 .sidebar__user {
