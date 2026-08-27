@@ -30,6 +30,7 @@
   --bg-3: #353237;
   --border: #3a373b;
   --text-0: #ffffff;
+  --text-0-rgb: 255, 255, 255;
   --text-1: rgba(255, 255, 255, 0.56);
   --text-2: rgba(255, 255, 255, 0.24);
   --accent: #5b2299;
@@ -87,8 +88,12 @@
   --auth-error: #fe3838;
   --auth-paste-bg: rgba(255, 255, 255, 0.08);
   --auth-headline-accent: #854dd1;
-  --auth-logo-bg: #ffffff;
-  --auth-logo-fg: #141117;
+
+  /* Brand mark (the "n" glyph square) — shared by the auth screen and the
+     sidebar logo. Two-tone (square + glyph) rather than a single fill so it
+     stays legible regardless of what's behind it. */
+  --brand-logo-bg: #ffffff;
+  --brand-logo-fg: #141117;
 
   --space-4: 4px;
   --space-8: 8px;
@@ -113,6 +118,7 @@
   --bg-3: #ede6f2;
   --border: #ddd0e6;
   --text-0: #1c1424;
+  --text-0-rgb: 28, 20, 36;
   --text-1: rgba(28, 20, 36, 0.62);
   --text-2: rgba(28, 20, 36, 0.34);
   --accent: #5b2299;
@@ -138,8 +144,9 @@
   --auth-error: #ec1313;
   --auth-paste-bg: rgba(20, 17, 23, 0.08);
   --auth-headline-accent: #8e65c2;
-  --auth-logo-bg: #5b2299;
-  --auth-logo-fg: #ffffff;
+
+  --brand-logo-bg: #5b2299;
+  --brand-logo-fg: #ffffff;
 }
 
 * {

@@ -123,24 +123,18 @@
   flex-shrink: 0;
 }
 
-/* Sidebar */
+/* Sidebar — no background/border of its own; it sits directly on the
+   shell's --bg-0, so all colors below are theme-aware (not the invariant
+   --on-accent tokens used by dark-only surfaces elsewhere). */
 .sidebar {
   grid-row: 2;
   grid-column: 1;
   position: relative;
-  background: rgb(var(--frames-bg-rgb));
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-24) var(--space-12);
-}
-
-.sidebar__logo {
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
+  padding: var(--space-24) var(--space-8);
 }
 
 .sidebar__nav {
@@ -164,47 +158,63 @@
   font-size: 11px;
   line-height: 16px;
   letter-spacing: -0.121px;
-  color: rgba(var(--on-accent-rgb), 0.56);
+  color: var(--text-1);
+  transition: color 0.12s;
 }
 
 .nav-item--active {
-  color: var(--on-accent);
-}
-
-.nav-item__icon {
-  position: relative;
-  width: 24px;
-  height: 24px;
-}
-
-.nav-item__icon-img--inactive {
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  width: 28px;
-  height: 28px;
-}
-
-.nav-item__icon-img--active {
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  width: 44px;
-  height: 37px;
+  color: var(--accent);
 }
 
 .sidebar__footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-12);
+  gap: var(--space-16);
   width: 100%;
 }
 
-.sidebar__avatar {
+.sidebar__connect {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-family: var(--font);
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: -0.121px;
+  color: var(--ok);
+}
+
+/* Circular swatch shared by the notification bell and the avatar */
+.sidebar__swatch {
+  position: relative;
+  flex-shrink: 0;
   width: 36px;
   height: 36px;
-  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: rgba(var(--text-0-rgb), 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-1);
+}
+
+.sidebar__notif-dot {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--err);
+  border: 2px solid var(--bg-0);
+}
+
+.sidebar__user {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-12);
 }
 
 .sidebar__footer-text {
@@ -219,54 +229,13 @@
 }
 
 .sidebar__footer-name {
-  color: var(--on-accent);
+  color: var(--text-0);
   white-space: nowrap;
 }
 
 .sidebar__footer-sub {
-  color: rgba(var(--on-accent-rgb), 0.56);
+  color: var(--text-1);
   white-space: nowrap;
-}
-
-.sidebar__connect {
-  position: absolute;
-  bottom: 152px;
-  left: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 56px;
-}
-
-.sidebar__connect-icon {
-  position: relative;
-  width: 12px;
-  height: 12px;
-}
-
-.sidebar__connect-icon img {
-  position: absolute;
-  top: -1px;
-  left: -1px;
-  width: 14px;
-  height: 14px;
-}
-
-.sidebar__connect-status {
-  margin-top: var(--space-4);
-  font-family: var(--font);
-  font-size: 11px;
-  line-height: 16px;
-  letter-spacing: -0.121px;
-  color: var(--text-green);
-}
-
-.sidebar__connect-latency {
-  font-family: var(--font);
-  font-size: 11px;
-  line-height: 16px;
-  letter-spacing: -0.121px;
-  color: rgba(var(--on-accent-rgb), 0.56);
 }
 
 /* Content */

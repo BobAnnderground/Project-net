@@ -1,25 +1,11 @@
+import { Home, LayoutGrid, Settings, Bell, User, Wifi } from 'lucide-react';
 import { useStore, type TabId } from '../../store/useStore';
-import { formatLatency } from '../../lib/labels';
+import { BrandLogo } from '../common/BrandLogo';
 
-const NAV: { id: TabId; label: string; active: string; inactive: string }[] = [
-  {
-    id: 'dashboard',
-    label: 'Home',
-    active: '/images/sidebar/nav-home-active.png',
-    inactive: '/images/sidebar/nav-home-inactive.png',
-  },
-  {
-    id: 'services',
-    label: 'Services',
-    active: '/images/sidebar/nav-services-active.png',
-    inactive: '/images/sidebar/nav-services-inactive.png',
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    active: '/images/sidebar/nav-settings-active.png',
-    inactive: '/images/sidebar/nav-settings-inactive.png',
-  },
+const NAV: { id: TabId; label: string; icon: typeof Home }[] = [
+  { id: 'dashboard', label: 'Home', icon: Home },
+  { id: 'services', label: 'Services', icon: LayoutGrid },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
 function daysLeftLabel(expiresAt: number): string {
@@ -34,7 +20,6 @@ export function Sidebar() {
   const user = useStore((s) => s.user);
   const isRunning = useStore((s) => s.isRunning);
   const library = useStore((s) => s.library);
-  const routes = useStore((s) => s.routes);
 
   const subscriptionLabel =
     user.subscriptionStatus === 'trial'
@@ -43,18 +28,14 @@ export function Sidebar() {
         ? 'Subscription active'
         : 'Subscription expired';
 
-  const connectedServices = library.filter((s) => s.enabled && s.status === 'connected');
-  const isConnected = isRunning && connectedServices.length > 0;
-  const avgLatency = isConnected
-    ? connectedServices.reduce((sum, s) => sum + (routes[s.id]?.latencyMs ?? 0), 0) / connectedServices.length
-    : 0;
+  const isConnected = isRunning && library.some((s) => s.enabled && s.status === 'connected');
 
   return (
     <div className="sidebar">
-      <img src="/images/sidebar/fixnet-logo.svg" alt="Fixnet" className="sidebar__logo" />
+      <BrandLogo size={36} />
 
       <div className="sidebar__nav">
-        {NAV.map(({ id, label, active, inactive }) => {
+        {NAV.map(({ id, label, icon: Icon }) => {
           const isActive = activeTab === id;
           return (
             <button
@@ -62,20 +43,7 @@ export function Sidebar() {
               className={`nav-item ${isActive ? 'nav-item--active' : ''}`}
               onClick={() => setActiveTab(id)}
             >
-              <span className="nav-item__icon">
-                <img
-                  src={inactive}
-                  alt=""
-                  className="nav-item__icon-img--inactive"
-                  style={{ opacity: isActive ? 0 : 1 }}
-                />
-                <img
-                  src={active}
-                  alt=""
-                  className="nav-item__icon-img--active"
-                  style={{ opacity: isActive ? 1 : 0 }}
-                />
-              </span>
+              <Icon size={24} strokeWidth={isActive ? 2.25 : 2} />
               {label}
             </button>
           );
@@ -85,17 +53,22 @@ export function Sidebar() {
       <div className="sidebar__footer">
         {isConnected && (
           <div className="sidebar__connect">
-            <span className="sidebar__connect-icon">
-              <img src="/images/sidebar/connect-icon.png" alt="" />
-            </span>
-            <span className="sidebar__connect-status">Connected</span>
-            <span className="sidebar__connect-latency">{formatLatency(avgLatency)}</span>
+            <Wifi size={14} />
+            <span>Connected</span>
           </div>
         )}
-        <img src="/images/sidebar/user-avatar.png" alt="" className="sidebar__avatar" />
-        <div className="sidebar__footer-text">
-          <span className="sidebar__footer-name">{subscriptionLabel}</span>
-          <span className="sidebar__footer-sub">{daysLeftLabel(user.subscriptionExpiresAt)}</span>
+        <div className="sidebar__swatch">
+          <Bell size={16} fill="currentColor" stroke="none" />
+          <span className="sidebar__notif-dot" />
+        </div>
+        <div className="sidebar__user">
+          <div className="sidebar__swatch">
+            <User size={16} fill="currentColor" stroke="none" />
+          </div>
+          <div className="sidebar__footer-text">
+            <span className="sidebar__footer-name">{subscriptionLabel}</span>
+            <span className="sidebar__footer-sub">{daysLeftLabel(user.subscriptionExpiresAt)}</span>
+          </div>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import type { KeyboardEvent, ClipboardEvent } from 'react';
 import { Minus, X, Sun, Moon, ClipboardPaste, Check } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { BrandLogo } from '../common/BrandLogo';
 
 type AuthState = 'idle' | 'checking' | 'error' | 'success';
 
@@ -16,21 +17,6 @@ function AuthErrorIcon() {
       <circle cx="8" cy="8" r="8" fill="var(--auth-text-primary)" />
       <rect x="7" y="3.5" width="2" height="6.5" rx="1" fill="var(--auth-bg)" />
       <circle cx="8" cy="12" r="1.1" fill="var(--auth-bg)" />
-    </svg>
-  );
-}
-
-function AuthLogo() {
-  return (
-    <svg width="56" height="56" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-      <path
-        d="M26.7245 0H9.2755C4.15368 0 0 4.15342 0 9.27492V26.7228C0 31.8466 4.15368 36 9.2755 36H26.7245C31.8486 36 36 31.8466 36 26.7228V9.27492C36 4.15342 31.8486 0 26.7245 0Z"
-        fill="var(--auth-logo-bg)"
-      />
-      <path
-        d="M27.193 28.3847H22.4816V20.8808C22.4816 19.8525 21.8994 19.2815 20.8844 19.2815L15.1179 19.3038C14.1029 19.3038 13.5206 19.8748 13.5206 20.9009V28.3847H8.80704V19.0718H13.5206V15.0678H8.80704V11.8201C8.80704 9.06301 10.8861 6.95285 13.6656 6.95285L26.6263 6.93054V11.5078L15.1179 11.5301C14.1029 11.5301 13.5206 12.206 13.5206 13.232V15.0678L22.7627 15.0455C25.2098 15.0455 27.193 17.0286 27.193 19.4756V28.3847Z"
-        fill="var(--auth-logo-fg)"
-      />
     </svg>
   );
 }
@@ -196,7 +182,7 @@ export function AuthScreen({ onAuthenticated, onMinimize }: Props) {
       </div>
 
       <div className="auth-logo-mark">
-        <AuthLogo />
+        <BrandLogo size={56} />
       </div>
 
       <div className="auth-content">
