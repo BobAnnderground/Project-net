@@ -39,7 +39,11 @@ export function Sidebar() {
   const user = useStore((s) => s.user);
   const isRunning = useStore((s) => s.isRunning);
   const library = useStore((s) => s.library);
+  const notifications = useStore((s) => s.notifications);
+  const toggleNotificationsPanel = useStore((s) => s.toggleNotificationsPanel);
   const resolvedTheme = useResolvedTheme();
+
+  const hasUnread = notifications.some((n) => !n.read);
 
   const subscriptionLabel =
     user.subscriptionStatus === 'trial'
@@ -93,10 +97,15 @@ export function Sidebar() {
             <span>Connected</span>
           </div>
         )}
-        <div className="sidebar__swatch">
+        <button
+          type="button"
+          className="sidebar__swatch"
+          onClick={toggleNotificationsPanel}
+          aria-label="Notifications"
+        >
           <Bell size={16} fill="currentColor" stroke="none" />
-          <span className="sidebar__notif-dot" />
-        </div>
+          {hasUnread && <span className="sidebar__notif-dot" />}
+        </button>
         <div className="sidebar__user">
           <img src={avatarSrc} alt="" className="sidebar__avatar" />
           <div className="sidebar__footer-text">

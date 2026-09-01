@@ -95,6 +95,21 @@
   --brand-logo-bg: #ffffff;
   --brand-logo-fg: #141117;
 
+  /* Notification window — exact values from the Figma notifications design
+     (node 2087:354190). Its own scheme, distinct from the general --bg/--text tokens. */
+  --notif-cover: rgba(20, 17, 23, 0.84);
+  --notif-bg: #27242a;
+  --notif-fade: rgba(39, 36, 42, 0);
+  --notif-text-primary: #ffffff;
+  --notif-text-secondary: rgba(255, 255, 255, 0.56);
+  --notif-button-bg: rgba(255, 255, 255, 0.08);
+  --notif-icon-neutral-fg: rgba(255, 255, 255, 0.76);
+  --notif-icon-neutral-bg: rgba(255, 255, 255, 0.16);
+  --notif-icon-negative-fg: #fe3838;
+  --notif-icon-negative-bg: rgba(254, 56, 56, 0.18);
+  --notif-icon-positive-fg: #00ff7b;
+  --notif-icon-positive-bg: rgba(0, 255, 123, 0.16);
+
   --space-4: 4px;
   --space-8: 8px;
   --space-12: 12px;
@@ -147,6 +162,21 @@
 
   --brand-logo-bg: #5b2299;
   --brand-logo-fg: #ffffff;
+
+  /* Notification window — exact values from the Figma notifications design
+     (light theme frames). */
+  --notif-cover: rgba(246, 245, 248, 0.64);
+  --notif-bg: #ffffff;
+  --notif-fade: rgba(255, 255, 255, 0);
+  --notif-text-primary: #130026;
+  --notif-text-secondary: rgba(20, 17, 23, 0.44);
+  --notif-button-bg: rgba(20, 17, 23, 0.08);
+  --notif-icon-neutral-fg: rgba(20, 17, 23, 0.44);
+  --notif-icon-neutral-bg: rgba(20, 17, 23, 0.08);
+  --notif-icon-negative-fg: #ec1313;
+  --notif-icon-negative-bg: rgba(236, 19, 19, 0.16);
+  --notif-icon-positive-fg: #00a14e;
+  --notif-icon-positive-bg: rgba(0, 161, 78, 0.16);
 }
 
 * {

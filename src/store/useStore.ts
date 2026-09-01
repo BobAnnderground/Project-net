@@ -11,6 +11,7 @@ import type {
   AppSettings,
   User,
   OnboardingStage,
+  AppNotification,
 } from '../types';
 import { catalogById } from '../data/catalog';
 import {
@@ -19,6 +20,7 @@ import {
   routeForService,
   defaultAppSettings,
   defaultUser,
+  defaultNotifications,
   type CustomServiceInput,
 } from '../data/factory';
 import { displayIdsForServices } from '../lib/libraryItems';
@@ -68,6 +70,8 @@ interface StoreState {
   emergencyBridge: EmergencyBridge | null;
   backupBridges: BackupBridge[];
   pendingServiceSelection: string[] | null;
+  notifications: AppNotification[];
+  notificationsOpen: boolean;
 
   // library / service management
   addServiceFromLibrary: (entryId: string) => void;
@@ -124,6 +128,11 @@ interface StoreState {
   removeBackupBridge: (id: string) => void;
   editLastSession: () => void;
   clearPendingServiceSelection: () => void;
+  toggleNotificationsPanel: () => void;
+  closeNotificationsPanel: () => void;
+  markNotificationRead: (id: string) => void;
+  markAllNotificationsRead: () => void;
+  deleteAllNotifications: () => void;
 }
 
 const MAX_QUALITY_SAMPLES = 40;
@@ -151,6 +160,8 @@ export const useStore = create<StoreState>((set, get) => ({
   },
   backupBridges: [],
   pendingServiceSelection: null,
+  notifications: defaultNotifications(),
+  notificationsOpen: false,
 
   addServiceFromLibrary: (entryId) => {
     const entry = catalogById(entryId);
@@ -580,4 +591,21 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   clearPendingServiceSelection: () => set({ pendingServiceSelection: null }),
+
+  toggleNotificationsPanel: () => set((s) => ({ notificationsOpen: !s.notificationsOpen })),
+  closeNotificationsPanel: () => set({ notificationsOpen: false }),
+
+  markNotificationRead: (id) => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    }));
+  },
+
+  markAllNotificationsRead: () => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, read: true })),
+    }));
+  },
+
+  deleteAllNotifications: () => set({ notifications: [] }),
 }));

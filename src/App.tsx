@@ -4,6 +4,7 @@ import { useStore, type TabId } from './store/useStore';
 import { useResolvedTheme } from './lib/useResolvedTheme';
 import { Sidebar } from './components/layout/Sidebar';
 import { WindowTitleBar } from './components/layout/WindowTitleBar';
+import { NotificationPanel } from './components/layout/NotificationPanel';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { Services } from './components/services/Services';
 import { Settings } from './components/settings/Settings';
@@ -19,6 +20,7 @@ function App() {
   const activeTab = useStore((s) => s.activeTab);
   const resolvedTheme = useResolvedTheme();
   const isAuthenticated = useStore((s) => s.isAuthenticated);
+  const notificationsOpen = useStore((s) => s.notificationsOpen);
 
   // 'auth'       — showing auth screen only
   // 'crossfade'  — both mounted, auth fading out, shell fading in
@@ -67,6 +69,7 @@ function App() {
           {activeTab === 'services' && <Services />}
           {activeTab === 'settings' && <Settings />}
         </div>
+        {notificationsOpen && <NotificationPanel />}
         <Toast />
       </div>
     );
