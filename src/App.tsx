@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import './App.css';
 import { useStore, type TabId } from './store/useStore';
+import { useResolvedTheme } from './lib/useResolvedTheme';
 import { Sidebar } from './components/layout/Sidebar';
 import { WindowTitleBar } from './components/layout/WindowTitleBar';
+import { NotificationPanel } from './components/layout/NotificationPanel';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { Services } from './components/services/Services';
 import { Settings } from './components/settings/Settings';
@@ -19,8 +21,9 @@ const SECTION_LABELS: Partial<Record<TabId, string>> = {
 
 function App() {
   const activeTab = useStore((s) => s.activeTab);
-  const theme = useStore((s) => s.appSettings.theme);
+  const resolvedTheme = useResolvedTheme();
   const isAuthenticated = useStore((s) => s.isAuthenticated);
+  const notificationsOpen = useStore((s) => s.notificationsOpen);
 
   // 'auth'       — showing auth screen only
   // 'crossfade'  — both mounted, auth fading out, shell fading in
@@ -31,15 +34,8 @@ function App() {
   const [minimized, setMinimized] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia('(prefers-color-scheme: light)');
-    function apply() {
-      const resolved = theme === 'system' ? (media.matches ? 'light' : 'dark') : theme;
-      document.documentElement.dataset.theme = resolved;
-    }
-    apply();
-    media.addEventListener('change', apply);
-    return () => media.removeEventListener('change', apply);
-  }, [theme]);
+    document.documentElement.dataset.theme = resolvedTheme;
+  }, [resolvedTheme]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -76,6 +72,7 @@ function App() {
           {activeTab === 'services' && <Services />}
           {activeTab === 'settings' && <Settings />}
         </div>
+        {notificationsOpen && <NotificationPanel />}
         <Toast />
         <NotificationToastStack />
         <NotificationUndoToast />

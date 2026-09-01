@@ -129,17 +129,23 @@ export interface User {
 // and Services screens. `null` means onboarding is finished or was skipped.
 export type OnboardingStage = 'welcome' | 'region' | 'tour-home' | 'tour-services' | 'tour-selected';
 
-export type NotificationIconKey = 'update' | 'route' | 'bridge' | 'quality' | 'service' | 'subscription';
+export type NotificationTone = 'neutral' | 'positive' | 'negative';
+export type NotificationIcon = 'server' | 'server-off' | 'region' | 'library' | 'billing' | 'chat';
+
+export interface NotificationAction {
+  label: string;
+  actionType: 'reconnect';
+}
 
 export interface AppNotification {
   id: string;
-  icon: NotificationIconKey;
+  tone: NotificationTone;
+  icon: NotificationIcon;
   title: string;
   message: string;
-  actionLabel: string | null;
   createdAt: number;
   read: boolean;
-  toastDismissed: boolean;
+  action: NotificationAction | null;
 }
 
 export interface LibraryEntry {

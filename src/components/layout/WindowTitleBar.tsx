@@ -1,9 +1,20 @@
-import { Minus, X, CircleHelp } from 'lucide-react';
+import { Minus, X } from 'lucide-react';
 
 interface WindowTitleBarProps {
   section?: string;
   onMinimize: () => void;
   onClose: () => void;
+}
+
+function HelpIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="7.25" stroke="currentColor" strokeWidth="1.3" />
+      <text x="8" y="11.4" textAnchor="middle" fontFamily="var(--font)" fontSize="9.5" fill="currentColor">
+        ?
+      </text>
+    </svg>
+  );
 }
 
 export function WindowTitleBar({ section, onMinimize, onClose }: WindowTitleBarProps) {
@@ -19,7 +30,7 @@ export function WindowTitleBar({ section, onMinimize, onClose }: WindowTitleBarP
         )}
       </div>
       <div className="window-titlebar__help">
-        <CircleHelp size={16} />
+        <HelpIcon />
         <span>Get help</span>
       </div>
       <div className="window-titlebar__actions">

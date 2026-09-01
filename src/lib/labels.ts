@@ -32,13 +32,18 @@ export function formatLatency(ms: number): string {
   return ms > 0 ? `${Math.round(ms)} ms` : '—';
 }
 
-export function formatRelativeTime(timestamp: number): string {
-  const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
-  if (seconds < 60) return 'Just now';
-  const minutes = Math.floor(seconds / 60);
+const MONTH_NAMES = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+/** "15m ago" / "2h ago" within the last day, otherwise "Mon D". */
+export function formatNotificationTime(timestamp: number): string {
+  const diffMs = Date.now() - timestamp;
+  const minutes = Math.floor(diffMs / (60 * 1000));
+  if (minutes < 1) return 'Just now';
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  const date = new Date(timestamp);
+  return `${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
 }

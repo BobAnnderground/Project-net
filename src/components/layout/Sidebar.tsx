@@ -1,27 +1,29 @@
-import { useEffect, useRef, useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Wifi, Bell } from 'lucide-react';
 import { useStore, type TabId } from '../../store/useStore';
-import { formatLatency } from '../../lib/labels';
-import { NotificationWindow } from '../notifications/NotificationWindow';
+import { useResolvedTheme } from '../../lib/useResolvedTheme';
+import { BrandLogo } from '../common/BrandLogo';
 
-const NAV: { id: TabId; label: string; active: string; inactive: string }[] = [
+const NAV: { id: TabId; label: string; active: string; inactiveDark: string; inactiveLight: string }[] = [
   {
     id: 'dashboard',
     label: 'Home',
     active: '/images/sidebar/nav-home-active.png',
-    inactive: '/images/sidebar/nav-home-inactive.png',
+    inactiveDark: '/images/sidebar/nav-home-inactive.png',
+    inactiveLight: '/images/sidebar/nav-home-inactive-light.png',
   },
   {
     id: 'services',
     label: 'Services',
     active: '/images/sidebar/nav-services-active.png',
-    inactive: '/images/sidebar/nav-services-inactive.png',
+    inactiveDark: '/images/sidebar/nav-services-inactive.png',
+    inactiveLight: '/images/sidebar/nav-services-inactive-light.png',
   },
   {
     id: 'settings',
     label: 'Settings',
     active: '/images/sidebar/nav-settings-active.png',
-    inactive: '/images/sidebar/nav-settings-inactive.png',
+    inactiveDark: '/images/sidebar/nav-settings-inactive.png',
+    inactiveLight: '/images/sidebar/nav-settings-inactive-light.png',
   },
 ];
 
@@ -37,23 +39,11 @@ export function Sidebar() {
   const user = useStore((s) => s.user);
   const isRunning = useStore((s) => s.isRunning);
   const library = useStore((s) => s.library);
-  const routes = useStore((s) => s.routes);
   const notifications = useStore((s) => s.notifications);
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const toggleNotificationsPanel = useStore((s) => s.toggleNotificationsPanel);
+  const resolvedTheme = useResolvedTheme();
 
-  const [notifOpen, setNotifOpen] = useState(false);
-  const notifRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!notifOpen) return;
-    function handleClick(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotifOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [notifOpen]);
+  const hasUnread = notifications.some((n) => !n.read);
 
   const subscriptionLabel =
     user.subscriptionStatus === 'trial'
@@ -62,19 +52,18 @@ export function Sidebar() {
         ? 'Subscription active'
         : 'Subscription expired';
 
-  const connectedServices = library.filter((s) => s.enabled && s.status === 'connected');
-  const isConnected = isRunning && connectedServices.length > 0;
-  const avgLatency = isConnected
-    ? connectedServices.reduce((sum, s) => sum + (routes[s.id]?.latencyMs ?? 0), 0) / connectedServices.length
-    : 0;
+  const isConnected = isRunning && library.some((s) => s.enabled && s.status === 'connected');
+  const avatarSrc =
+    resolvedTheme === 'light' ? '/images/sidebar/user-avatar-light.png' : '/images/sidebar/user-avatar.png';
 
   return (
     <div className="sidebar">
-      <img src="/images/sidebar/fixnet-logo.svg" alt="Fixnet" className="sidebar__logo" />
+      <BrandLogo size={36} />
 
       <div className="sidebar__nav">
-        {NAV.map(({ id, label, active, inactive }) => {
+        {NAV.map(({ id, label, active, inactiveDark, inactiveLight }) => {
           const isActive = activeTab === id;
+          const inactiveSrc = resolvedTheme === 'light' ? inactiveLight : inactiveDark;
           return (
             <button
               key={id}
@@ -83,7 +72,7 @@ export function Sidebar() {
             >
               <span className="nav-item__icon">
                 <img
-                  src={inactive}
+                  src={inactiveSrc}
                   alt=""
                   className="nav-item__icon-img--inactive"
                   style={{ opacity: isActive ? 0 : 1 }}
@@ -104,29 +93,25 @@ export function Sidebar() {
       <div className="sidebar__footer">
         {isConnected && (
           <div className="sidebar__connect">
-            <span className="sidebar__connect-icon">
-              <img src="/images/sidebar/connect-icon.png" alt="" />
-            </span>
-            <span className="sidebar__connect-status">Connected</span>
-            <span className="sidebar__connect-latency">{formatLatency(avgLatency)}</span>
+            <Wifi size={14} />
+            <span>Connected</span>
           </div>
         )}
-        <div className="sidebar__notif" ref={notifRef}>
-          <button
-            type="button"
-            className="sidebar__bell"
-            onClick={() => setNotifOpen((v) => !v)}
-            aria-label="Notifications"
-          >
-            <Bell size={20} />
-            {unreadCount > 0 && <span className="sidebar__bell-badge" />}
-          </button>
-          {notifOpen && <NotificationWindow />}
-        </div>
-        <img src="/images/sidebar/user-avatar.png" alt="" className="sidebar__avatar" />
-        <div className="sidebar__footer-text">
-          <span className="sidebar__footer-name">{subscriptionLabel}</span>
-          <span className="sidebar__footer-sub">{daysLeftLabel(user.subscriptionExpiresAt)}</span>
+        <button
+          type="button"
+          className="sidebar__swatch"
+          onClick={toggleNotificationsPanel}
+          aria-label="Notifications"
+        >
+          <Bell size={16} fill="currentColor" stroke="none" />
+          {hasUnread && <span className="sidebar__notif-dot" />}
+        </button>
+        <div className="sidebar__user">
+          <img src={avatarSrc} alt="" className="sidebar__avatar" />
+          <div className="sidebar__footer-text">
+            <span className="sidebar__footer-name">{subscriptionLabel}</span>
+            <span className="sidebar__footer-sub">{daysLeftLabel(user.subscriptionExpiresAt)}</span>
+          </div>
         </div>
       </div>
     </div>

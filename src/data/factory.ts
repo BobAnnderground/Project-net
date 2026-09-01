@@ -1,6 +1,10 @@
 import { nanoid } from 'nanoid';
-import type { LibraryEntry, Service, Route, AppSettings, User } from '../types';
+import type { LibraryEntry, Service, Route, AppSettings, User, AppNotification } from '../types';
 import { REGIONS } from './regions';
+
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
 
 export function serviceFromLibraryEntry(entry: LibraryEntry): Service {
   return {
@@ -100,3 +104,91 @@ export const defaultUser: User = {
   subscriptionExpiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
   homeRegion: null,
 };
+
+// Seed content, not live engine output — matches the example copy from the
+// Figma notification-window design so the panel has something to show.
+export function defaultNotifications(): AppNotification[] {
+  const now = Date.now();
+  return [
+    {
+      id: nanoid(),
+      tone: 'neutral',
+      icon: 'server',
+      title: 'Server update',
+      message: 'The Amsterdam server address has changed. Reconnect to apply the update',
+      createdAt: now - 15 * MINUTE,
+      read: false,
+      action: { label: 'Reconnect', actionType: 'reconnect' },
+    },
+    {
+      id: nanoid(),
+      tone: 'negative',
+      icon: 'server-off',
+      title: 'Server temporarily unavailable',
+      message: 'The Singapore server is undergoing maintenance and will be back shortly',
+      createdAt: now - 2 * HOUR,
+      read: false,
+      action: null,
+    },
+    {
+      id: nanoid(),
+      tone: 'positive',
+      icon: 'region',
+      title: 'New region',
+      message: 'São Paulo is now available as a connection region',
+      createdAt: now - 5 * DAY,
+      read: false,
+      action: null,
+    },
+    {
+      id: nanoid(),
+      tone: 'neutral',
+      icon: 'library',
+      title: 'New service in the library',
+      message: '"Notion" is now available to add from our library',
+      createdAt: now - 12 * DAY,
+      read: true,
+      action: null,
+    },
+    {
+      id: nanoid(),
+      tone: 'negative',
+      icon: 'billing',
+      title: 'Subscription ending soon',
+      message: 'Only 2 days left. Renew now to avoid losing access',
+      createdAt: now - 18 * DAY,
+      read: true,
+      action: null,
+    },
+    {
+      id: nanoid(),
+      tone: 'positive',
+      icon: 'chat',
+      title: 'New reply',
+      message: 'You have a new reply in your support chat',
+      createdAt: now - 25 * DAY,
+      read: true,
+      action: null,
+    },
+    {
+      id: nanoid(),
+      tone: 'positive',
+      icon: 'chat',
+      title: 'Waiting on you',
+      message: 'Support is waiting for your reply to continue helping',
+      createdAt: now - 33 * DAY,
+      read: true,
+      action: null,
+    },
+    {
+      id: nanoid(),
+      tone: 'negative',
+      icon: 'billing',
+      title: 'Time to renew',
+      message: 'Your subscription expires soon — renew to keep your services connected',
+      createdAt: now - 45 * DAY,
+      read: false,
+      action: null,
+    },
+  ];
+}
