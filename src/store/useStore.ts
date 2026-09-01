@@ -13,6 +13,7 @@ import type {
   OnboardingStage,
   AppNotification,
 } from '../types';
+import { randomNotificationTemplate } from '../data/notificationPool';
 import { catalogById } from '../data/catalog';
 import {
   serviceFromLibraryEntry,
@@ -49,6 +50,11 @@ interface BackupBridge {
   code: string;
   addedAt: number;
   status: 'connected' | 'disconnected';
+}
+
+interface NotificationsUndoState {
+  items: AppNotification[];
+  count: number;
 }
 
 interface StoreState {
@@ -136,6 +142,7 @@ interface StoreState {
 }
 
 const MAX_QUALITY_SAMPLES = 40;
+const MAX_NOTIFICATIONS = 60;
 
 export const useStore = create<StoreState>((set, get) => ({
   isAuthenticated: false,
