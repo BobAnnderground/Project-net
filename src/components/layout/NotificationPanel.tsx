@@ -1,58 +1,5 @@
-import { Server, ServerOff, Globe, LayoutGrid, CreditCard, MessageCircle, RotateCw } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { formatNotificationTime } from '../../lib/labels';
-import type { AppNotification, NotificationIcon } from '../../types';
-
-const ICONS: Record<NotificationIcon, typeof Server> = {
-  server: Server,
-  'server-off': ServerOff,
-  region: Globe,
-  library: LayoutGrid,
-  billing: CreditCard,
-  chat: MessageCircle,
-};
-
-interface NoticeProps {
-  notification: AppNotification;
-  onRead: () => void;
-  onAction: () => void;
-}
-
-function Notice({ notification, onRead, onAction }: NoticeProps) {
-  const Icon = ICONS[notification.icon];
-  return (
-    <div className={`notif-item notif-item--${notification.tone}`} onClick={onRead}>
-      <span className="notif-item__icon">
-        <Icon size={20} />
-      </span>
-      <div className="notif-item__content">
-        <div className="notif-item__text">
-          <div className="notif-item__title-row">
-            <span className="notif-item__title">{notification.title}</span>
-            <span className="notif-item__meta">
-              {!notification.read && <span className="notif-item__dot" />}
-              {formatNotificationTime(notification.createdAt)}
-            </span>
-          </div>
-          <p className="notif-item__message">{notification.message}</p>
-        </div>
-        {notification.action && (
-          <button
-            type="button"
-            className="notif-item__action"
-            onClick={(e) => {
-              e.stopPropagation();
-              onAction();
-            }}
-          >
-            {notification.action.label}
-            <RotateCw size={14} />
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
+import { NoticeCard } from '../notifications/NoticeCard';
 
 export function NotificationPanel() {
   const notifications = useStore((s) => s.notifications);
@@ -83,10 +30,11 @@ export function NotificationPanel() {
             <div className="notif-panel__scroll">
               <div className="notif-panel__list">
                 {notifications.map((n) => (
-                  <Notice
+                  <NoticeCard
                     key={n.id}
                     notification={n}
-                    onRead={() => markNotificationRead(n.id)}
+                    variant="window"
+                    onOpen={() => markNotificationRead(n.id)}
                     onAction={() => {
                       markNotificationRead(n.id);
                       showToast('Reconnecting...');

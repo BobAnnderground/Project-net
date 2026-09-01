@@ -145,6 +145,11 @@ export interface AppNotification {
   message: string;
   createdAt: number;
   read: boolean;
+  // Toasts and the persistent notification window share one list; this
+  // tracks whether the top-right toast popup for this item has been
+  // dismissed (or was never shown, for backdated seed content), independent
+  // of `read`.
+  toastDismissed: boolean;
   action: NotificationAction | null;
 }
 

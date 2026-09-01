@@ -1,54 +1,62 @@
-import type { NotificationIconKey } from '../types';
+import type { NotificationTone, NotificationIcon, NotificationAction } from '../types';
 
 export interface NotificationTemplate {
-  icon: NotificationIconKey;
+  tone: NotificationTone;
+  icon: NotificationIcon;
   title: string;
   message: string;
-  actionLabel: string | null;
+  action: NotificationAction | null;
 }
 
 export const NOTIFICATION_POOL: NotificationTemplate[] = [
   {
-    icon: 'update',
+    tone: 'neutral',
+    icon: 'server',
     title: 'Server update',
-    message: 'The Amsterdam server address has changed. Reconnect to apply the update.',
-    actionLabel: 'Reconnect',
+    message: 'The Amsterdam server address has changed. Reconnect to apply the update',
+    action: { label: 'Reconnect', actionType: 'reconnect' },
   },
   {
-    icon: 'route',
+    tone: 'negative',
+    icon: 'server-off',
     title: 'Route unavailable',
-    message: 'The main route for one of your services stopped responding. Trying to restore it.',
-    actionLabel: null,
+    message: 'The main route for one of your services stopped responding. Trying to restore it',
+    action: null,
   },
   {
-    icon: 'quality',
+    tone: 'negative',
+    icon: 'server-off',
     title: 'Connection quality degraded',
-    message: 'Latency has increased on the current route. Performance may be affected.',
-    actionLabel: null,
+    message: 'Latency has increased on the current route. Performance may be affected',
+    action: null,
   },
   {
-    icon: 'service',
+    tone: 'negative',
+    icon: 'server-off',
     title: 'Server overload',
-    message: 'The selected region is under heavy load. Consider switching to a nearby server.',
-    actionLabel: 'Switch region',
+    message: 'The selected region is under heavy load. Consider switching to a nearby server',
+    action: null,
   },
   {
-    icon: 'bridge',
+    tone: 'positive',
+    icon: 'region',
     title: 'Bridge connected',
-    message: 'A backup bridge was connected automatically to keep your service online.',
-    actionLabel: null,
+    message: 'A backup bridge was connected automatically to keep your service online',
+    action: null,
   },
   {
-    icon: 'service',
+    tone: 'positive',
+    icon: 'library',
     title: 'New service available',
-    message: 'A new preset service was added to the catalog and is ready to route.',
-    actionLabel: 'View in Services',
+    message: 'A new preset service was added to the catalog and is ready to route',
+    action: null,
   },
   {
-    icon: 'subscription',
+    tone: 'negative',
+    icon: 'billing',
     title: 'Subscription expiring soon',
-    message: 'Your trial period ends in a few days. Renew to keep all services running.',
-    actionLabel: 'Renew',
+    message: 'Your trial period ends in a few days. Renew to keep all services running',
+    action: null,
   },
 ];
 

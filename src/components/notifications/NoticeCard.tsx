@@ -1,50 +1,68 @@
-import { X, ArrowRight } from 'lucide-react';
-import type { AppNotification } from '../../types';
-import { formatRelativeTime } from '../../lib/labels';
-import { NOTIFICATION_ICONS } from './notificationIcons';
+import { Server, ServerOff, Globe, LayoutGrid, CreditCard, MessageCircle, RotateCw, X } from 'lucide-react';
+import type { AppNotification, NotificationIcon } from '../../types';
+import { formatNotificationTime } from '../../lib/labels';
+
+export const NOTICE_ICONS: Record<NotificationIcon, typeof Server> = {
+  server: Server,
+  'server-off': ServerOff,
+  region: Globe,
+  library: LayoutGrid,
+  billing: CreditCard,
+  chat: MessageCircle,
+};
 
 interface NoticeCardProps {
   notification: AppNotification;
   variant: 'toast' | 'window';
   onOpen?: () => void;
+  onAction?: () => void;
   onClose?: () => void;
 }
 
-export function NoticeCard({ notification, variant, onOpen, onClose }: NoticeCardProps) {
-  const Icon = NOTIFICATION_ICONS[notification.icon];
+export function NoticeCard({ notification, variant, onOpen, onAction, onClose }: NoticeCardProps) {
+  const Icon = NOTICE_ICONS[notification.icon];
 
   return (
     <div
-      className={`notice-card notice-card--${variant}`}
+      className={`notif-item notif-item--${notification.tone} notif-item--${variant}`}
       onClick={onOpen}
       role={onOpen ? 'button' : undefined}
       tabIndex={onOpen ? 0 : undefined}
     >
-      <span className="notice-card__icon">
+      <span className="notif-item__icon">
         <Icon size={20} />
       </span>
-      <div className="notice-card__content">
-        <div className="notice-card__title-row">
-          <span className="notice-card__title">{notification.title}</span>
-          {variant === 'window' && (
-            <span className="notice-card__meta">
-              {!notification.read && <span className="notice-card__unread-dot" />}
-              {formatRelativeTime(notification.createdAt)}
-            </span>
-          )}
+      <div className="notif-item__content">
+        <div className="notif-item__text">
+          <div className="notif-item__title-row">
+            <span className="notif-item__title">{notification.title}</span>
+            {variant === 'window' && (
+              <span className="notif-item__meta">
+                {!notification.read && <span className="notif-item__dot" />}
+                {formatNotificationTime(notification.createdAt)}
+              </span>
+            )}
+          </div>
+          <p className="notif-item__message">{notification.message}</p>
         </div>
-        <p className="notice-card__message">{notification.message}</p>
-        {notification.actionLabel && (
-          <span className="notice-card__action">
-            {notification.actionLabel}
-            <ArrowRight size={12} />
-          </span>
+        {notification.action && onAction && (
+          <button
+            type="button"
+            className="notif-item__action"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction();
+            }}
+          >
+            {notification.action.label}
+            <RotateCw size={14} />
+          </button>
         )}
       </div>
       {onClose && (
         <button
           type="button"
-          className="notice-card__close"
+          className="notif-item__close"
           onClick={(e) => {
             e.stopPropagation();
             onClose();
