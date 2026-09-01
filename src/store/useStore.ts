@@ -53,6 +53,7 @@ interface BackupBridge {
 }
 
 interface NotificationsUndoState {
+  id: string;
   items: AppNotification[];
   count: number;
 }
@@ -78,6 +79,7 @@ interface StoreState {
   pendingServiceSelection: string[] | null;
   notifications: AppNotification[];
   notificationsOpen: boolean;
+  notificationsUndo: NotificationsUndoState | null;
 
   // library / service management
   addServiceFromLibrary: (entryId: string) => void;
@@ -139,6 +141,10 @@ interface StoreState {
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
   deleteAllNotifications: () => void;
+  undoDeleteAllNotifications: () => void;
+  dismissToast: (id: string) => void;
+  dismissAllToasts: () => void;
+  pushRandomNotification: () => void;
 }
 
 const MAX_QUALITY_SAMPLES = 40;
@@ -169,6 +175,7 @@ export const useStore = create<StoreState>((set, get) => ({
   pendingServiceSelection: null,
   notifications: defaultNotifications(),
   notificationsOpen: false,
+  notificationsUndo: null,
 
   addServiceFromLibrary: (entryId) => {
     const entry = catalogById(entryId);
@@ -614,5 +621,52 @@ export const useStore = create<StoreState>((set, get) => ({
     }));
   },
 
-  deleteAllNotifications: () => set({ notifications: [] }),
+  deleteAllNotifications: () => {
+    const state = get();
+    if (state.notifications.length === 0) return;
+    const id = nanoid();
+    set({
+      notifications: [],
+      notificationsUndo: { id, items: state.notifications, count: state.notifications.length },
+    });
+    setTimeout(() => {
+      if (get().notificationsUndo?.id === id) set({ notificationsUndo: null });
+    }, 5000);
+  },
+
+  undoDeleteAllNotifications: () => {
+    const undo = get().notificationsUndo;
+    if (!undo) return;
+    set({ notifications: undo.items, notificationsUndo: null });
+  },
+
+  dismissToast: (id) => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => (n.id === id ? { ...n, toastDismissed: true } : n)),
+    }));
+  },
+
+  dismissAllToasts: () => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, toastDismissed: true })),
+    }));
+  },
+
+  pushRandomNotification: () => {
+    const template = randomNotificationTemplate();
+    const notification: AppNotification = {
+      id: nanoid(),
+      tone: template.tone,
+      icon: template.icon,
+      title: template.title,
+      message: template.message,
+      createdAt: Date.now(),
+      read: false,
+      toastDismissed: false,
+      action: template.action,
+    };
+    set((state) => ({
+      notifications: [notification, ...state.notifications].slice(0, MAX_NOTIFICATIONS),
+    }));
+  },
 }));

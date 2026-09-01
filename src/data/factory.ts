@@ -118,6 +118,7 @@ export function defaultNotifications(): AppNotification[] {
       message: 'The Amsterdam server address has changed. Reconnect to apply the update',
       createdAt: now - 15 * MINUTE,
       read: false,
+      toastDismissed: true,
       action: { label: 'Reconnect', actionType: 'reconnect' },
     },
     {
@@ -128,6 +129,7 @@ export function defaultNotifications(): AppNotification[] {
       message: 'The Singapore server is undergoing maintenance and will be back shortly',
       createdAt: now - 2 * HOUR,
       read: false,
+      toastDismissed: true,
       action: null,
     },
     {
@@ -138,6 +140,7 @@ export function defaultNotifications(): AppNotification[] {
       message: 'São Paulo is now available as a connection region',
       createdAt: now - 5 * DAY,
       read: false,
+      toastDismissed: true,
       action: null,
     },
     {
@@ -148,6 +151,7 @@ export function defaultNotifications(): AppNotification[] {
       message: '"Notion" is now available to add from our library',
       createdAt: now - 12 * DAY,
       read: true,
+      toastDismissed: true,
       action: null,
     },
     {
@@ -158,6 +162,7 @@ export function defaultNotifications(): AppNotification[] {
       message: 'Only 2 days left. Renew now to avoid losing access',
       createdAt: now - 18 * DAY,
       read: true,
+      toastDismissed: true,
       action: null,
     },
     {
@@ -168,6 +173,7 @@ export function defaultNotifications(): AppNotification[] {
       message: 'You have a new reply in your support chat',
       createdAt: now - 25 * DAY,
       read: true,
+      toastDismissed: true,
       action: null,
     },
     {
@@ -178,6 +184,7 @@ export function defaultNotifications(): AppNotification[] {
       message: 'Support is waiting for your reply to continue helping',
       createdAt: now - 33 * DAY,
       read: true,
+      toastDismissed: true,
       action: null,
     },
     {
@@ -188,6 +195,7 @@ export function defaultNotifications(): AppNotification[] {
       message: 'Your subscription expires soon — renew to keep your services connected',
       createdAt: now - 45 * DAY,
       read: false,
+      toastDismissed: true,
       action: null,
     },
   ];
