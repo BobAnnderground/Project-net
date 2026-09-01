@@ -8,6 +8,9 @@ import { Services } from './components/services/Services';
 import { Settings } from './components/settings/Settings';
 import { AuthScreen } from './components/auth/AuthScreen';
 import { Toast } from './components/common/Toast';
+import { NotificationToastStack } from './components/notifications/NotificationToastStack';
+import { NotificationUndoToast } from './components/notifications/NotificationUndoToast';
+import { NotificationDebugTrigger } from './components/notifications/NotificationDebugTrigger';
 
 const SECTION_LABELS: Partial<Record<TabId, string>> = {
   services: 'Services',
@@ -74,6 +77,9 @@ function App() {
           {activeTab === 'settings' && <Settings />}
         </div>
         <Toast />
+        <NotificationToastStack />
+        <NotificationUndoToast />
+        <NotificationDebugTrigger />
       </div>
     );
   }

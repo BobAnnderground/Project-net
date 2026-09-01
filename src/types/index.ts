@@ -129,6 +129,19 @@ export interface User {
 // and Services screens. `null` means onboarding is finished or was skipped.
 export type OnboardingStage = 'welcome' | 'region' | 'tour-home' | 'tour-services' | 'tour-selected';
 
+export type NotificationIconKey = 'update' | 'route' | 'bridge' | 'quality' | 'service' | 'subscription';
+
+export interface AppNotification {
+  id: string;
+  icon: NotificationIconKey;
+  title: string;
+  message: string;
+  actionLabel: string | null;
+  createdAt: number;
+  read: boolean;
+  toastDismissed: boolean;
+}
+
 export interface LibraryEntry {
   id: string;
   name: string;

@@ -11,7 +11,9 @@ import type {
   AppSettings,
   User,
   OnboardingStage,
+  AppNotification,
 } from '../types';
+import { randomNotificationTemplate } from '../data/notificationPool';
 import { catalogById } from '../data/catalog';
 import {
   serviceFromLibraryEntry,
@@ -49,6 +51,11 @@ interface BackupBridge {
   status: 'connected' | 'disconnected';
 }
 
+interface NotificationsUndoState {
+  items: AppNotification[];
+  count: number;
+}
+
 interface StoreState {
   isAuthenticated: boolean;
   onboardingStage: OnboardingStage | null;
@@ -68,6 +75,8 @@ interface StoreState {
   emergencyBridge: EmergencyBridge | null;
   backupBridges: BackupBridge[];
   pendingServiceSelection: string[] | null;
+  notifications: AppNotification[];
+  notificationsUndo: NotificationsUndoState | null;
 
   // library / service management
   addServiceFromLibrary: (entryId: string) => void;
@@ -124,9 +133,19 @@ interface StoreState {
   removeBackupBridge: (id: string) => void;
   editLastSession: () => void;
   clearPendingServiceSelection: () => void;
+
+  // notifications
+  pushRandomNotification: () => void;
+  dismissToast: (id: string) => void;
+  dismissAllToasts: () => void;
+  markNotificationRead: (id: string) => void;
+  markAllNotificationsRead: () => void;
+  deleteAllNotifications: () => void;
+  undoDeleteAllNotifications: () => void;
 }
 
 const MAX_QUALITY_SAMPLES = 40;
+const MAX_NOTIFICATIONS = 60;
 
 export const useStore = create<StoreState>((set, get) => ({
   isAuthenticated: false,
@@ -151,6 +170,8 @@ export const useStore = create<StoreState>((set, get) => ({
   },
   backupBridges: [],
   pendingServiceSelection: null,
+  notifications: [],
+  notificationsUndo: null,
 
   addServiceFromLibrary: (entryId) => {
     const entry = catalogById(entryId);
@@ -580,4 +601,62 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   clearPendingServiceSelection: () => set({ pendingServiceSelection: null }),
+
+  pushRandomNotification: () => {
+    const template = randomNotificationTemplate();
+    const notification: AppNotification = {
+      id: nanoid(),
+      icon: template.icon,
+      title: template.title,
+      message: template.message,
+      actionLabel: template.actionLabel,
+      createdAt: Date.now(),
+      read: false,
+      toastDismissed: false,
+    };
+    set((state) => ({
+      notifications: [notification, ...state.notifications].slice(0, MAX_NOTIFICATIONS),
+    }));
+  },
+
+  dismissToast: (id) => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => (n.id === id ? { ...n, toastDismissed: true } : n)),
+    }));
+  },
+
+  dismissAllToasts: () => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, toastDismissed: true })),
+    }));
+  },
+
+  markNotificationRead: (id) => {
+    set((state) => ({
+      notifications: state.notifications.map((n) =>
+        n.id === id ? { ...n, read: true, toastDismissed: true } : n
+      ),
+    }));
+  },
+
+  markAllNotificationsRead: () => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, read: true })),
+    }));
+  },
+
+  deleteAllNotifications: () => {
+    const items = get().notifications;
+    if (items.length === 0) return;
+    set({ notifications: [], notificationsUndo: { items, count: items.length } });
+    setTimeout(() => {
+      if (get().notificationsUndo?.items === items) set({ notificationsUndo: null });
+    }, 6000);
+  },
+
+  undoDeleteAllNotifications: () => {
+    const undo = get().notificationsUndo;
+    if (!undo) return;
+    set({ notifications: undo.items, notificationsUndo: null });
+  },
 }));

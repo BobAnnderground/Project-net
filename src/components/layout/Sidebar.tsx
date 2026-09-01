@@ -1,5 +1,8 @@
+import { useEffect, useRef, useState } from 'react';
+import { Bell } from 'lucide-react';
 import { useStore, type TabId } from '../../store/useStore';
 import { formatLatency } from '../../lib/labels';
+import { NotificationWindow } from '../notifications/NotificationWindow';
 
 const NAV: { id: TabId; label: string; active: string; inactive: string }[] = [
   {
@@ -35,6 +38,22 @@ export function Sidebar() {
   const isRunning = useStore((s) => s.isRunning);
   const library = useStore((s) => s.library);
   const routes = useStore((s) => s.routes);
+  const notifications = useStore((s) => s.notifications);
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!notifOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [notifOpen]);
 
   const subscriptionLabel =
     user.subscriptionStatus === 'trial'
@@ -92,6 +111,18 @@ export function Sidebar() {
             <span className="sidebar__connect-latency">{formatLatency(avgLatency)}</span>
           </div>
         )}
+        <div className="sidebar__notif" ref={notifRef}>
+          <button
+            type="button"
+            className="sidebar__bell"
+            onClick={() => setNotifOpen((v) => !v)}
+            aria-label="Notifications"
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && <span className="sidebar__bell-badge" />}
+          </button>
+          {notifOpen && <NotificationWindow />}
+        </div>
         <img src="/images/sidebar/user-avatar.png" alt="" className="sidebar__avatar" />
         <div className="sidebar__footer-text">
           <span className="sidebar__footer-name">{subscriptionLabel}</span>
