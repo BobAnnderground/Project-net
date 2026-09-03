@@ -25,7 +25,7 @@ export function OnboardingCoachmark({
     <div className={`coachmark${className ? ` ${className}` : ''}`}>
       <p className="coachmark__text">{text}</p>
       <div className="coachmark__footer">
-        <button className="hero-banner__btn hero-banner__btn--secondary" onClick={onSkip}>
+        <button className="btn btn--sm btn--invariant" onClick={onSkip}>
           Skip tips
         </button>
         <div className="coachmark__pager">
@@ -36,7 +36,7 @@ export function OnboardingCoachmark({
             </button>
           )}
           {isLast ? (
-            <button className="hero-banner__btn hero-banner__btn--secondary" onClick={onNext}>
+            <button className="btn btn--sm btn--invariant" onClick={onNext}>
               Got it
             </button>
           ) : (

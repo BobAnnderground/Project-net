@@ -40,6 +40,12 @@
   --panel-gradient-1: #251930;
   --panel-gradient-2: #1b1521;
   --panel-gradient-3: #141116;
+  /* Home screen "Service Routing" card gradient — exact values from Figma
+     (Fixnet · Wip, node 2105:507806, "gradients/blue-1/2/3"). Invariant like
+     --panel-gradient-*: the card's art stays dark regardless of app theme. */
+  --blue-gradient-1: #1a2231;
+  --blue-gradient-2: #151a21;
+  --blue-gradient-3: #111417;
   --ok: #18b363;
   --ok-dim: #152d23;
   --warn: #f0db1a;
