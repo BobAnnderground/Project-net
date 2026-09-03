@@ -136,19 +136,19 @@ export function Services() {
               {selectedIds.size} service{selectedIds.size > 1 ? 's' : ''}
             </span>
             {!isRunning && (
-              <button className="btn btn--sm btn--gradient" onClick={handleStart}>
+              <button className="btn btn--sm btn--primary" onClick={handleStart}>
                 Start selected
                 <Play size={12} />
               </button>
             )}
             {isRunning && matchesRunningSelection && (
-              <button className="btn btn--sm btn--gradient" onClick={stopAll}>
+              <button className="btn btn--sm btn--primary" onClick={stopAll}>
                 Stop current connection
                 <Square size={12} />
               </button>
             )}
             {isRunning && !matchesRunningSelection && (
-              <button className="btn btn--sm btn--gradient" onClick={handleStart}>
+              <button className="btn btn--sm btn--primary" onClick={handleStart}>
                 Reconnect with changes
                 <RotateCw size={12} />
               </button>
