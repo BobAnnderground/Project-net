@@ -68,6 +68,8 @@
   --text-red: #fe3838;
   --text-red-rgb: 254, 56, 56;
   --window-bg: #0a0810;
+  --btn-gradient-1: #854dd1;
+  --btn-gradient-2: #4d1c8c;
 
   /* Legacy values with no equivalent in design/tokens.json — kept at their
      original value (no visual change) but named so nothing is a bare
@@ -109,6 +111,17 @@
   --notif-icon-negative-bg: rgba(254, 56, 56, 0.18);
   --notif-icon-positive-fg: #00ff7b;
   --notif-icon-positive-bg: rgba(0, 255, 123, 0.16);
+
+  /* Buttons — exact values from the Figma button system (Fixnet • Library
+     file, node 760:1170 "Buttons", dark theme column). */
+  --btn-shadow-color: rgba(91, 34, 153, 0.6);
+  --btn-primary-hover-bg: #5b2299;
+  --btn-primary-disabled-bg: rgba(255, 255, 255, 0.08);
+  --btn-primary-disabled-text: rgba(255, 255, 255, 0.24);
+  --btn-secondary-text: #ffffff;
+  --btn-secondary-bg: rgba(255, 255, 255, 0.08);
+  --btn-secondary-hover-bg: rgba(255, 255, 255, 0.16);
+  --btn-disabled-text: rgba(255, 255, 255, 0.24);
 
   --space-4: 4px;
   --space-8: 8px;
@@ -177,6 +190,17 @@
   --notif-icon-negative-bg: rgba(236, 19, 19, 0.16);
   --notif-icon-positive-fg: #00a14e;
   --notif-icon-positive-bg: rgba(0, 161, 78, 0.16);
+
+  /* Buttons — exact values from the Figma button system (Fixnet • Library
+     file, node 760:1170 "Buttons", light theme column). */
+  --btn-shadow-color: transparent;
+  --btn-primary-hover-bg: #854dd1;
+  --btn-primary-disabled-bg: rgba(91, 34, 153, 0.24);
+  --btn-primary-disabled-text: rgba(255, 255, 255, 0.56);
+  --btn-secondary-text: #141117;
+  --btn-secondary-bg: rgba(20, 17, 23, 0.08);
+  --btn-secondary-hover-bg: rgba(62, 13, 112, 0.08);
+  --btn-disabled-text: rgba(20, 17, 23, 0.18);
 }
 
 * {
