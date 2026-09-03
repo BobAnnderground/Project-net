@@ -6,6 +6,16 @@ Fixnet is a Windows desktop-app prototype (1200x800px fixed window) for per-app/
 
 ---
 
+## Design-task checklist (mandatory, self-initiated)
+
+Run through this at the end of every task that touches visual/UI design — a new component, a restyle, bringing something to a Figma spec — and state the results in the reply without being asked first. This exists because skipping it once produced real, user-caught regressions: a CTA left at the wrong size after a "bring to spec" pass, and two other button families (HeroBanner, Settings) left with no hover states because the task's scope was silently narrowed to the one class named in the ticket.
+
+1. **Inventory before implementing.** Before restyling a shared pattern (buttons, cards, inputs, chips, etc.), grep the whole codebase for every element that is visually the same kind of thing — not just the specific class or component named in the task. State what's in scope and what's explicitly being left out, before writing any CSS/JSX. Don't let scope narrow itself silently to "the one class I was told to touch."
+2. **Screen × state completion table before reporting done.** Enumerate every screen/component touched — directly or transitively, since a shared class change ripples beyond the files edited — crossed with every relevant state (default/hover/active/disabled/selected/etc., both themes if the app is theme-aware). Mark each cell pass/fail from actual verification (computed styles via Playwright, or a screenshot) — never from memory or assumption that "it must have inherited the fix."
+3. **Full-app screenshot pass, not just the files edited.** Before calling a design task done, screenshot every screen in the app in every theme — including ones not directly touched this task — since a shared-component change surfaces in places that don't share a file with the edit (a hero banner CTA or a settings action button reusing the same visual pattern under a completely different class name is exactly how the last regression slipped through).
+
+---
+
 ## Stack
 
 - **Runtime:** Node.js (ESM), TypeScript ~6.0.2

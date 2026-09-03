@@ -96,6 +96,7 @@ export function CreateCustomServiceModal({
         <div className="file-picker-row">
           <button type="button" className="btn btn--sm" onClick={() => fileInputRef.current?.click()}>
             <FolderOpen size={12} />
+            <span className="btn__divider" />
             Choose file
           </button>
           <span className="file-picker-row__name">{exeFile ? exeFile.name : 'No file selected'}</span>

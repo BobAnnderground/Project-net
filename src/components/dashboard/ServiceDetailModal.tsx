@@ -248,6 +248,7 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
             ))}
             <button className="btn btn--sm" onClick={addRule}>
               <Plus size={12} />
+              <span className="btn__divider" />
               Add rule
             </button>
           </div>
@@ -257,6 +258,7 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
       <div style={{ display: 'flex', gap: 'var(--space-8)', marginTop: 'var(--space-8)' }}>
         <button className="btn btn--primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handleStart}>
           <Play size={14} />
+          <span className="btn__divider" />
           Start
         </button>
       </div>
