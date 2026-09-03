@@ -15,6 +15,7 @@ export function Dashboard() {
   const lastSessionServiceIds = useStore((s) => s.lastSessionServiceIds);
   const relaunchLastSession = useStore((s) => s.relaunchLastSession);
   const editLastSession = useStore((s) => s.editLastSession);
+  const startAll = useStore((s) => s.startAll);
   const beginOnboardingRegionStep = useStore((s) => s.beginOnboardingRegionStep);
   const skipOnboarding = useStore((s) => s.skipOnboarding);
   const advanceOnboardingTour = useStore((s) => s.advanceOnboardingTour);
@@ -28,14 +29,18 @@ export function Dashboard() {
     return <RegionStep />;
   }
 
-  const lastSessionServices = lastSessionServiceIds
-    .map((id) => library.find((s) => s.id === id))
-    .filter((s): s is NonNullable<typeof s> => !!s);
-
   if (library.length === 0) {
     return (
       <div style={{ position: 'relative' }}>
-        <HeroBanner showRoutingCta onSelectServices={() => setActiveTab('services')} />
+        <HeroBanner
+          serviceRouting={{
+            isEmpty: true,
+            services: [],
+            onSelectServices: () => setActiveTab('services'),
+            onStart: () => {},
+            onEdit: () => {},
+          }}
+        />
         {onboardingStage === 'tour-home' && (
           <OnboardingCoachmark
             step={2}
@@ -52,20 +57,32 @@ export function Dashboard() {
   }
 
   const isRoutingLive = isRunning && library.some((s) => s.enabled);
-  const hasLastSession = !isRoutingLive && lastSessionServices.length > 0;
+
+  if (isRoutingLive) {
+    return (
+      <div>
+        <RoutingDiagram />
+        {activeServiceId && <ServiceDetailModal serviceId={activeServiceId} onClose={closeServiceDetail} />}
+      </div>
+    );
+  }
+
+  const lastSessionServices = lastSessionServiceIds
+    .map((id) => library.find((s) => s.id === id))
+    .filter((s): s is NonNullable<typeof s> => !!s);
+  const hasLastSession = lastSessionServices.length > 0;
 
   return (
     <div>
-      {isRoutingLive ? (
-        <RoutingDiagram />
-      ) : hasLastSession ? (
-        <HeroBanner
-          lastSession={{ services: lastSessionServices, onStart: relaunchLastSession, onEdit: editLastSession }}
-        />
-      ) : (
-        <HeroBanner />
-      )}
-
+      <HeroBanner
+        serviceRouting={{
+          isEmpty: false,
+          services: hasLastSession ? lastSessionServices : library,
+          onSelectServices: () => setActiveTab('services'),
+          onStart: hasLastSession ? relaunchLastSession : startAll,
+          onEdit: hasLastSession ? editLastSession : () => setActiveTab('services'),
+        }}
+      />
       {activeServiceId && <ServiceDetailModal serviceId={activeServiceId} onClose={closeServiceDetail} />}
     </div>
   );
