@@ -560,31 +560,12 @@
   padding: var(--space-24) var(--space-24);
 }
 
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-16);
-}
-
-.page-title {
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--text-0);
-}
-
-.page-subtitle {
-  font-size: 12.5px;
-  color: var(--text-2);
-  margin-top: var(--space-4);
-}
-
 .services-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-16);
-  margin-bottom: var(--space-16);
+  margin-bottom: var(--space-12);
 }
 
 .library-tabs {
@@ -592,9 +573,29 @@
 }
 
 .services-search {
-  width: 260px;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
   margin-bottom: 0;
+}
+
+.services-toolbar-row2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  margin-bottom: var(--space-16);
+}
+
+.services-toolbar-row2__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.services-toolbar-row2__subtitle {
+  font-size: 13px;
+  color: var(--text-1);
+  white-space: nowrap;
 }
 
 .services-page {
@@ -628,8 +629,7 @@
 
 .services-selected-panel__count {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text-0);
+  color: var(--text-1);
 }
 
 .services-selected-panel__list {
@@ -638,19 +638,35 @@
   gap: var(--space-8);
 }
 
+.services-selected-panel__delete-all {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+  cursor: pointer;
+}
+
+.services-selected-panel__delete-all:hover {
+  color: var(--text-0);
+}
+
 .services-selected-card {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-12);
   padding: var(--space-12);
-  background: var(--bg-1);
-  border: 1px solid var(--border);
+  background: var(--frames-neutral-m);
   border-radius: var(--radius);
+  box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24);
 }
 
 .services-selected-card__icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-sm);
   background: var(--icon-swatch-bg);
   display: flex;
@@ -659,47 +675,53 @@
   flex-shrink: 0;
 }
 
-.services-selected-card__info {
+.services-selected-card__chips {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-4);
   min-width: 0;
   flex: 1;
 }
 
-.services-selected-card__name {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-0);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.services-selected-card__meta {
-  font-size: 11px;
-  color: var(--text-2);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.services-selected-card__remove {
+.services-selected-card__settings-btn {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text-2);
+  color: var(--on-accent);
   cursor: pointer;
 }
 
+.services-selected-card__settings-btn:hover {
+  background: rgba(var(--on-accent-rgb), 0.08);
+}
+
+.services-selected-card__remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgb(var(--frames-bg-rgb));
+  color: var(--on-accent);
+  box-shadow: 0 0 0 1px rgba(var(--on-accent-rgb), 0.16);
+  cursor: pointer;
+  z-index: 1;
+}
+
 .services-selected-card__remove:hover {
-  background: var(--bg-2);
+  background: var(--err-dim);
   color: var(--err);
 }
 
@@ -742,6 +764,13 @@
   background: var(--err-dim);
   border-color: var(--err);
   color: var(--err);
+}
+
+.btn--gradient {
+  background: linear-gradient(135deg, var(--accent-gradient-1), var(--accent-gradient-2));
+  border-color: transparent;
+  color: var(--on-accent);
+  box-shadow: 0 4px 20px -2px rgba(91, 34, 153, 0.6);
 }
 
 .btn--sm {

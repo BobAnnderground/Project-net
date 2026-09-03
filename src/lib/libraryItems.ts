@@ -1,6 +1,6 @@
 import { LIBRARY_CATALOG, catalogById } from '../data/catalog';
 import { REGIONS } from '../data/regions';
-import { TRANSPORT_TYPE_CHIP_LABELS } from './labels';
+import { connectionModeChipLabel } from './labels';
 import type { Service, ServiceCategory } from '../types';
 
 export type LibraryTab = 'all' | 'games' | 'social' | 'ai' | 'entertainment' | 'other' | 'custom';
@@ -20,7 +20,7 @@ export interface LibraryDisplayItem {
   icon: string;
   name: string;
   regionLabel: string;
-  transportLabel: string;
+  modeLabel: string;
   isCustom: boolean;
   category: ServiceCategory;
 }
@@ -33,7 +33,7 @@ export function buildCatalogDisplayItems(): LibraryDisplayItem[] {
       icon: entry.icon,
       name: entry.name,
       regionLabel: region?.displayName ?? entry.recommendedRegion,
-      transportLabel: 'auto',
+      modeLabel: connectionModeChipLabel(entry.recommendedConnectionMode, entry.category),
       isCustom: false,
       category: entry.category,
     };
@@ -50,7 +50,7 @@ export function buildCustomDisplayItems(library: Service[]): LibraryDisplayItem[
         icon: s.icon,
         name: s.name,
         regionLabel: region?.displayName ?? s.region,
-        transportLabel: TRANSPORT_TYPE_CHIP_LABELS[s.transportType],
+        modeLabel: connectionModeChipLabel(s.connectionMode, s.category),
         isCustom: true,
         category: s.category,
       };

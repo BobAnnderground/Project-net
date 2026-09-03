@@ -15,18 +15,26 @@ export const TRANSPORT_TYPE_LABELS: Record<TransportType, string> = {
   mixed: 'Mixed (UDP + TCP)',
 };
 
-export const TRANSPORT_TYPE_CHIP_LABELS: Record<TransportType, string> = {
-  udp: 'UDP',
-  tcp: 'TCP',
-  mixed: 'Mixed',
-};
-
 export const CONNECTION_MODE_LABELS: Record<ConnectionMode, string> = {
   default: 'Default',
   fast: 'Fast',
   stable: 'Stable',
   secure: 'Secure',
 };
+
+const CONNECTION_MODE_CHIP_LABELS: Record<ConnectionMode, string> = {
+  default: 'General',
+  fast: 'Fast',
+  stable: 'Stable',
+  secure: 'Secure',
+};
+
+/** Short badge text for a service card: category-flavored connection mode, e.g. "Secure", "Fast gaming", "Gaming". */
+export function connectionModeChipLabel(mode: ConnectionMode, category: ServiceCategory): string {
+  const label = CONNECTION_MODE_CHIP_LABELS[mode];
+  if (category !== 'game') return label;
+  return label === 'General' ? 'Gaming' : `${label} gaming`;
+}
 
 export function formatLatency(ms: number): string {
   return ms > 0 ? `${Math.round(ms)} ms` : '—';

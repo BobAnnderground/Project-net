@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Search, MapPin, Waypoints } from 'lucide-react';
 import { ServiceCard } from './ServiceCard';
 import { LIBRARY_TABS, type LibraryTab, type LibraryDisplayItem } from '../../lib/libraryItems';
@@ -14,6 +15,8 @@ interface LibraryPickerGridProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   searchPlaceholder: string;
+  toolbarActions?: ReactNode;
+  toolbarSubtitle?: string;
 }
 
 export function LibraryPickerGrid({
@@ -28,6 +31,8 @@ export function LibraryPickerGrid({
   searchQuery,
   onSearchChange,
   searchPlaceholder,
+  toolbarActions,
+  toolbarSubtitle,
 }: LibraryPickerGridProps) {
   return (
     <>
@@ -55,6 +60,13 @@ export function LibraryPickerGrid({
         </div>
       </div>
 
+      {(toolbarActions || toolbarSubtitle) && (
+        <div className="services-toolbar-row2">
+          {toolbarActions && <div className="services-toolbar-row2__actions">{toolbarActions}</div>}
+          {toolbarSubtitle && <span className="services-toolbar-row2__subtitle">{toolbarSubtitle}</span>}
+        </div>
+      )}
+
       {visibleItems.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state__title">{emptyTitle}</div>
@@ -69,7 +81,7 @@ export function LibraryPickerGrid({
               name={item.name}
               chips={[
                 { icon: MapPin, label: item.regionLabel },
-                { icon: Waypoints, label: item.transportLabel },
+                { icon: Waypoints, label: item.modeLabel },
               ]}
               selected={selectedIds.has(item.id)}
               onClick={() => onToggle(item.id)}
