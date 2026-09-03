@@ -70,6 +70,7 @@
   --window-bg: #0a0810;
   --btn-gradient-1: #854dd1;
   --btn-gradient-2: #4d1c8c;
+  --btn-primary-divider: rgba(255, 255, 255, 0.24);
 
   /* Legacy values with no equivalent in design/tokens.json — kept at their
      original value (no visual change) but named so nothing is a bare
@@ -122,6 +123,7 @@
   --btn-secondary-bg: rgba(255, 255, 255, 0.08);
   --btn-secondary-hover-bg: rgba(255, 255, 255, 0.16);
   --btn-disabled-text: rgba(255, 255, 255, 0.24);
+  --btn-secondary-divider: rgba(255, 255, 255, 0.24);
 
   --space-4: 4px;
   --space-8: 8px;
@@ -201,6 +203,7 @@
   --btn-secondary-bg: rgba(20, 17, 23, 0.08);
   --btn-secondary-hover-bg: rgba(62, 13, 112, 0.08);
   --btn-disabled-text: rgba(20, 17, 23, 0.18);
+  --btn-secondary-divider: rgba(20, 17, 23, 0.12);
 }
 
 * {

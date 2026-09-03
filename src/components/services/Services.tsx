@@ -122,6 +122,7 @@ export function Services() {
                 onClick={() => setManualAddStep('intro')}
               >
                 Add service
+                <span className="btn__divider" />
                 <Plus size={14} />
               </button>
             </>
@@ -136,21 +137,24 @@ export function Services() {
               {selectedIds.size} service{selectedIds.size > 1 ? 's' : ''}
             </span>
             {!isRunning && (
-              <button className="btn btn--sm btn--primary" onClick={handleStart}>
+              <button className="btn btn--primary" onClick={handleStart}>
                 Start selected
-                <Play size={12} />
+                <span className="btn__divider" />
+                <Play size={14} />
               </button>
             )}
             {isRunning && matchesRunningSelection && (
-              <button className="btn btn--sm btn--primary" onClick={stopAll}>
+              <button className="btn btn--primary" onClick={stopAll}>
                 Stop current connection
-                <Square size={12} />
+                <span className="btn__divider" />
+                <Square size={14} />
               </button>
             )}
             {isRunning && !matchesRunningSelection && (
-              <button className="btn btn--sm btn--primary" onClick={handleStart}>
+              <button className="btn btn--primary" onClick={handleStart}>
                 Reconnect with changes
-                <RotateCw size={12} />
+                <span className="btn__divider" />
+                <RotateCw size={14} />
               </button>
             )}
           </div>

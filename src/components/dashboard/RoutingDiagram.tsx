@@ -267,6 +267,7 @@ export function RoutingDiagram() {
       <div className="routing-diagram__header">
         <button className="btn btn--lg btn--primary" onClick={stopAll}>
           <Square size={16} />
+          <span className="btn__divider" />
           Stop routing
         </button>
       </div>

@@ -245,6 +245,7 @@ function AccountSection() {
 
       <button className="settings-btn" style={{ alignSelf: 'flex-start' }} onClick={() => logout()}>
         Sign Out
+        <span className="btn__divider" />
         <LogOut size={14} />
       </button>
     </div>
@@ -328,6 +329,7 @@ function ConnectionSection() {
 
         <button className="settings-btn settings-btn--ghost settings-btn--indent" onClick={addBackupDns}>
           Add backup DNS
+          <span className="btn__divider" />
           <Plus size={14} />
         </button>
       </div>
@@ -403,6 +405,7 @@ function ConnectionSection() {
 
         <button className="settings-btn settings-btn--ghost" onClick={handleAddBridgeClick}>
           Add fallback bridge
+          <span className="btn__divider" />
           <Plus size={14} />
         </button>
       </div>
@@ -472,6 +475,7 @@ export function Settings() {
         ) : (
           <button className="settings-btn" onClick={() => setPendingReset(true)}>
             Reset settings
+            <span className="btn__divider" />
             <RotateCcw size={14} />
           </button>
         )}
