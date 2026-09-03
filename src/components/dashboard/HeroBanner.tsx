@@ -72,19 +72,19 @@ export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
           </div>
           <div className="dashboard-hero__actions">
             {isEmpty ? (
-              <button className="btn btn--invariant" onClick={onSelectServices}>
+              <button className="btn" onClick={onSelectServices}>
                 Select services
                 <span className="btn__divider" />
                 <ArrowRight size={14} />
               </button>
             ) : (
               <>
-                <button className="btn btn--invariant" onClick={onStart}>
+                <button className="btn" onClick={onStart}>
                   Start
                   <span className="btn__divider" />
                   <ArrowRight size={14} />
                 </button>
-                <button className="btn btn--invariant" onClick={onEdit}>
+                <button className="btn" onClick={onEdit}>
                   Edit
                   <span className="btn__divider" />
                   <ArrowRight size={14} />
@@ -123,7 +123,7 @@ export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
             </p>
           </div>
           <div className="dashboard-hero__actions">
-            <button className="btn btn--icon btn--invariant" aria-label="Full mode settings">
+            <button className="btn btn--icon" aria-label="Full mode settings">
               <SlidersHorizontal size={14} />
             </button>
             {/* No onClick: full-tunnel routing isn't modeled in the store yet — matches the

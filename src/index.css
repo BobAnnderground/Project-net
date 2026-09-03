@@ -40,12 +40,6 @@
   --panel-gradient-1: #251930;
   --panel-gradient-2: #1b1521;
   --panel-gradient-3: #141116;
-  /* Home screen "Service Routing" card gradient — exact values from Figma
-     (Fixnet · Wip, node 2105:507806, "gradients/blue-1/2/3"). Invariant like
-     --panel-gradient-*: the card's art stays dark regardless of app theme. */
-  --blue-gradient-1: #1a2231;
-  --blue-gradient-2: #151a21;
-  --blue-gradient-3: #111417;
   --ok: #18b363;
   --ok-dim: #152d23;
   --warn: #f0db1a;
@@ -131,6 +125,20 @@
   --btn-disabled-text: rgba(255, 255, 255, 0.24);
   --btn-secondary-divider: rgba(255, 255, 255, 0.24);
 
+  /* Home dashboard hero cards — exact values from Figma (Fixnet · Wip,
+     node 1071:98907/1071:99031, dark/light "Первый вход" frames). The
+     cards actually switch with app theme (confirmed via get_variable_defs
+     against the light frame directly — a card-stays-dark assumption
+     carried over from the Services cards was wrong for this screen). */
+  --hero-blue-1: #1a2231;
+  --hero-blue-2: #151a21;
+  --hero-blue-3: #111417;
+  --hero-purple-1: #251a31;
+  --hero-purple-2: #1b1521;
+  --hero-purple-3: #141117;
+  --hero-text-primary: #ffffff;
+  --hero-text-secondary: rgba(255, 255, 255, 0.56);
+
   --space-4: 4px;
   --space-8: 8px;
   --space-12: 12px;
@@ -210,6 +218,18 @@
   --btn-secondary-hover-bg: rgba(62, 13, 112, 0.08);
   --btn-disabled-text: rgba(20, 17, 23, 0.18);
   --btn-secondary-divider: rgba(20, 17, 23, 0.12);
+
+  /* Home dashboard hero cards — exact values from Figma (Fixnet · Wip,
+     node 1071:99031, light "Первый вход" frame), resolved via
+     get_variable_defs against that frame directly. */
+  --hero-blue-1: #d3e0f5;
+  --hero-blue-2: #e7eefa;
+  --hero-blue-3: #fafcff;
+  --hero-purple-1: #dbd1e8;
+  --hero-purple-2: #eae2f0;
+  --hero-purple-3: #f6f5f8;
+  --hero-text-primary: #130026;
+  --hero-text-secondary: rgba(20, 17, 23, 0.44);
 }
 
 * {
