@@ -160,6 +160,7 @@ export interface LibraryEntry {
   category: ServiceCategory;
   domains: string[];
   recommendedRegion: string;
+  recommendedConnectionMode: ConnectionMode;
   description: string;
   popular: boolean;
 }

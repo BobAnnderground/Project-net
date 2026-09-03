@@ -23,7 +23,7 @@ export function serviceFromLibraryEntry(entry: LibraryEntry): Service {
     encryption: 'on',
     transportType: 'mixed',
     dnsMode: 'default',
-    connectionMode: 'default',
+    connectionMode: entry.recommendedConnectionMode,
     advancedSettings: {},
     isCustom: false,
     status: 'inactive',
