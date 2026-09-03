@@ -38,6 +38,7 @@ export function NotificationToastStack() {
         <div className="toast-stack__peek-card toast-stack__peek-card--3" />
         <div className="toast-stack__peek-card toast-stack__peek-card--2" />
         <NoticeCard
+          key={top.id}
           notification={top}
           variant="toast"
           onOpen={() => markNotificationRead(top.id)}
