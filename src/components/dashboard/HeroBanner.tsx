@@ -1,5 +1,6 @@
 import { ArrowRight, SlidersHorizontal } from 'lucide-react';
 import { ServiceIcon } from '../common/ServiceIcon';
+import { useResolvedTheme } from '../../lib/useResolvedTheme';
 import type { Service } from '../../types';
 
 interface ServiceRoutingInfo {
@@ -23,6 +24,8 @@ interface HeroBannerProps {
 const MAX_ROW_ICONS = 7;
 
 export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
+  const resolvedTheme = useResolvedTheme();
+
   if (welcomeIntro) {
     return (
       <div className="hero-banner">
@@ -50,12 +53,13 @@ export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
   const { isEmpty, services, onSelectServices, onStart, onEdit } = serviceRouting;
   const visibleIcons = services.slice(0, MAX_ROW_ICONS);
   const overflowCount = services.length - visibleIcons.length;
+  const isLight = resolvedTheme === 'light';
 
   return (
     <div className="dashboard-hero">
       <div className="dashboard-hero__card dashboard-hero__card--routing">
         <img
-          src="/images/Home screen/Service Routing.webp"
+          src={isLight ? '/images/Home screen/Service Routing-light.webp' : '/images/Home screen/Service Routing.webp'}
           alt=""
           className="dashboard-hero__art dashboard-hero__art--routing"
         />
@@ -107,7 +111,7 @@ export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
 
       <div className="dashboard-hero__card dashboard-hero__card--fullmode">
         <img
-          src="/images/Home screen/Full mode.webp"
+          src={isLight ? '/images/Home screen/Full mode-light.webp' : '/images/Home screen/Full mode.webp'}
           alt=""
           className="dashboard-hero__art dashboard-hero__art--fullmode"
         />
