@@ -1,4 +1,4 @@
-import { ArrowRight, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, PencilLine, Play, SlidersHorizontal } from 'lucide-react';
 import { ServiceIcon } from '../common/ServiceIcon';
 import { useResolvedTheme } from '../../lib/useResolvedTheme';
 import type { Service } from '../../types';
@@ -82,12 +82,12 @@ export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
                 <button className="btn" onClick={onStart}>
                   Start
                   <span className="btn__divider" />
-                  <ArrowRight size={14} />
+                  <Play size={14} />
                 </button>
                 <button className="btn" onClick={onEdit}>
                   Edit
                   <span className="btn__divider" />
-                  <ArrowRight size={14} />
+                  <PencilLine size={14} />
                 </button>
               </>
             )}
@@ -132,7 +132,7 @@ export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
             <button className="btn btn--primary">
               Enable full mode
               <span className="btn__divider" />
-              <ArrowRight size={14} />
+              <Play size={14} />
             </button>
           </div>
         </div>

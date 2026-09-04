@@ -124,9 +124,11 @@
 }
 
 /* Sidebar — no background/border of its own; it sits directly on the
-   shell's --bg-0. Text/notification colors use the theme-aware --text-*
-   tokens; the nav icons and avatar are separate light/dark PNG assets
-   (picked in Sidebar.tsx) since they're pre-rendered art, not flat icons. */
+   shell's --bg-0. Text uses the theme-aware --text-* tokens; the nav
+   icons, notification button, and avatar are separate light/dark
+   assets (picked in Sidebar.tsx) since they're pre-rendered art, not
+   flat icons — the active nav icons are raster (glow baked in from
+   Figma's foreground blur), the rest are self-contained SVGs. */
 .sidebar {
   grid-row: 2;
   grid-column: 1;
@@ -164,7 +166,7 @@
 }
 
 .nav-item--active {
-  color: var(--accent);
+  color: var(--text-0);
 }
 
 .nav-item__icon {
@@ -175,18 +177,23 @@
 
 .nav-item__icon-img--inactive {
   position: absolute;
-  top: -2px;
-  left: -2px;
-  width: 28px;
-  height: 28px;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 24px;
 }
 
+/* Active icons are 3x raster exports with a soft glow baked in that
+   overflows the 24px slot; Figma's own layout crops them to ~29x29
+   centered on the slot. object-fit: contain keeps each icon's native
+   aspect ratio (they're not all perfectly square) inside that box. */
 .nav-item__icon-img--active {
   position: absolute;
-  top: -10px;
-  left: -10px;
-  width: 44px;
-  height: 37px;
+  top: -2.5px;
+  left: -2.5px;
+  width: 29px;
+  height: 29px;
+  object-fit: contain;
 }
 
 .sidebar__footer {
@@ -197,18 +204,104 @@
   width: 100%;
 }
 
-.sidebar__connect {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  font-family: var(--font);
-  font-size: 11px;
-  line-height: 16px;
-  letter-spacing: -0.121px;
-  color: var(--text-green);
+/* Active-connection signal — floats over the empty space between the
+   nav and the footer, matching the Figma "Signal" node: it's an
+   absolutely-positioned overlay there, not a flex participant, so it
+   never shifts the nav or squeezes the notification/avatar stack when
+   a connection starts or stops. top is the measured vertical center of
+   that gap for this sidebar's fixed content (logo/3-item nav/footer);
+   the window is a fixed 1200x800px, so this doesn't need to be dynamic.
+   A static core dot plus four staggered expanding-ring pulses. Green
+   is theme-dependent via --text-green (#00ff7b dark / #00a14e light,
+   the latter matching --notif-icon-positive-fg for contrast on white). */
+.sidebar__signal {
+  position: absolute;
+  top: 505px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
 }
 
-/* Circular swatch behind the notification bell */
+/* Core dot gets its own subtle double-beat (lub-dub) so the whole marker
+   reads as a heartbeat rather than a mechanical radar sweep. Duration
+   matches the ring cycle below so both loops stay in sync. */
+.sidebar__signal-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-green);
+  transform: translate(-50%, -50%);
+  animation: signal-core-beat 5s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+@keyframes signal-core-beat {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  8% {
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  16% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  24% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  36% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Slowed from a mechanical 2s/linear to 3s with an ease-out-heavy curve —
+   each ring now snaps outward quickly, then decelerates and fades slowly,
+   closer to a heartbeat's thump-and-decay than a uniform radar sweep. */
+.sidebar__signal-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 1px solid var(--text-green);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: signal-ring 3s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.sidebar__signal-ring:nth-child(2) {
+  animation-delay: -0.75s;
+}
+
+.sidebar__signal-ring:nth-child(3) {
+  animation-delay: -1.5s;
+}
+
+.sidebar__signal-ring:nth-child(4) {
+  animation-delay: -2.25s;
+}
+
+@keyframes signal-ring {
+  0% {
+    width: 6px;
+    height: 6px;
+    opacity: 1;
+  }
+  45% {
+    width: 22px;
+    height: 22px;
+    opacity: 0.4;
+  }
+  100% {
+    width: 32px;
+    height: 32px;
+    opacity: 0;
+  }
+}
+
+/* Notification button — the circular background is baked into the
+   SVG asset itself, so this is just a positioning/hit-target wrapper. */
 .sidebar__swatch {
   position: relative;
   flex-shrink: 0;
@@ -216,13 +309,16 @@
   height: 36px;
   border: none;
   padding: 0;
-  border-radius: var(--radius-full);
-  background: rgba(var(--text-0-rgb), 0.08);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-2);
   cursor: pointer;
+}
+
+.sidebar__swatch-icon {
+  width: 36px;
+  height: 36px;
 }
 
 .sidebar__notif-dot {
@@ -560,11 +656,56 @@
   padding: var(--space-24) var(--space-24);
 }
 
+/* Services owns two independent inner scroll regions (card grid + selected
+   panel) instead of scrolling the whole page as one — so the outer .content
+   itself must stop scrolling and just hand its already-bounded grid-row
+   height down via flex. */
+.content--services {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Shared scroll-fade mask (Fixnet • Wip, node 1314:81308): edges fade into
+   the page instead of clipping abruptly, and only on the side that
+   actually has more content to reveal — toggled live from scroll position
+   via useScrollFade, not a permanent mask. */
+.scroll-fade {
+  overflow-y: auto;
+}
+
+.scroll-fade--top {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--space-64));
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--space-64));
+}
+
+.scroll-fade--bottom {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - var(--space-64)), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--space-64)), transparent 100%);
+}
+
+.scroll-fade--top.scroll-fade--bottom {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--space-64),
+    #000 calc(100% - var(--space-64)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--space-64),
+    #000 calc(100% - var(--space-64)),
+    transparent 100%
+  );
+}
+
 .services-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-16);
+  gap: var(--space-24);
   margin-bottom: var(--space-12);
 }
 
@@ -572,10 +713,12 @@
   width: fit-content;
 }
 
+/* Layout-only modifier for the Services toolbar's copy of the shared
+   search field below (.search-input-wrap) — sizing/visuals live there,
+   this only makes it fill the row next to the tabs. */
 .services-search {
   flex: 1;
   min-width: 0;
-  margin-bottom: 0;
 }
 
 .services-toolbar-row2 {
@@ -598,26 +741,46 @@
   white-space: nowrap;
 }
 
+/* Both columns stretch to the same height (rather than sizing to their own
+   content) so each can hand its scrollable region a bounded height via
+   flex — that's what makes the grid and the selected panel scroll
+   independently instead of the whole page scrolling as one. */
 .services-page {
   position: relative;
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-16);
+  align-items: stretch;
+  gap: var(--space-32);
+  flex: 1;
+  min-height: 0;
 }
 
+/* Capped at the Figma card-grid width (3 × 255px cards + 2 × 16px gaps =
+   797px, Fixnet • Wip node 1136:63791) regardless of whether the selected
+   panel is actually mounted — the panel's column is reserved from the
+   start so the first click doesn't resize/reflow every card, it just
+   reveals the already-reserved space on the right. */
 .services-main {
   flex: 1;
   min-width: 0;
+  max-width: 797px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
+/* Opts out of .services-page's stretch: sized to its own content (header +
+   cards + Delete all sitting right under the last card) up to the row's
+   available height, only capping — and handing the overflow to the
+   internal list's own scroll — once the content actually exceeds it. */
 .services-selected-panel {
-  width: 280px;
+  width: 243px;
   flex-shrink: 0;
+  align-self: flex-start;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
-  position: sticky;
-  top: 0;
+  min-height: 0;
 }
 
 .services-selected-panel__header {
@@ -627,15 +790,52 @@
   gap: var(--space-8);
 }
 
+/* Used once a connection is live: the button label ("Stop current
+   connection" / "Reconnect with changes") is long enough that it can't
+   share a row with the count and still fit in 243px without wrapping —
+   and a button's own label must never wrap to two lines. So instead of
+   letting the button shrink/wrap, the count drops to its own line below,
+   right-aligned, sized to land level with .services-toolbar-row2__subtitle
+   in the main column (38px row + 12px margin-top, mirroring
+   .services-toolbar's own 38px row + 12px margin-bottom exactly). */
+.services-selected-panel__header--split {
+  flex-direction: column;
+  align-items: flex-end;
+  /* Base header's gap would stack with .services-selected-panel__count--row2's
+     own margin-top (12px) and overshoot the target offset — spacing here is
+     driven entirely by that margin-top. */
+  gap: 0;
+}
+
+.services-selected-panel__count--row2 {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  margin-top: var(--space-12);
+}
+
 .services-selected-panel__count {
   font-size: 13px;
   color: var(--text-1);
 }
 
+/* Padding + matching negative margin carve out room for two things the
+   scroll box would otherwise clip flush at its own edge: the vertical
+   scrollbar (--space-8, same clearance as .services-grid-scroll) and each
+   card's remove badge, which oversails its card by -4px top/right
+   (.services-selected-card__remove). overflow-x stays hidden explicitly —
+   left as the default "auto" overflow-y alone pushes the UA to also
+   compute overflow-x as auto (not visible), which turned the badges'
+   overhang into a stray horizontal scrollbar instead of just clipping it. */
 .services-selected-panel__list {
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  padding: var(--space-4) calc(var(--space-8) + var(--space-4)) 0 0;
+  margin: calc(var(--space-4) * -1) calc((var(--space-8) + var(--space-4)) * -1) 0 0;
 }
 
 .services-selected-panel__delete-all {
@@ -693,36 +893,49 @@
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--on-accent);
+  color: var(--frames-item-icon);
   cursor: pointer;
 }
 
 .services-selected-card__settings-btn:hover {
-  background: rgba(var(--on-accent-rgb), 0.08);
+  background: rgba(var(--frames-item-text-rgb), 0.08);
 }
 
 .services-selected-card__remove {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -4px;
+  right: -4px;
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   border: none;
   border-radius: 50%;
-  background: rgb(var(--frames-bg-rgb));
-  color: var(--on-accent);
-  box-shadow: 0 0 0 1px rgba(var(--on-accent-rgb), 0.16);
+  background: transparent;
   cursor: pointer;
   z-index: 1;
 }
 
-.services-selected-card__remove:hover {
-  background: var(--err-dim);
-  color: var(--err);
+/* The icon is a disc with the X cut out of it (Fixnet • Wip, node 295:799
+   "Delete") — the X isn't drawn, it's negative space revealing whatever's
+   behind the disc, which at rest is the page background. Both layers flip
+   with theme (dark: white disc / dark cutout — light: dark disc / light
+   cutout — confirmed against the rendered light frame), and on hover the
+   cutout turns red instead of staying the rest-state page-bg color. */
+.services-selected-card__remove-disc {
+  fill: var(--frames-item-badge-bg);
+}
+
+.services-selected-card__remove-hole {
+  fill: rgb(var(--frames-page-bg-rgb));
+  transition: fill 120ms ease;
+}
+
+.services-selected-card__remove:hover .services-selected-card__remove-hole {
+  fill: var(--err);
 }
 
 /* ── Buttons — Figma "Buttons" component (Fixnet • Library, node 760:1170) ─
@@ -743,6 +956,7 @@
   border: none;
   font-size: 14px;
   font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
   background: var(--btn-secondary-bg);
   backdrop-filter: blur(8px);
@@ -889,11 +1103,19 @@
     var(--panel-gradient-2) 54.9%,
     var(--panel-gradient-3) 100%
   );
-  margin-bottom: var(--space-16);
-  /* Matches the pre-existing empirically-verified hero height at 1200x800
-     (.shell's own 1px border eats into the naive 800 - 32 - 24*2 = 720px
-     estimate) — reused as-is by .dashboard-hero below. */
-  height: 719px;
+  /* No margin-bottom: .content (this element's parent) is the only scroll
+     container in the shell, and a trailing margin on a scroll container's
+     last child isn't absorbed by the container's own bottom padding — it
+     adds straight to scrollHeight instead, producing a phantom scrollbar
+     for exactly the margin's size. There's never anything after this
+     banner inside .content, so the margin had no layout purpose anyway.
+     Height is computed from .shell's fixed 800px height:
+     800 - 2 (.shell's own 1px border × 2) - 49 (.window-titlebar height)
+     - 24 - 24 (.content's top/bottom padding) = 701px. Re-derive this if
+     any of those change — a stale copy of this sum (from when the title
+     bar was 32px) is what caused that scrollbar in the first place.
+     Reused as-is by .dashboard-hero below. */
+  height: 701px;
 }
 
 .hero-banner__keyvisual {
@@ -960,8 +1182,8 @@
 .dashboard-hero {
   display: flex;
   gap: var(--space-24);
-  /* Same empirically-verified height as .hero-banner above. */
-  height: 719px;
+  /* Same computed height as .hero-banner above — see that comment. */
+  height: 701px;
 }
 
 .dashboard-hero__card {
@@ -1627,31 +1849,49 @@ input.settings-text-field--input::placeholder {
   background: var(--text-red);
 }
 
+/* Matches the Figma "Segmented-control" component (Fixnet • Library,
+   node 762:4270): a 38px pill with a 4px inset padding, transparent
+   items that gain a border on hover and a subtle text-tinted fill when
+   active — not the old solid-accent-fill tab style. Labels stay full
+   text-0 in every state; selection is conveyed by the fill/border, not
+   by dimming inactive labels. */
 .segmented {
   display: flex;
+  align-items: center;
+  gap: 0;
+  height: 38px;
+  padding: 4px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  border-radius: var(--radius);
+  box-sizing: border-box;
 }
 
 .segmented__option {
-  padding: var(--space-8) var(--space-12);
-  font-size: 11.5px;
-  background: var(--bg-2);
-  color: var(--text-1);
-  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 var(--space-16);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-0);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  font-weight: 400;
+  white-space: nowrap;
   cursor: pointer;
-  border-right: 1px solid var(--border);
+  transition: background-color 0.12s, border-color 0.12s;
 }
 
-.segmented__option:last-child {
-  border-right: none;
+.segmented__option:hover:not(.segmented__option--active) {
+  border-color: var(--border);
 }
 
 .segmented__option--active {
-  background: var(--accent);
-  color: var(--btn-accent-text);
-  font-weight: 600;
+  background: rgba(var(--text-0-rgb), 0.08);
 }
 
 /* Invariant (theme-fixed dark) segmented control used on the Settings page */
@@ -2443,32 +2683,90 @@ input.settings-text-field--input::placeholder {
   animation: service-card-reveal 200ms ease-out both;
 }
 
-/* ── Onboarding region picker ───────────────────────────────────────────── */
-
+/* ── Search field (shared) ──────────────────────────────────────────────
+   One component, two call sites: the Services toolbar (.services-search
+   modifier makes it fill the row) and ServiceDetailModal's region search.
+   Not used by onboarding — RegionStep is a flat .region-grid with no
+   search box. Matches the Figma "Search field" component (Fixnet •
+   Library, node 764:5704): idle border is --border, hover/focus both
+   bump to --text-1 (Figma's "icon x shape/secondary"), a clear button
+   appears once there's a query. No margin of its own — spacing to
+   whatever follows is each call site's job (see .region-picker-list's
+   margin-top for the ServiceDetailModal case), so it can't silently
+   fight a layout-only modifier over it the way it used to. */
 .search-input-wrap {
   position: relative;
-  margin-bottom: var(--space-16);
 }
 
 .search-input-wrap__icon {
   position: absolute;
-  left: 12px;
+  left: var(--space-16);
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-2);
+  color: var(--text-1);
   pointer-events: none;
 }
 
 .search-input-wrap__input {
   width: 100%;
-  padding-left: var(--space-32);
+  height: 38px;
   box-sizing: border-box;
+  padding: 0 var(--space-32) 0 38px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: 14px;
+  letter-spacing: -0.28px;
+  color: var(--text-0);
+  outline: none;
+  transition: border-color 0.12s;
+}
+
+.search-input-wrap__input::placeholder {
+  color: var(--text-1);
+}
+
+.search-input-wrap__input:hover {
+  border-color: var(--text-1);
+}
+
+.search-input-wrap__input:focus {
+  border-color: var(--text-1);
+}
+
+.search-input-wrap__input:focus::placeholder {
+  color: var(--text-2);
+}
+
+.search-input-wrap__clear {
+  position: absolute;
+  top: 50%;
+  right: var(--space-12);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-1);
+  cursor: pointer;
+}
+
+.search-input-wrap__clear:hover {
+  background: rgba(var(--text-0-rgb), 0.08);
+  color: var(--text-0);
 }
 
 .region-picker-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
+  margin-top: var(--space-12);
   max-height: 180px;
   overflow-y: auto;
   padding-right: var(--space-4);
@@ -2528,10 +2826,21 @@ input.settings-text-field--input::placeholder {
 
 /* ── ServiceCard shared component ───────────────────────────────────────── */
 
+/* Owns the grid's independent scroll (see .services-page) — a couple of px
+   of right padding keeps the browser's scrollbar off the card border, and
+   matching negative margin keeps the grid's own width/alignment unchanged. */
+.services-grid-scroll {
+  flex: 1;
+  min-height: 0;
+  padding-right: var(--space-8);
+  margin-right: calc(var(--space-8) * -1);
+}
+
 .service-card-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-12);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-16);
+  padding-bottom: var(--space-4);
 }
 
 .service-card {
@@ -2545,22 +2854,25 @@ input.settings-text-field--input::placeholder {
   background: var(--frames-neutral-m);
   border: 1px solid transparent;
   box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24);
-  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  transition: background-color 120ms ease, border-color 120ms ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   box-sizing: border-box;
 }
 
-.service-card:hover:not(.service-card--selected) {
-  background: rgb(var(--frames-bg-rgb));
-  border-color: rgba(var(--on-accent-rgb), 0.16);
-  box-shadow: none;
-}
-
+/* Hover/selected darken the card to the current page background so it
+   reads as visually "pressed in" (Fixnet • Wip, node 1136:63791 dark /
+   774:63568 light) — --frames-page-bg-rgb tracks theme, unlike the
+   invariant --frames-bg-rgb used for fixed-dark badges elsewhere. Because
+   that background now matches the page behind it, the border is what
+   keeps the card's edge visible instead of it blending into the
+   surrounding page — so hover gets the same border treatment as selected,
+   not just the fill. */
+.service-card:hover,
 .service-card--selected {
-  background: rgb(var(--frames-bg-rgb));
-  border-color: rgba(var(--on-accent-rgb), 0.16);
+  background: rgb(var(--frames-page-bg-rgb));
+  border-color: var(--frames-item-border);
 }
 
 .service-card:focus-visible {
@@ -2592,7 +2904,7 @@ input.settings-text-field--input::placeholder {
   line-height: 24px;
   letter-spacing: -0.198px;
   font-weight: 400;
-  color: var(--on-accent);
+  color: var(--frames-item-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2616,7 +2928,7 @@ input.settings-text-field--input::placeholder {
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
-  color: var(--on-accent);
+  color: var(--frames-item-icon);
   cursor: pointer;
   padding: 0;
   opacity: 0;
@@ -2625,7 +2937,7 @@ input.settings-text-field--input::placeholder {
 
 .service-card:hover .service-card__settings-btn {
   opacity: 1;
-  background: rgba(var(--on-accent-rgb), 0.08);
+  background: rgba(var(--frames-item-text-rgb), 0.08);
 }
 
 .service-card--selected .service-card__settings-btn {
@@ -2633,7 +2945,7 @@ input.settings-text-field--input::placeholder {
 }
 
 .service-card__settings-btn:hover {
-  background: rgba(var(--on-accent-rgb), 0.08);
+  background: rgba(var(--frames-item-text-rgb), 0.08);
 }
 
 .service-card__chips {
@@ -2653,7 +2965,7 @@ input.settings-text-field--input::placeholder {
 }
 
 .service-chip__icon {
-  color: rgba(var(--on-accent-rgb), 0.64);
+  color: var(--frames-item-icon-secondary);
   flex-shrink: 0;
 }
 
@@ -2661,7 +2973,7 @@ input.settings-text-field--input::placeholder {
   font-size: 11px;
   line-height: 16px;
   font-weight: 400;
-  color: var(--on-accent);
+  color: var(--frames-item-text);
   letter-spacing: -0.121px;
   white-space: nowrap;
   overflow: hidden;

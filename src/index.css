@@ -63,7 +63,45 @@
   --shadow-color-rgb: 0, 0, 0;
   --overlay-rgb: 2, 5, 10;
   --frames-bg-rgb: 20, 17, 22;
-  --frames-neutral-m: #1f1827;
+  --frames-neutral-m: #251a31;
+  /* Theme-aware counterpart to --frames-bg-rgb above: that one is pinned to
+     the dark app-frame color always (badges/cutouts that punch through to a
+     fixed dark layer regardless of theme, e.g. .service-card__check,
+     .services-selected-card__remove-hole — confirmed against the light
+     Figma frame, where that badge stays #141117). This one tracks the
+     current theme's own page background, for surfaces that are meant to
+     read as "recessed into the page" either way (e.g. service-card
+     hover/selected) — see the light override below. */
+  --frames-page-bg-rgb: 20, 17, 22;
+  /* Selected/hover card border — confirmed against the light Services
+     frame (Fixnet • Wip, node 774:63568): not just --on-accent-rgb at a
+     fixed alpha, the base color and alpha both flip with theme (white
+     16% dark, near-black 12% light), so it needs its own token rather
+     than reusing the invariant --on-accent-rgb. */
+  --frames-item-border: rgba(255, 255, 255, 0.16);
+
+  /* Service-card text/icons were also wired to the invariant --on-accent
+     (always white) instead of tracking theme — same class of bug as
+     --frames-neutral-m above. --frames-item-text/-icon confirmed against
+     the light frame ("Text/Primary" #130026, "Button/Icon x Shape/Secondary"
+     #141117); --frames-item-icon-secondary (chip icon) confirmed too
+     ("Icon x Shape/Secondary" #14111770). --frames-item-text-rgb has no
+     directly-confirmed usage — it only drives the settings-button hover
+     highlight, hand-derived the same way as the alpha on the dark value. */
+  --frames-item-text: #ffffff;
+  --frames-item-text-rgb: 255, 255, 255;
+  --frames-item-icon: #ffffff;
+  --frames-item-icon-secondary: rgba(255, 255, 255, 0.64);
+
+  /* Selected-service remove badge (mini card, Fixnet • Wip node 774:63568)
+     fully inverts with theme — confirmed against the rendered light frame,
+     not just the raw asset export (which misleadingly still listed the
+     dark-theme fill values baked in). Dark: white disc, dark cutout X.
+     Light: dark disc, light cutout X — so both the disc and what the
+     cutout reveals flip together. */
+  --frames-item-badge-bg: #ffffff;
+  /* Not actually invariant — light theme uses a darker green for contrast
+     on white (see the override below), matching --notif-icon-positive-fg. */
   --text-green: #00ff7b;
   --text-red: #fe3838;
   --text-red-rgb: 254, 56, 56;
@@ -161,6 +199,21 @@
   --bg-2: #f8f5fa;
   --bg-3: #ede6f2;
   --border: #ddd0e6;
+
+  /* Services cards — exact values from Figma (Fixnet • Wip, node 774:63568,
+     light frame), resolved via get_variable_defs against that frame
+     directly. The unselected/hover/selected card backgrounds actually
+     switch with app theme — same "cards stay dark" assumption that was
+     already caught and fixed for the home dashboard hero cards had been
+     left uncorrected here. */
+  --frames-neutral-m: #eae2f0;
+  --frames-page-bg-rgb: 246, 245, 248;
+  --frames-item-border: rgba(20, 17, 23, 0.12);
+  --frames-item-text: #130026;
+  --frames-item-text-rgb: 20, 17, 23;
+  --frames-item-icon: #141117;
+  --frames-item-icon-secondary: rgba(20, 17, 23, 0.44);
+  --frames-item-badge-bg: #141117;
   --text-0: #1c1424;
   --text-0-rgb: 28, 20, 36;
   --text-1: rgba(28, 20, 36, 0.62);
@@ -175,6 +228,7 @@
   --err-dim: #fbe2e2;
   --info: #5768d6;
   --info-rgb: 87, 104, 214;
+  --text-green: #00a14e;
 
   /* Auth screen — exact values from the Figma authorization flow (light
      theme frames). */
@@ -242,20 +296,27 @@ html, body {
   overflow: hidden;
 }
 
+/* position:fixed + inset:0 instead of height:100vh/width:100vw — vh/vw are
+   computed against the initial containing block and can round to a
+   fraction of a CSS pixel off the actual viewport in some browsers/DPI
+   combos, which is enough to leave a 1px scrollbar even with
+   overflow:hidden above. Fixed positioning is pinned to the real
+   viewport with no unit conversion, so there's nothing to round. */
 body {
+  position: fixed;
+  inset: 0;
   font-family: var(--font);
   background: var(--window-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  width: 100vw;
   color: var(--text-0);
 }
 
 #root {
   width: 1200px;
   height: 800px;
+  overflow: hidden;
 }
 
 button {

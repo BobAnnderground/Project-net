@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Plus, Trash2, Play, Search, X } from 'lucide-react';
+import { Plus, Trash2, Play, X } from 'lucide-react';
 import { Modal } from '../common/Modal';
+import { SearchInput } from '../common/SearchInput';
 import { useStore } from '../../store/useStore';
 import { REGIONS } from '../../data/regions';
 import { TRANSPORT_TYPE_LABELS, CONNECTION_MODE_LABELS } from '../../lib/labels';
@@ -76,15 +77,7 @@ export function ServiceDetailModal({ serviceId, onClose }: { serviceId: string; 
 
       <div className="form-group">
         <label className="form-label">Region</label>
-        <div className="search-input-wrap">
-          <Search size={14} className="search-input-wrap__icon" />
-          <input
-            className="form-input search-input-wrap__input"
-            placeholder="Search regions..."
-            value={regionSearch}
-            onChange={(e) => setRegionSearch(e.target.value)}
-          />
-        </div>
+        <SearchInput value={regionSearch} onChange={setRegionSearch} placeholder="Search regions..." />
         <div className="region-picker-list">
           {REGIONS.filter((r) =>
             r.displayName.toLowerCase().includes(regionSearch.trim().toLowerCase())

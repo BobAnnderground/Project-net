@@ -25,11 +25,21 @@ export function ServiceCard({ icon, name, chips, selected, onClick, onSettingsCl
     onSettingsClick();
   }
 
+  // Chromium's :focus-visible heuristic doesn't reliably suppress the ring
+  // on click for ARIA-role divs the way it does for native <button> — so a
+  // plain mouse click here can leave a visible focus outline behind it.
+  // Blocking the default mousedown focus keeps the card keyboard-focusable
+  // (Tab still works) while a mouse click never triggers the ring.
+  function handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    e.preventDefault();
+  }
+
   return (
     <div
       role="button"
       tabIndex={0}
       onClick={onClick}
+      onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       className={clsx('service-card', { 'service-card--selected': selected })}
     >

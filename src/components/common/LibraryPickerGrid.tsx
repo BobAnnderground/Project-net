@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react';
-import { Search, MapPin, Waypoints } from 'lucide-react';
+import clsx from 'clsx';
+import { MapPin, Waypoints } from 'lucide-react';
 import { ServiceCard } from './ServiceCard';
+import { SearchInput } from './SearchInput';
 import { LIBRARY_TABS, type LibraryTab, type LibraryDisplayItem } from '../../lib/libraryItems';
+import { useScrollFade } from '../../lib/useScrollFade';
 
 interface LibraryPickerGridProps {
   tab: LibraryTab;
@@ -34,6 +37,8 @@ export function LibraryPickerGrid({
   toolbarActions,
   toolbarSubtitle,
 }: LibraryPickerGridProps) {
+  const { ref: scrollRef, fadeTop, fadeBottom } = useScrollFade<HTMLDivElement>([visibleItems.length]);
+
   return (
     <>
       <div className="services-toolbar">
@@ -49,15 +54,12 @@ export function LibraryPickerGrid({
           ))}
         </div>
 
-        <div className="search-input-wrap services-search">
-          <Search size={14} className="search-input-wrap__icon" />
-          <input
-            className="form-input search-input-wrap__input"
-            placeholder={searchPlaceholder}
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-        </div>
+        <SearchInput
+          className="services-search"
+          value={searchQuery}
+          onChange={onSearchChange}
+          placeholder={searchPlaceholder}
+        />
       </div>
 
       {(toolbarActions || toolbarSubtitle) && (
@@ -67,29 +69,37 @@ export function LibraryPickerGrid({
         </div>
       )}
 
-      {visibleItems.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state__title">{emptyTitle}</div>
-          <p>{emptyText}</p>
-        </div>
-      ) : (
-        <div className="service-card-grid">
-          {visibleItems.map((item) => (
-            <ServiceCard
-              key={item.id}
-              icon={item.icon}
-              name={item.name}
-              chips={[
-                { icon: MapPin, label: item.regionLabel },
-                { icon: Waypoints, label: item.modeLabel },
-              ]}
-              selected={selectedIds.has(item.id)}
-              onClick={() => onToggle(item.id)}
-              onSettingsClick={() => onSettingsClick(item)}
-            />
-          ))}
-        </div>
-      )}
+      <div
+        ref={scrollRef}
+        className={clsx('services-grid-scroll', 'scroll-fade', {
+          'scroll-fade--top': fadeTop,
+          'scroll-fade--bottom': fadeBottom,
+        })}
+      >
+        {visibleItems.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state__title">{emptyTitle}</div>
+            <p>{emptyText}</p>
+          </div>
+        ) : (
+          <div className="service-card-grid">
+            {visibleItems.map((item) => (
+              <ServiceCard
+                key={item.id}
+                icon={item.icon}
+                name={item.name}
+                chips={[
+                  { icon: MapPin, label: item.regionLabel },
+                  { icon: Waypoints, label: item.modeLabel },
+                ]}
+                selected={selectedIds.has(item.id)}
+                onClick={() => onToggle(item.id)}
+                onSettingsClick={() => onSettingsClick(item)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 }

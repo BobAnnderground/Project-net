@@ -67,7 +67,7 @@ function App() {
           onClose={() => setMinimized(true)}
         />
         <Sidebar />
-        <div className="content">
+        <div className={activeTab === 'services' ? 'content content--services' : 'content'}>
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'services' && <Services />}
           {activeTab === 'settings' && <Settings />}
