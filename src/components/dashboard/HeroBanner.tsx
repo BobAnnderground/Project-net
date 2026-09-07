@@ -25,11 +25,20 @@ const MAX_ROW_ICONS = 7;
 
 export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
   const resolvedTheme = useResolvedTheme();
+  const isLightTheme = resolvedTheme === 'light';
 
   if (welcomeIntro) {
     return (
       <div className="hero-banner">
-        <img src="/images/Key-visual-Welcome.webp" alt="" className="hero-banner__keyvisual" />
+        <img
+          src={
+            isLightTheme
+              ? '/images/Onboarding/onboarding-visual-light.webp'
+              : '/images/Onboarding/onboarding-visual.webp'
+          }
+          alt=""
+          className="hero-banner__keyvisual"
+        />
         <div className="hero-banner__content">
           <h1 className="hero-banner__title">Welcome to Fixnet</h1>
           <p className="hero-banner__subtitle">
@@ -53,13 +62,12 @@ export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
   const { isEmpty, services, onSelectServices, onStart, onEdit } = serviceRouting;
   const visibleIcons = services.slice(0, MAX_ROW_ICONS);
   const overflowCount = services.length - visibleIcons.length;
-  const isLight = resolvedTheme === 'light';
 
   return (
     <div className="dashboard-hero">
       <div className="dashboard-hero__card dashboard-hero__card--routing">
         <img
-          src={isLight ? '/images/Home screen/Service Routing-light.webp' : '/images/Home screen/Service Routing.webp'}
+          src={isLightTheme ? '/images/Home screen/Service Routing-light.webp' : '/images/Home screen/Service Routing.webp'}
           alt=""
           className="dashboard-hero__art dashboard-hero__art--routing"
         />
@@ -111,7 +119,7 @@ export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
 
       <div className="dashboard-hero__card dashboard-hero__card--fullmode">
         <img
-          src={isLight ? '/images/Home screen/Full mode-light.webp' : '/images/Home screen/Full mode.webp'}
+          src={isLightTheme ? '/images/Home screen/Full mode-light.webp' : '/images/Home screen/Full mode.webp'}
           alt=""
           className="dashboard-hero__art dashboard-hero__art--fullmode"
         />

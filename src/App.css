@@ -76,7 +76,7 @@
   padding: 0;
   color: var(--text-1);
   cursor: pointer;
-  transition: color 0.12s;
+  transition: color 300ms ease;
 }
 
 .window-titlebar__btn:hover {
@@ -162,7 +162,7 @@
   line-height: 16px;
   letter-spacing: -0.121px;
   color: var(--text-1);
-  transition: color 0.12s;
+  transition: color 300ms ease;
 }
 
 .nav-item--active {
@@ -931,7 +931,7 @@
 
 .services-selected-card__remove-hole {
   fill: rgb(var(--frames-page-bg-rgb));
-  transition: fill 120ms ease;
+  transition: fill 300ms ease;
 }
 
 .services-selected-card__remove:hover .services-selected-card__remove-hole {
@@ -961,7 +961,7 @@
   background: var(--btn-secondary-bg);
   backdrop-filter: blur(8px);
   color: var(--btn-secondary-text);
-  transition: background 120ms ease, color 120ms ease;
+  transition: background 300ms ease, color 300ms ease;
 }
 
 .btn:hover:not(:disabled),
@@ -989,17 +989,55 @@
   background: transparent;
 }
 
+/* The hover color is a separate solid-fill layer (::before) cross-faded in
+   via opacity, not a change to this element's own gradient — browsers
+   don't actually interpolate between two linear-gradient() color stops on
+   a background transition (confirmed by sampling getComputedStyle through
+   a real hover: the gradient just snaps instantly the moment :hover
+   engages, transition-duration or not), so animating background directly
+   was never going to be smooth no matter the easing/duration used.
+   isolation:isolate scopes ::before's z-index so it layers between this
+   element's own gradient background and its text/icon content instead of
+   escaping into the surrounding stacking context. */
 .btn--primary {
+  position: relative;
+  isolation: isolate;
   background: linear-gradient(135deg, var(--btn-gradient-1), var(--btn-gradient-2));
   backdrop-filter: none;
   color: var(--on-accent);
   box-shadow: 0 4px 20px -2px var(--btn-shadow-color);
+  /* box-shadow color itself DOES interpolate smoothly (unlike the gradient
+     above) — extends the inherited .btn transition rather than replacing
+     it, so color/background stay covered too. */
+  transition: background 300ms ease, color 300ms ease, box-shadow 300ms ease;
 }
 
+.btn--primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--btn-primary-hover-bg);
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+/* Pins the gradient as-is on hover/active — otherwise the base .btn:hover
+   rule (background: var(--btn-secondary-hover-bg), a plain color) would
+   win on specificity+source-order and reset this element's own
+   background-image to "none" out from under the ::before overlay,
+   flashing through to whatever is behind the button for the ~100ms
+   ::before hadn't caught up to full opacity yet. */
 .btn--primary:hover:not(:disabled),
 .btn--primary:active:not(:disabled) {
-  background: var(--btn-primary-hover-bg);
-  box-shadow: none;
+  background: linear-gradient(135deg, var(--btn-gradient-1), var(--btn-gradient-2));
+  box-shadow: 0 4px 20px -2px transparent;
+}
+
+.btn--primary:hover:not(:disabled)::before,
+.btn--primary:active:not(:disabled)::before {
+  opacity: 1;
 }
 
 .btn--primary:disabled {
@@ -1097,11 +1135,17 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius);
+  /* --hero-purple-* (not --panel-gradient-*): this panel switches with app
+     theme just like the other two dashboard hero cards below — confirmed
+     via get_variable_defs against the light "Welcome screen" frame
+     directly (Fixnet • Wip, node 1170:268825) rather than assumed, since a
+     "stays dark regardless of theme" assumption already turned out wrong
+     once for these hero panels. */
   background: linear-gradient(
     144.52deg,
-    var(--panel-gradient-1) 0%,
-    var(--panel-gradient-2) 54.9%,
-    var(--panel-gradient-3) 100%
+    var(--hero-purple-1) 0%,
+    var(--hero-purple-2) 54.9%,
+    var(--hero-purple-3) 100%
   );
   /* No margin-bottom: .content (this element's parent) is the only scroll
      container in the shell, and a trailing margin on a scroll container's
@@ -1118,19 +1162,21 @@
   height: 701px;
 }
 
+/* Fills the whole banner edge-to-edge (Fixnet • Wip, node 1170:268811) —
+   the source images are pre-cropped to the same ~1.639 aspect ratio as
+   this 1152×703 box, so cover just supplies a safety margin against any
+   future export that isn't pixel-identical. */
 .hero-banner__keyvisual {
   position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  inset: 0;
+  width: 100%;
   height: 100%;
-  width: auto;
-  max-width: none;
+  object-fit: cover;
 }
 
 .hero-banner__content {
   position: relative;
-  padding: var(--space-40) var(--space-48);
+  padding: var(--space-64) var(--space-48) var(--space-40);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1148,19 +1194,23 @@
   /* Figma letter-spacing of -1.4% is relative to font-size */
   letter-spacing: -0.644px;
   text-transform: uppercase;
-  /* Invariant white, not var(--text-0): the banner's gradient + key-visual
-     stay dark regardless of app theme, so its text must too. */
-  color: var(--on-accent);
+  color: var(--hero-text-primary);
   margin: 0;
 }
 
+/* Same --hero-text-primary as the title, at full opacity — not a dimmed
+   secondary tone, confirmed via get_variable_defs against this exact text
+   node (both nodes resolve to the same "Text/Primary" variable, no
+   secondary/opacity variant referenced). Fixed 306px width per Figma
+   (node 1170:268817), centered by the parent's align-items:center. */
 .hero-banner__subtitle {
   font-family: var(--font);
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.28px;
-  color: rgba(var(--on-accent-rgb), 0.56);
-  margin: var(--space-8) 0 0;
+  color: var(--hero-text-primary);
+  width: 306px;
+  margin: var(--space-12) 0 0;
 }
 
 .hero-banner__welcome-actions {
@@ -1168,13 +1218,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-16);
-  margin-top: var(--space-32);
-  width: 220px;
-}
-
-.hero-banner__welcome-actions .btn {
-  width: 100%;
-  justify-content: center;
+  margin-top: var(--space-48);
 }
 
 /* ── Home dashboard: two-card layout (Fixnet · Wip, node 1134:55072) ────── */
@@ -1653,7 +1697,7 @@ input.settings-text-field--input::placeholder {
   border-radius: var(--radius);
   color: var(--on-accent);
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background 300ms ease;
 }
 
 .settings-icon-btn:hover,
@@ -1679,7 +1723,7 @@ input.settings-text-field--input::placeholder {
   letter-spacing: -0.28px;
   color: var(--on-accent);
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background 300ms ease;
 }
 
 .settings-btn:hover,
@@ -1883,7 +1927,7 @@ input.settings-text-field--input::placeholder {
   font-weight: 400;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.12s, border-color 0.12s;
+  transition: background-color 300ms ease, border-color 300ms ease;
 }
 
 .segmented__option:hover:not(.segmented__option--active) {
@@ -2248,7 +2292,7 @@ input.settings-text-field--input::placeholder {
   padding: 0;
   color: var(--auth-text-secondary);
   cursor: pointer;
-  transition: color 0.12s;
+  transition: color 300ms ease;
 }
 
 .auth-header__btn:hover {
@@ -2411,7 +2455,7 @@ input.settings-text-field--input::placeholder {
   letter-spacing: -0.28px;
   color: var(--auth-text-secondary);
   cursor: pointer;
-  transition: color 0.12s;
+  transition: color 300ms ease;
   white-space: nowrap;
 }
 
@@ -2447,7 +2491,7 @@ input.settings-text-field--input::placeholder {
   letter-spacing: -0.28px;
   color: var(--auth-text-primary);
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background 300ms ease;
 }
 
 .auth-paste-btn:hover {
@@ -2504,7 +2548,7 @@ input.settings-text-field--input::placeholder {
   background: var(--auth-paste-bg);
   color: var(--auth-text-secondary);
   cursor: pointer;
-  transition: color 0.12s, background 0.12s;
+  transition: color 300ms ease, background 300ms ease;
 }
 
 .auth-theme-toggle:hover {
@@ -2793,7 +2837,7 @@ input.settings-text-field--input::placeholder {
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition: background 300ms ease, border-color 300ms ease;
 }
 
 .region-tile:hover:not(.region-tile--selected) {
@@ -2854,7 +2898,7 @@ input.settings-text-field--input::placeholder {
   background: var(--frames-neutral-m);
   border: 1px solid transparent;
   box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24);
-  transition: background-color 120ms ease, border-color 120ms ease;
+  transition: background-color 300ms ease, border-color 300ms ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -2932,7 +2976,7 @@ input.settings-text-field--input::placeholder {
   cursor: pointer;
   padding: 0;
   opacity: 0;
-  transition: opacity 150ms ease, background 150ms ease;
+  transition: opacity 300ms ease, background 300ms ease;
 }
 
 .service-card:hover .service-card__settings-btn {
@@ -3362,7 +3406,7 @@ input.settings-text-field--input::placeholder {
   background: var(--notif-text-secondary);
   opacity: 0.12;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity 300ms ease;
 }
 
 .notif-debug-btn:hover {
