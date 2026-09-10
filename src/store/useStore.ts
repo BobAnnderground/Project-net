@@ -547,7 +547,9 @@ export const useStore = create<StoreState>((set, get) => ({
 
   retreatOnboardingTour: () => {
     const stage = get().onboardingStage;
-    if (stage === 'tour-services') {
+    if (stage === 'tour-home') {
+      set({ onboardingStage: 'region' });
+    } else if (stage === 'tour-services') {
       set({ onboardingStage: 'tour-home', activeTab: 'dashboard' });
     } else if (stage === 'tour-selected') {
       set({ onboardingStage: 'tour-services' });

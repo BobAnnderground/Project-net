@@ -169,6 +169,14 @@
   color: var(--text-0);
 }
 
+/* Step 2 of the onboarding tour dims every nav item except Home (Fixnet •
+   Wip, node 1170:268433) — same 400ms/300ms-delay timing as the tooltip
+   and .dashboard-hero__card--dim. */
+.nav-item--dim {
+  opacity: 0.2;
+  transition: opacity 400ms ease-in 300ms;
+}
+
 .nav-item__icon {
   position: relative;
   width: 24px;
@@ -336,6 +344,16 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-12);
+}
+
+/* Same tour dim as .nav-item--dim (steps 2-3, Fixnet • Wip nodes
+   1170:268433 and 1170:268348) — logo and notification bell included too,
+   not just the nav items and account block. */
+.sidebar__user--dim,
+.sidebar__logo--dim,
+.sidebar__swatch--dim {
+  opacity: 0.2;
+  transition: opacity 400ms ease-in 300ms;
 }
 
 .sidebar__avatar {
@@ -709,6 +727,16 @@
   margin-bottom: var(--space-12);
 }
 
+/* Step 3 of the onboarding tour (Fixnet • Wip, node 1170:268348) dims the
+   tabs/search row, the subtitle, and "Add service" — everything but
+   "Auto-select popular" and the tooltip pointing at it. Animation not
+   transition: Services first mounts at the exact moment tour-services
+   starts (advanceOnboardingTour flips activeTab to 'services' in the same
+   update), so there's no earlier undimmed frame to transition from. */
+.services-toolbar--dim {
+  animation: tour-dim-in 400ms ease-in 300ms both;
+}
+
 .library-tabs {
   width: fit-content;
 }
@@ -739,6 +767,10 @@
   font-size: 13px;
   color: var(--text-1);
   white-space: nowrap;
+}
+
+.services-toolbar-row2__subtitle--dim {
+  animation: tour-dim-in 400ms ease-in 300ms both;
 }
 
 /* Both columns stretch to the same height (rather than sizing to their own
@@ -989,6 +1021,15 @@
   background: transparent;
 }
 
+/* Dims a single button during an onboarding tour step (e.g. "Add service"
+   while step 3 points at "Auto-select popular", Fixnet • Wip node
+   1170:268348) — distinct from :disabled, which recolors rather than
+   fades, and applied on top of it here since the button is also
+   non-interactive for the same reason. */
+.btn--dim {
+  animation: tour-dim-in 400ms ease-in 300ms both;
+}
+
 /* The hover color is a separate solid-fill layer (::before) cross-faded in
    via opacity, not a change to this element's own gradient — browsers
    don't actually interpolate between two linear-gradient() color stops on
@@ -1068,24 +1109,6 @@
    dark-theme on-accent scale instead of following --btn-secondary-*, which
    would otherwise flip to light-theme values while the card around it
    doesn't. */
-.btn--invariant {
-  background: rgba(var(--on-accent-rgb), 0.08);
-  color: var(--on-accent);
-}
-
-.btn--invariant:hover:not(:disabled),
-.btn--invariant:active:not(:disabled) {
-  background: rgba(var(--on-accent-rgb), 0.16);
-}
-
-.btn--invariant:disabled {
-  color: rgba(var(--on-accent-rgb), 0.24);
-}
-
-.btn--invariant .btn__divider {
-  background: rgba(var(--on-accent-rgb), 0.24);
-}
-
 .btn--sm {
   height: 26px;
   padding: 0 var(--space-8);
@@ -1250,6 +1273,32 @@
   min-width: 0;
   justify-content: flex-end;
   background: linear-gradient(117deg, var(--hero-purple-1) 0%, var(--hero-purple-2) 54.9%, var(--hero-purple-3) 100%);
+}
+
+/* Step 2 of the onboarding tour (Fixnet • Wip, node 1170:268433) dims
+   everything except the Service Routing card and the tooltip pointing at
+   it — same 400ms/300ms-delay timing as the tooltip's own genie-in so
+   both read as one coordinated move, not two unrelated animations.
+   An @keyframes animation, not a transition: this card and the coachmark
+   mount together (Dashboard swaps its whole return branch when the stage
+   flips to tour-home), so there's no earlier "opacity: 1" render for a
+   transition to animate away from — it would just paint at 0.2 from the
+   first frame. Keyframes carry their own from-state regardless. Shared by
+   every other tour-dimmed element that has the same fresh-mount problem
+   (see .services-toolbar--dim, .services-toolbar-row2__subtitle--dim,
+   .btn--dim) — .nav-item--dim/.sidebar__user--dim don't need it since the
+   sidebar never unmounts across tour stages, so a plain transition works. */
+.dashboard-hero__card--dim {
+  animation: tour-dim-in 400ms ease-in 300ms both;
+}
+
+@keyframes tour-dim-in {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.2;
+  }
 }
 
 /* The key-visual webp assets already bake in their own glow/blur, so they're
@@ -2597,22 +2646,68 @@ input.settings-text-field--input::placeholder {
   pointer-events: none;
 }
 
-/* ── Welcome Onboarding ─────────────────────────────────────────────────── */
+/* ── Welcome Onboarding: region step (Fixnet • Wip, node 1170:268669) ───── */
+
+/* Same gradient/height/radius treatment as .hero-banner (the Welcome
+   screen) — confirmed this step sits in an identical "active-connection"
+   panel in Figma, not bare on the page background. Height reuses
+   .hero-banner's own derivation (see that rule for the math); padding-top
+   36px + the header/grid/footer flow below reproduce Figma's fixed
+   offsets without hardcoding every child's absolute position. */
+.onboard-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: linear-gradient(
+    144.52deg,
+    var(--hero-purple-1) 0%,
+    var(--hero-purple-2) 54.9%,
+    var(--hero-purple-3) 100%
+  );
+  height: 701px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 0 64px;
+  gap: 46px;
+}
+
+.onboard-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-12);
+  width: 348px;
+  text-align: center;
+}
 
 .onboard-step {
   font-family: var(--font);
   font-size: 12px;
+  line-height: 16px;
   letter-spacing: -0.132px;
-  color: var(--text-2);
-  margin-bottom: var(--space-8);
+  color: var(--hero-text-secondary);
+  margin: 0;
 }
 
 .onboard-heading {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--text-0);
-  margin: 0 0 var(--space-16);
+  font-family: var(--font);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 36px;
+  letter-spacing: -0.308px;
+  color: var(--hero-text-primary);
+  margin: 0;
+}
+
+.onboard-subtitle {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.28px;
+  color: var(--hero-text-primary);
+  width: 348px;
+  margin: 0;
 }
 
 .onboard-empty {
@@ -2625,13 +2720,25 @@ input.settings-text-field--input::placeholder {
   padding: var(--space-24) 0;
 }
 
+/* margin-top: auto pins this to the panel's bottom padding edge (64px)
+   regardless of how tall the region grid above ends up. */
 .onboard-footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-8);
+  margin-top: auto;
 }
 
 /* ── Onboarding coachmark tour (steps 2-4, layered over Home/Services) ──── */
 
+/* Squared top-left corner (not a separate pointer shape — confirmed via
+   Figma metadata, the tooltip has no extra arrow/wedge child) is what
+   reads as "pointing" at the thing it's anchored to. Solid --notif-bg
+   (not a translucent/blurred panel) and --frames-item-border, both
+   confirmed against the light frame (Fixnet • Wip, node 1170:268462).
+   transform-origin sits at that same squared corner so the genie animation
+   below reads as unfurling from the button it's pointing at, not growing
+   from its own center. */
 .coachmark {
   position: absolute;
   width: 312px;
@@ -2639,12 +2746,30 @@ input.settings-text-field--input::placeholder {
   flex-direction: column;
   gap: var(--space-16);
   padding: var(--space-16);
-  border-radius: var(--radius);
-  border: 1px solid rgba(var(--on-accent-rgb), 0.16);
-  background: rgba(var(--frames-bg-rgb), 0.92);
-  backdrop-filter: blur(8px);
-  box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24), 0 12px 32px rgba(var(--shadow-color-rgb), 0.4);
+  border: 1px solid var(--frames-item-border);
+  background: var(--notif-bg);
+  box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24);
   z-index: 20;
+  animation: coachmark-genie-in 400ms ease-in 300ms both;
+}
+
+/* Not a Figma-specified motion (the file has no prototype transition on
+   this node) — a "genie" pop built by hand: it launches squashed flat
+   against the anchor corner, like it's being squeezed out, and unfurls to
+   full size. Kept to a single 0%→100% pair deliberately — an earlier
+   version added overshoot keyframes in between, but overshoot needs its
+   own back-out curve; layering that on top of ease-in re-applied the
+   timing function at each keyframe boundary and produced a visible snap
+   right at the end instead of one continuous motion. */
+@keyframes coachmark-genie-in {
+  from {
+    opacity: 0;
+    transform: scale(0.15, 0.05);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1, 1);
+  }
 }
 
 .coachmark__text {
@@ -2652,7 +2777,7 @@ input.settings-text-field--input::placeholder {
   font-size: 14px;
   line-height: 20px;
   letter-spacing: -0.28px;
-  color: var(--on-accent);
+  color: var(--frames-item-text);
   margin: 0;
 }
 
@@ -2669,11 +2794,21 @@ input.settings-text-field--input::placeholder {
   gap: var(--space-16);
 }
 
+/* 8px between the prev/next buttons themselves, distinct from the 16px
+   between the step counter and this group (Fixnet • Wip, node 1170:268461
+   "Frame 1581" vs "Frame 1587") — .coachmark__pager's own gap was
+   wrongly applying that same 16px between the two buttons too. */
+.coachmark__nav-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
 .coachmark__step {
   font-family: var(--font);
   font-size: 12px;
   letter-spacing: -0.132px;
-  color: rgba(var(--on-accent-rgb), 0.56);
+  color: var(--hero-text-secondary);
   white-space: nowrap;
 }
 
@@ -2685,29 +2820,53 @@ input.settings-text-field--input::placeholder {
   height: 38px;
   flex-shrink: 0;
   border: none;
-  border-radius: var(--radius-sm);
-  background: rgba(var(--on-accent-rgb), 0.08);
-  color: var(--on-accent);
+  border-radius: var(--radius);
+  background: var(--btn-secondary-bg);
+  color: var(--frames-item-icon);
   cursor: pointer;
 }
 
 .coachmark__nav-btn:hover {
-  background: rgba(var(--on-accent-rgb), 0.16);
+  background: var(--btn-secondary-hover-bg);
 }
 
+/* Anchored to the actual rendered "Select services" button (measured live,
+   not copied from Figma's raw canvas coordinates — our sidebar/margins
+   aren't identical to the mockup's) so the tooltip's squared corner sits
+   just under its right half, same relationship as the Figma frame. Points
+   up at its target, so the squared corner (the "pointer") is top-left —
+   the animation launches from that same corner. */
 .coachmark--home {
-  bottom: var(--space-24);
-  right: 14px;
+  top: 242px;
+  left: 336px;
+  border-radius: 0 var(--radius) var(--radius) var(--radius);
+  transform-origin: top left;
 }
 
+/* Points DOWN at "Auto-select popular" (Fixnet • Wip, node 1170:268348),
+   so the squared pointer corner is bottom-left instead. Position (top/left)
+   is NOT set here — Services.tsx measures the live "Auto-select popular"
+   button and the tooltip's own rendered size via refs, then sets
+   position: fixed + top/left inline: bottom edge level with the button's
+   bottom, 12px to its right. Fixed rather than absolute for the same
+   reason as before (.services-page's ancestor .content--services has
+   overflow: hidden for the grid/panel's independent scroll regions, which
+   would clip an absolutely-positioned negative top offset) — but driven
+   by real measured geometry now instead of a hardcoded coordinate, so it
+   can't drift out of sync with the actual button position again. */
 .coachmark--services {
-  top: 110px;
-  right: 0;
+  border-radius: var(--radius) var(--radius) var(--radius) 0;
+  transform-origin: bottom left;
 }
 
+/* Position/corner not yet checked against Figma (step 4 wasn't in scope
+   for this pass) — placeholder matching .coachmark--home's shape so it
+   isn't unstyled in the meantime. */
 .coachmark--selected {
   top: 110px;
   right: 0;
+  border-radius: 0 var(--radius) var(--radius) var(--radius);
+  transform-origin: top left;
 }
 
 /* ── Onboarding reveal animation ────────────────────────────────────────── */
@@ -2816,11 +2975,15 @@ input.settings-text-field--input::placeholder {
   padding-right: var(--space-4);
 }
 
+/* Fixed 802px (3 × 262px tiles + 2 × 8px gaps, node 1170:268680) rather
+   than fluid — that width is what makes each 1fr column resolve to
+   exactly 262px, matching Figma without hardcoding the tile width
+   separately and risking the two drifting apart. */
 .region-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-12);
-  margin-bottom: var(--space-24);
+  gap: var(--space-8);
+  width: 802px;
 }
 
 .region-grid--scroll {
@@ -2866,6 +3029,58 @@ input.settings-text-field--input::placeholder {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* ── Onboarding region tile ──────────────────────────────────────────────
+   Deliberately its own class, not a reskin of .region-tile above: that one
+   is shared with ServiceDetailModal's region picker (a dense two-line
+   list — name + "country · load %"), which this Figma spec (large
+   centered single-line tiles, node 1170:268680) doesn't apply to. */
+.onboard-region-tile {
+  position: relative;
+  width: 262px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16);
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: rgb(var(--frames-page-bg-rgb));
+  box-shadow: inset 0 0 1px rgba(var(--on-accent-rgb), 0.24);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+
+.onboard-region-tile:hover:not(.onboard-region-tile--selected) {
+  background: var(--btn-secondary-bg);
+  box-shadow: none;
+}
+
+.onboard-region-tile--selected {
+  background: var(--frames-neutral-m);
+  border-color: var(--frames-item-border);
+  box-shadow: none;
+}
+
+.onboard-region-tile__name {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 400;
+  letter-spacing: -0.198px;
+  color: var(--hero-text-primary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.onboard-region-tile__radio {
+  position: absolute;
+  top: 7px;
+  left: 7px;
 }
 
 /* ── ServiceCard shared component ───────────────────────────────────────── */

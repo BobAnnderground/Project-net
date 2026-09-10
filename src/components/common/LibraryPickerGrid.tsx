@@ -20,6 +20,10 @@ interface LibraryPickerGridProps {
   searchPlaceholder: string;
   toolbarActions?: ReactNode;
   toolbarSubtitle?: string;
+  // Step 3 of the onboarding tour dims the tabs/search row and subtitle
+  // so "Auto-select popular" (passed in via toolbarActions, dimmed
+  // per-button by the caller) stands out (Fixnet • Wip, node 1170:268348).
+  dimToolbar?: boolean;
 }
 
 export function LibraryPickerGrid({
@@ -36,12 +40,13 @@ export function LibraryPickerGrid({
   searchPlaceholder,
   toolbarActions,
   toolbarSubtitle,
+  dimToolbar = false,
 }: LibraryPickerGridProps) {
   const { ref: scrollRef, fadeTop, fadeBottom } = useScrollFade<HTMLDivElement>([visibleItems.length]);
 
   return (
     <>
-      <div className="services-toolbar">
+      <div className={clsx('services-toolbar', { 'services-toolbar--dim': dimToolbar })}>
         <div className="segmented library-tabs">
           {LIBRARY_TABS.map((t) => (
             <button
@@ -65,7 +70,15 @@ export function LibraryPickerGrid({
       {(toolbarActions || toolbarSubtitle) && (
         <div className="services-toolbar-row2">
           {toolbarActions && <div className="services-toolbar-row2__actions">{toolbarActions}</div>}
-          {toolbarSubtitle && <span className="services-toolbar-row2__subtitle">{toolbarSubtitle}</span>}
+          {toolbarSubtitle && (
+            <span
+              className={clsx('services-toolbar-row2__subtitle', {
+                'services-toolbar-row2__subtitle--dim': dimToolbar,
+              })}
+            >
+              {toolbarSubtitle}
+            </span>
+          )}
         </div>
       )}
 

@@ -36,16 +36,19 @@ export function Dashboard() {
           serviceRouting={{
             isEmpty: true,
             services: [],
-            onSelectServices: () => setActiveTab('services'),
+            // During the tour this doubles as its "next" action — clicking
+            // the card's own CTA should advance the tour just like the
+            // tooltip's arrow does, not silently leave it stuck on step 2.
+            onSelectServices: onboardingStage === 'tour-home' ? advanceOnboardingTour : () => setActiveTab('services'),
             onStart: () => {},
             onEdit: () => {},
           }}
+          dimFullMode={onboardingStage === 'tour-home'}
         />
         {onboardingStage === 'tour-home' && (
           <OnboardingCoachmark
             step={2}
             className="coachmark--home"
-            showPrev={false}
             text="Pick which services run through Fixnet and fine-tune each one — like Ultra-Speed Mode for gaming. Everything else stays exactly as it was"
             onSkip={skipOnboarding}
             onPrev={retreatOnboardingTour}

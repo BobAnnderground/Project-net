@@ -19,11 +19,14 @@ interface WelcomeIntroInfo {
 interface HeroBannerProps {
   serviceRouting?: ServiceRoutingInfo;
   welcomeIntro?: WelcomeIntroInfo;
+  // Step 2 of the onboarding tour dims the Full mode card so the Service
+  // Routing card it's pointing at stands out (Fixnet • Wip, node 1170:268433).
+  dimFullMode?: boolean;
 }
 
 const MAX_ROW_ICONS = 7;
 
-export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
+export function HeroBanner({ serviceRouting, welcomeIntro, dimFullMode = false }: HeroBannerProps) {
   const resolvedTheme = useResolvedTheme();
   const isLightTheme = resolvedTheme === 'light';
 
@@ -117,7 +120,7 @@ export function HeroBanner({ serviceRouting, welcomeIntro }: HeroBannerProps) {
         )}
       </div>
 
-      <div className="dashboard-hero__card dashboard-hero__card--fullmode">
+      <div className={`dashboard-hero__card dashboard-hero__card--fullmode ${dimFullMode ? 'dashboard-hero__card--dim' : ''}`}>
         <img
           src={isLightTheme ? '/images/Home screen/Full mode-light.webp' : '/images/Home screen/Full mode.webp'}
           alt=""

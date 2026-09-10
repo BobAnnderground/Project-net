@@ -100,6 +100,13 @@
      Light: dark disc, light cutout X — so both the disc and what the
      cutout reveals flip together. */
   --frames-item-badge-bg: #ffffff;
+  /* Onboarding region-tile selected radio (Fixnet • Wip, node 1170:268717
+     dark / 1170:268787 light): ring and dot don't share one relationship
+     across themes (the dot isn't just "the tile's own background" in
+     light — it's a distinct lavender accent, #dfc7ff), so both need their
+     own dedicated tokens rather than reusing --on-accent/--frames-bg-rgb. */
+  --onboard-radio-ring: #ffffff;
+  --onboard-radio-dot: #251a31;
   /* Not actually invariant — light theme uses a darker green for contrast
      on white (see the override below), matching --notif-icon-positive-fg. */
   --text-green: #00ff7b;
@@ -214,6 +221,8 @@
   --frames-item-icon: #141117;
   --frames-item-icon-secondary: rgba(20, 17, 23, 0.44);
   --frames-item-badge-bg: #141117;
+  --onboard-radio-ring: #141117;
+  --onboard-radio-dot: #dfc7ff;
   --text-0: #1c1424;
   --text-0-rgb: 28, 20, 36;
   --text-1: rgba(28, 20, 36, 0.62);

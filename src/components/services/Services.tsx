@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import clsx from 'clsx';
 import { Plus, Play, Square, RotateCw, SlidersHorizontal, MapPin, Waypoints } from 'lucide-react';
 import { useStore } from '../../store/useStore';
@@ -121,6 +121,39 @@ export function Services() {
   const { ref: selectedListRef, fadeTop: selectedFadeTop, fadeBottom: selectedFadeBottom } =
     useScrollFade<HTMLDivElement>([selectedItems.length]);
 
+  // Step 3's tooltip is positioned against the real "Auto-select popular"
+  // button rather than a fixed coordinate — its bottom edge level with the
+  // button's own bottom, 12px to its right. Measured in JS (not CSS) since
+  // the tooltip's own height isn't known ahead of time and a hardcoded
+  // viewport coordinate drifted out of sync with the button whenever the
+  // actual browser window wasn't exactly 1200×800 (#root is centered by
+  // body's flexbox, not pinned at the viewport origin).
+  const autoSelectBtnRef = useRef<HTMLButtonElement>(null);
+  const servicesCoachmarkRef = useRef<HTMLDivElement>(null);
+  const [servicesCoachmarkStyle, setServicesCoachmarkStyle] = useState<{ position: 'fixed'; top: number; left: number }>({
+    position: 'fixed',
+    top: 0,
+    left: 0,
+  });
+
+  useLayoutEffect(() => {
+    if (onboardingStage !== 'tour-services') return;
+    const btn = autoSelectBtnRef.current;
+    const coachmark = servicesCoachmarkRef.current;
+    if (!btn || !coachmark) return;
+    const btnRect = btn.getBoundingClientRect();
+    // offsetHeight, not getBoundingClientRect().height — this measurement
+    // runs synchronously right after mount, while the entry animation's
+    // opening keyframe (scale(0.15, 0.05)) is already active, and
+    // getBoundingClientRect reports the post-transform (squashed) box.
+    // offsetHeight reads the untransformed layout size instead.
+    setServicesCoachmarkStyle({
+      position: 'fixed',
+      left: btnRect.right + 12,
+      top: btnRect.bottom - coachmark.offsetHeight,
+    });
+  }, [onboardingStage]);
+
   return (
     <div className="services-page">
       <div className="services-main">
@@ -137,10 +170,11 @@ export function Services() {
           onSearchChange={setSearchQuery}
           searchPlaceholder="Search by services"
           toolbarSubtitle="Choose the services you want to connect"
+          dimToolbar={onboardingStage === 'tour-services'}
           toolbarActions={
             <>
               <button
-                className="btn"
+                className={clsx('btn', { 'btn--dim': onboardingStage === 'tour-services' })}
                 disabled={isOnboardingTour}
                 onClick={() => setManualAddStep('intro')}
               >
@@ -148,7 +182,7 @@ export function Services() {
                 <span className="btn__divider" />
                 <Plus size={14} />
               </button>
-              <button className="btn" onClick={handleAutoSelectPopular}>
+              <button ref={autoSelectBtnRef} className="btn" onClick={handleAutoSelectPopular}>
                 Auto-select popular
               </button>
             </>
@@ -245,8 +279,10 @@ export function Services() {
 
       {onboardingStage === 'tour-services' && (
         <OnboardingCoachmark
+          ref={servicesCoachmarkRef}
           step={3}
           className="coachmark--services"
+          style={servicesCoachmarkStyle}
           text='Choose the services you need manually, or tap "Auto-select popular" to preselect the most popular ones for your region'
           onSkip={skipOnboarding}
           onPrev={retreatOnboardingTour}

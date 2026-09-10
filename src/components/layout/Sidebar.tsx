@@ -35,6 +35,7 @@ function daysLeftLabel(expiresAt: number): string {
 export function Sidebar() {
   const activeTab = useStore((s) => s.activeTab);
   const setActiveTab = useStore((s) => s.setActiveTab);
+  const onboardingStage = useStore((s) => s.onboardingStage);
   const user = useStore((s) => s.user);
   const isRunning = useStore((s) => s.isRunning);
   const library = useStore((s) => s.library);
@@ -51,6 +52,11 @@ export function Sidebar() {
         ? 'Subscription active'
         : 'Subscription expired';
 
+  // Steps 2-3 of the onboarding tour dim every inactive nav item — Home
+  // stays lit during step 2 (it's the active tab then), Services during
+  // step 3 (Fixnet • Wip, nodes 1170:268433 and 1170:268348). Keyed off
+  // !isActive rather than a specific tab id so it generalizes across both.
+  const dimForTour = onboardingStage === 'tour-home' || onboardingStage === 'tour-services';
   const isConnected = isRunning && library.some((s) => s.enabled && s.status === 'connected');
   const isLight = resolvedTheme === 'light';
   const avatarSrc = isLight ? '/images/sidebar/user-avatar-light.svg' : '/images/sidebar/user-avatar.svg';
@@ -60,7 +66,7 @@ export function Sidebar() {
 
   return (
     <div className="sidebar">
-      <BrandLogo size={36} />
+      <BrandLogo size={36} className={dimForTour ? 'sidebar__logo--dim' : undefined} />
 
       <div className="sidebar__nav">
         {NAV.map(({ id, label, active, inactiveDark, inactiveLight }) => {
@@ -69,7 +75,7 @@ export function Sidebar() {
           return (
             <button
               key={id}
-              className={`nav-item ${isActive ? 'nav-item--active' : ''}`}
+              className={`nav-item ${isActive ? 'nav-item--active' : ''} ${dimForTour && !isActive ? 'nav-item--dim' : ''}`}
               onClick={() => setActiveTab(id)}
             >
               <span className="nav-item__icon">
@@ -105,14 +111,14 @@ export function Sidebar() {
       <div className="sidebar__footer">
         <button
           type="button"
-          className="sidebar__swatch"
+          className={`sidebar__swatch ${dimForTour ? 'sidebar__swatch--dim' : ''}`}
           onClick={toggleNotificationsPanel}
           aria-label="Notifications"
         >
           <img src={notificationSrc} alt="" className="sidebar__swatch-icon" />
           {hasUnread && <span className="sidebar__notif-dot" />}
         </button>
-        <div className="sidebar__user">
+        <div className={`sidebar__user ${dimForTour ? 'sidebar__user--dim' : ''}`}>
           <img src={avatarSrc} alt="" className="sidebar__avatar" />
           <div className="sidebar__footer-text">
             <span className="sidebar__footer-name">{subscriptionLabel}</span>

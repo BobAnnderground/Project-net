@@ -24,9 +24,10 @@ Run through this at the end of every task that touches visual/UI design — a ne
 - **State:** Zustand 5.0.14 (no persist middleware — all state is in-memory, reset on page reload)
 - **Styling:** Single global stylesheet split across `src/index.css` (CSS custom properties / tokens) and `src/App.css` (all component classes). No CSS modules, no Tailwind, no styled-components.
 - **Icons:** lucide-react 1.23.0 — always import individual named icons, never the barrel.
+- **Brand icons:** simple-icons 16.25.0 — used via `src/lib/brandIcons.ts`; renders SVG paths for known service names (ChatGPT, Grok, Disney+ have no entry — use emoji fallback).
 - **Class merging:** clsx 2.1.1
 - **ID generation:** nanoid 5.1.16
-- **Linter:** oxlint (no eslint)
+- **Linter:** oxlint 1.71.0 (no eslint)
 - **tsconfig strict flags:** `noUnusedLocals`, `noUnusedParameters`, `erasableSyntaxOnly`, `noFallthroughCasesInSwitch`, `verbatimModuleSyntax`
 
 ---
@@ -36,7 +37,7 @@ Run through this at the end of every task that touches visual/UI design — a ne
 ```
 Fixnet/
 ├── src/
-│   ├── index.css              — CSS custom properties (design tokens), base reset, scrollbar
+│   ├── index.css              — CSS custom properties (design tokens), base reset, custom font-faces
 │   ├── App.css                — All component-level CSS classes; both files form one design system
 │   ├── main.tsx               — Entry point; mounts <App /> in StrictMode
 │   ├── App.tsx                — Root: auth/crossfade/shell view state machine; theme application
@@ -49,36 +50,51 @@ Fixnet/
 │   ├── data/
 │   │   ├── catalog.ts         — LIBRARY_CATALOG: 19 preset LibraryEntry items with emoji icons
 │   │   ├── regions.ts         — REGIONS: 9 proxy server locations services route through
-│   │   ├── worldCountries.ts  — WORLD_COUNTRIES: large list of user's own physical countries (onboarding only, not routing)
-│   │   └── factory.ts         — serviceFromLibraryEntry, serviceFromCustomInput, routeForService, defaultAppSettings, defaultUser
+│   │   ├── worldRegions.ts    — WORLD_REGIONS: 12 broad user home-region options (onboarding only, not routing)
+│   │   ├── notificationPool.ts — NOTIFICATION_POOL: random notification templates for debug trigger
+│   │   └── factory.ts         — serviceFromLibraryEntry, serviceFromCustomInput, routeForService, defaultAppSettings, defaultUser, defaultNotifications
 │   ├── lib/
-│   │   ├── labels.ts          — CATEGORY_LABELS, formatLatency
-│   │   └── libraryItems.ts    — LibraryTab type, LIBRARY_TABS, LibraryDisplayItem, build/filter helpers
+│   │   ├── labels.ts          — CATEGORY_LABELS, TRANSPORT_TYPE_LABELS, CONNECTION_MODE_LABELS, formatLatency, formatNotificationTime, connectionModeChipLabel
+│   │   ├── libraryItems.ts    — LibraryTab type, LIBRARY_TABS, LibraryDisplayItem, build/filter/resolve helpers
+│   │   ├── brandIcons.ts      — getBrandIcon(name): maps service display names to simple-icons SVG data
+│   │   ├── useResolvedTheme.ts — Hook: resolves 'system' theme via matchMedia
+│   │   ├── useServiceSelection.ts — Hook: manages a Set<string> of selected service/catalog IDs
+│   │   └── useScrollFade.ts   — Hook: detects top/bottom scroll overflow for fade gradient effect
 │   └── components/
 │       ├── auth/
-│       │   └── AuthScreen.tsx          — 16-digit key entry (4 cells × 4 digits); shake on error, crossfade on success
+│       │   └── AuthScreen.tsx          — 16-digit key entry (4 cells × 4 digits); theme toggle; shake on error, crossfade on success
 │       ├── layout/
-│       │   ├── WindowTitleBar.tsx      — Windows-style title bar (minimize/close mock buttons; minimize = hide to chip)
-│       │   ├── Sidebar.tsx             — Nav (Dashboard/Library/Presets/Settings), bell+notification panel, account popup with logout
-│       │   └── NotificationCenter.tsx  — Dropdown notification list with per-item action buttons
+│       │   ├── WindowTitleBar.tsx      — Windows-style title bar (minimize/close mock buttons; minimize = show restore chip)
+│       │   ├── Sidebar.tsx             — Nav (Home/Services/Settings), connection pulse indicator, notification bell, subscription/trial footer
+│       │   └── NotificationPanel.tsx   — Overlay notification window (mark all read, delete all with undo)
+│       ├── notifications/
+│       │   ├── NoticeCard.tsx          — Shared card for both toast and panel notification items
+│       │   ├── NotificationToastStack.tsx — Top-right toast stack: peek (1 visible) or expanded list
+│       │   ├── NotificationUndoToast.tsx  — Bottom "X notifications deleted / Undo" strip
+│       │   └── NotificationDebugTrigger.tsx — Invisible button to push a random notification (prototype QA only)
 │       ├── dashboard/
-│       │   ├── Dashboard.tsx           — Conditional: onboarding | empty-state | stopped (last-session + preset quick-launch cards) | running (RoutingDiagram)
-│       │   ├── WelcomeOnboarding.tsx   — 2-step wizard: step 1 = service picker (catalog tiles), step 2 = home country picker (WORLD_COUNTRIES)
+│       │   ├── Dashboard.tsx           — State machine: welcome | region | library-empty+tour | running (RoutingDiagram) | stopped (HeroBanner)
+│       │   ├── HeroBanner.tsx          — Two-card layout: "Service Routing" card (start/edit/select) + "Full Mode" card (UI placeholder, feature not implemented)
 │       │   ├── RoutingDiagram.tsx      — SVG topology diagram: You → Region nodes → Service leaf nodes, with bezier edges and animated connecting dots
-│       │   └── ServiceDetailModal.tsx  — Per-service modal: status, latency/stability stats, quality charts, region/encryption/transport/DNS controls, network rules editor (advanced), remove button
-│       ├── library/
-│       │   ├── Library.tsx              — Catalog grid with All/Games/Programs/Custom tabs; multi-select with bulk "Add to preset"/"Start" action bar; "Create service manually" button
-│       │   └── CreateCustomServiceModal.tsx — Form to create a custom service (name, category, detection method, domains/exePath, region)
-│       ├── presets/
-│       │   ├── Presets.tsx              — Expandable preset cards with inline service grid; apply (with confirm step), delete, expand to see/remove services and add new ones
-│       │   ├── CreatePresetModal.tsx    — Full-size modal (860px) with embedded LibraryPickerGrid to name preset and pick services
-│       │   ├── AddServiceModal.tsx      — Same full-size picker, pre-filtered to exclude already-included services; adds to existing preset
-│       │   └── SavePresetModal.tsx      — Simple name-entry modal used from Library's "Add to preset" bulk action
+│       │   ├── ServiceDetailModal.tsx  — Per-service config modal: region, encryption, transport, DNS, connectionMode, includeSubdomains, network rules (advanced), start-this-service-only action
+│       │   ├── ServiceSessionModal.tsx — Per-service monitoring modal: status badge, latency/stability stats, quality charts, bridge info, enable toggle
+│       │   └── onboarding/
+│       │       └── RegionStep.tsx      — Onboarding step 1/4: broad world-region picker (WORLD_REGIONS tiles)
+│       ├── services/
+│       │   ├── Services.tsx              — Full-screen Services page: LibraryPickerGrid + selected-services side panel with start/stop/reconnect actions; onboarding coachmarks
+│       │   ├── CreateCustomServiceModal.tsx — Form: name, domains+includeSubdomains, exePath, ipRange
+│       │   └── ManualServiceIntroModal.tsx  — Pre-form warning: recommends contacting support for public services
 │       ├── settings/
-│       │   └── Settings.tsx             — General (theme, language, window behavior, auto-launch, update mode), Account (auth key display/copy/regenerate, subscription, logout), Connection (DNS, transport defaults, region, encryption, IPv6, auto-bridge), Advanced simulation parameters (degradation chance, tick interval) behind showAdvancedSettings toggle
+│       │   └── Settings.tsx             — 4 tabs: General (autoLaunch, launchInTray, reconnectOnStartup, closeToTray, theme, language), Account (key display/copy/regenerate, subscription, logout), Connection (DNS primary+backups, default region, emergency bridge, backup bridges), Advanced (degradation chance, tick interval, showAdvancedSettings) behind toggle
 │       └── common/
-│           ├── ServiceCard.tsx          — Unified 108px tile: icon swatch + name + 2 info chips; optional check badge (selected), settings gear button, optional remove (X) button. Used in onboarding, library, presets, preset picker modals.
-│           ├── LibraryPickerGrid.tsx    — Segmented tab bar + 4-column ServiceCard grid with "Select all" tile; reused in Library, CreatePresetModal, AddServiceModal
+│           ├── ServiceCard.tsx          — Grid tile: brand icon + name + 2 chips (region, connection mode); check badge when selected; gear settings button. Used in Services and CreatePresetModal.
+│           ├── LibraryPickerGrid.tsx    — Tab bar (All/Games/Social/AI/Entertainment/Other/Custom) + search + 4-column ServiceCard grid; reused in Services.tsx
+│           ├── ServiceIcon.tsx          — Renders simple-icons SVG for known service names; emoji string fallback for unknown
+│           ├── BrandLogo.tsx            — The "n" glyph square logo mark (used in Sidebar and AuthScreen)
+│           ├── SearchInput.tsx          — Styled search input with magnifier icon
+│           ├── OnboardingCoachmark.tsx  — Floating tip box: step indicator, skip/prev/next; overlaid on real screens during tour
+│           ├── Dropdown.tsx             — Custom styled dropdown (used in Settings DNS selector)
+│           ├── Toast.tsx                — Simple one-line transient message (store.toast field; auto-dismisses after 5s)
 │           ├── Modal.tsx                — Wrapper: overlay + modal box in standard (440px) or lg (860px) size; sticky header/footer
 │           ├── StatusBadge.tsx          — Colored dot + label for ServiceStatus values
 │           ├── Toggle.tsx               — CSS toggle switch (on/off)
@@ -89,32 +105,53 @@ Fixnet/
 
 ## Design token system
 
-All tokens are CSS custom properties on `:root` (dark mode defaults) overridden by `:root[data-theme="light"]`. Toggled by writing `document.documentElement.dataset.theme` in `App.tsx`. `theme: 'system'` resolves via `window.matchMedia('(prefers-color-scheme: light)')`.
+All tokens are CSS custom properties on `:root` (dark mode defaults) overridden by `:root[data-theme="light"]`. Toggled by writing `document.documentElement.dataset.theme` in `App.tsx`. `theme: 'system'` resolves via `useResolvedTheme` hook (`window.matchMedia`).
+
+**Light theme is provisional** — no light Figma mockups exist yet; values are hand-derived from dark palette.
+
+### Core semantic tokens
 
 | Token | Dark | Light | Meaning |
 |---|---|---|---|
-| `--bg-0` | `#0d1117` | `#eef1f5` | Deepest background |
-| `--bg-1` | `#131a22` | `#ffffff` | Card / panel surface |
-| `--bg-2` | `#1a232d` | `#f5f7fa` | Input / secondary surface |
-| `--bg-3` | `#212c38` | `#e9edf2` | Toggle track / tertiary |
-| `--border` | `#2a3644` | `#d7dde4` | All borders |
-| `--text-0` | `#eef2f6` | `#16202a` | Primary text |
-| `--text-1` | `#a9b7c6` | `#4d5b68` | Secondary text |
-| `--text-2` | `#6b7a89` | `#8894a0` | Muted / labels |
-| `--accent` | `#3ea6ff` | `#1c7ed6` | Primary action, active state |
-| `--accent-dim` | `#1f4864` | `#dceafb` | Accent background tint |
-| `--ok` | `#35c975` | `#1f9d55` | Connected status |
-| `--ok-dim` | `#133a24` | `#e3f7ea` | Connected background |
-| `--warn` | `#f0a83a` | `#c9791a` | Degraded status |
-| `--warn-dim` | `#4a3413` | `#fbeed9` | Degraded background |
-| `--err` | `#f2495c` | `#d9273c` | Error status |
-| `--err-dim` | `#4a1a20` | `#fbe1e4` | Error background |
-| `--info` | `#7d8ff0` | `#5768d6` | Bridge/connecting |
-| `--radius` | `10px` | — | Standard border-radius |
-| `--radius-sm` | `6px` | — | Small border-radius |
-| `--font` | `"Segoe UI", -apple-system, …` | — | Body font stack |
+| `--bg-0` | `#141116` | `#f5f1f8` | Deepest background |
+| `--bg-1` | `#272429` | `#ffffff` | Card / panel surface |
+| `--bg-2` | `#302e32` | `#f8f5fa` | Input / secondary surface |
+| `--bg-3` | `#353237` | `#ede6f2` | Toggle track / tertiary |
+| `--border` | `#3a373b` | `#ddd0e6` | All borders |
+| `--text-0` | `#ffffff` | `#1c1424` | Primary text |
+| `--text-1` | `rgba(255,255,255,0.56)` | `rgba(28,20,36,0.62)` | Secondary text |
+| `--text-2` | `rgba(255,255,255,0.24)` | `rgba(28,20,36,0.34)` | Muted / labels |
+| `--accent` | `#5b2299` | `#5b2299` | Primary action, active state (purple) |
+| `--accent-dim` | `#2e1745` | `#ece0f7` | Accent background tint |
+| `--ok` | `#18b363` | `#16a34a` | Connected status |
+| `--ok-dim` | `#152d23` | `#e1f7ea` | Connected background |
+| `--warn` | `#f0db1a` | `#a6790a` | Degraded status |
+| `--warn-dim` | `#4b4417` | `#fbf0d9` | Degraded background |
+| `--err` | `#ff3838` | `#dc2626` | Error status |
+| `--err-dim` | `#41181c` | `#fbe2e2` | Error background |
+| `--info` | `#7d8ff0` | `#5768d6` | Connecting / bridge |
+| `--radius` | `12px` | — | Standard border-radius |
+| `--radius-sm` | `8px` | — | Small border-radius |
+| `--radius-full` | `999px` | — | Pill shape |
+| `--font` | `"ABC Favorit", "Segoe UI", …` | — | Body font stack (ABC Favorit loaded via @font-face) |
+| `--font-display` | `"Panama", Georgia, serif` | — | Display / heading font |
+| `--font-mono` | `"Cascadia Code", …` | — | Monospace |
 
-No `--info-dim` token exists; bridge info boxes use `rgba(125,143,240,0.1)` inline.
+### Additional token families (see `src/index.css`)
+
+All are exact values from specific Figma nodes, not derived from the core tokens above:
+
+| Family prefix | Purpose |
+|---|---|
+| `--frames-*` | Service cards on the Services screen (card bg, borders, text, badge) — theme-aware |
+| `--auth-*` | Auth screen (its own dedicated color scheme) |
+| `--notif-*` | Notification panel and notification icon tones |
+| `--btn-*` | Button system (primary/secondary gradient, shadow, disabled) |
+| `--hero-*` | Dashboard hero cards (blue and purple card variants) |
+| `--onboard-*` | Onboarding region-tile radio ring and dot |
+| `--space-*` | Spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 40 / 48 / 64 / 68 px |
+
+Invariant tokens (same in both themes, contrast against saturated surfaces): `--on-accent`, `--shadow-color-rgb`, `--overlay-rgb`, `--frames-bg-rgb`, `--window-bg`.
 
 ---
 
@@ -126,21 +163,24 @@ No `--info-dim` token exists; bridge info boxes use `rgba(125,143,240,0.1)` inli
 |---|---|---|
 | id | string | nanoid |
 | name | string | |
-| icon | string | Emoji character |
+| icon | string | Emoji character (fallback when no brand SVG) |
 | category | `'ai' \| 'game' \| 'streaming' \| 'browser' \| 'messenger' \| 'other'` | |
 | detectionMethod | `'domain' \| 'exe' \| 'game' \| 'manual'` | |
 | domains | string[] | |
+| includeSubdomains | boolean | Default false |
 | exePath | string \| null | |
+| ipRange | string \| null | Manual IP range rule |
 | additionalRules | NetworkRule[] | |
 | region | string | Region.id |
 | enabled | boolean | |
 | encryption | `'on' \| 'off'` | |
-| transportType | `'auto' \| 'tcp' \| 'udp' \| 'wireguard-like'` | |
-| dnsMode | `'default' \| 'custom'` | Per-service DNS; distinct from AppSettings.dnsMode |
-| advancedSettings | Record\<string, unknown\> | Always `{}` in practice; no UI writes to it |
-| isCustom | boolean | true = user-created, not from catalog |
+| transportType | `'udp' \| 'tcp' \| 'mixed'` | ⚠️ D-1: SRS says `'auto' \| 'tcp' \| 'udp' \| 'wireguard-like'` |
+| dnsMode | `'default' \| 'custom'` | Per-service DNS |
+| connectionMode | `'default' \| 'fast' \| 'stable' \| 'secure'` | ⚠️ D-2: Not in SRS |
+| advancedSettings | Record\<string, unknown\> | Always `{}` in practice |
+| isCustom | boolean | |
 | status | `'inactive' \| 'connecting' \| 'connected' \| 'degraded' \| 'error'` | |
-| addedFromLibrary | boolean | Used to disambiguate catalog vs custom services |
+| addedFromLibrary | boolean | |
 
 ### Region
 
@@ -152,7 +192,7 @@ No `--info-dim` token exists; bridge info boxes use `rgba(125,143,240,0.1)` inli
 | serverLoad | number | 0–100, mock static value |
 | recommendedFor | ServiceCategory[] | |
 
-9 regions defined in `src/data/regions.ts`: sweden, germany-1, germany-2, netherlands, finland, moscow-gaming-node, usa-east, usa-west, japan.
+9 regions in `src/data/regions.ts`: sweden, germany-1, germany-2, netherlands, finland, moscow-gaming-node, usa-east, usa-west, japan.
 
 ### Route
 
@@ -176,38 +216,16 @@ No `--info-dim` token exists; bridge info boxes use `rgba(125,143,240,0.1)` inli
 | endedAt | number \| null | Unix ms |
 | qualityHistory | QualitySample[] | Max 40 samples (`MAX_QUALITY_SAMPLES`) |
 
-QualitySample: `{ timestamp: number; latencyMs: number; stability: number }`
-
-### ServiceConfigSnapshot (inside Preset)
-
-| Field | Type | Notes |
-|---|---|---|
-| serviceId | string | |
-| region | string | |
-| enabled | boolean | |
-| encryption | Encryption | |
-| transportType | TransportType | |
-
-⚠️ D-3: Snapshot omits `dnsMode`, `additionalRules`, `advancedSettings` vs. SRS §3.7 implication.
-
-### Preset
-
-| Field | Type | Notes |
-|---|---|---|
-| id | string | nanoid |
-| name | string | |
-| serviceConfigs | ServiceConfigSnapshot[] | |
-| isActive | boolean | At most one preset has `isActive: true` at a time |
-| createdAt | number | Unix ms |
+`QualitySample`: `{ timestamp: number; latencyMs: number; stability: number }`
 
 ### Bridge
 
 | Field | Type | Notes |
 |---|---|---|
 | id | string | nanoid |
-| name | string | `Bridge-N` where N = bridges.length + 1 at creation time |
+| name | string | Always `Bridge-N` (sequential) |
 | status | `'available' \| 'connecting' \| 'connected' \| 'failed'` | |
-| triggeredBy | string \| null | serviceId (⚠️ D-6: SRS §3.8 says routeId) |
+| triggeredBy | string \| null | **serviceId** ⚠️ D-3: SRS §3.8 says routeId |
 | isAuto | boolean | |
 
 ### AppNotification
@@ -215,17 +233,20 @@ QualitySample: `{ timestamp: number; latencyMs: number; stability: number }`
 | Field | Type | Notes |
 |---|---|---|
 | id | string | nanoid |
-| type | `'route_unavailable' \| 'server_overload' \| 'quality_degraded' \| 'service_unresponsive' \| 'bridge_suggested' \| 'bridge_connected' \| 'subscription_expiring'` | |
-| relatedServiceId | string \| null | |
-| severity | `'info' \| 'warning' \| 'critical'` | |
-| message | string | |
+| tone | `'neutral' \| 'positive' \| 'negative'` | Controls color scheme of card |
+| icon | `'server' \| 'server-off' \| 'region' \| 'library' \| 'billing' \| 'chat'` | Maps to Lucide icon in NoticeCard |
+| title | string | Short heading |
+| message | string | Body text |
 | createdAt | number | Unix ms |
 | read | boolean | |
-| actions | NotificationAction[] | |
+| toastDismissed | boolean | Tracks whether top-right toast was dismissed; independent of `read` |
+| action | NotificationAction \| null | Single optional CTA |
 
-NotificationAction: `{ label: string; actionType: 'switch_route' \| 'connect_bridge' \| 'go_to_service' \| 'dismiss' }`
+`NotificationAction`: `{ label: string; actionType: 'reconnect' }` — only one action type exists.
 
-Max 60 notifications stored (`MAX_NOTIFICATIONS`). ⚠️ D-4: `subscription_expiring` is defined but never emitted by the engine.
+⚠️ D-4: Entirely different schema from SRS §3.9 (which describes typed event notifications with `type`, `severity`, `relatedServiceId`, multiple `actions`).
+
+Max 60 notifications (`MAX_NOTIFICATIONS`). Notifications are **not** emitted by the engine — they are pre-seeded static content (`defaultNotifications()` in factory.ts) plus a debug `pushRandomNotification` store action.
 
 ### User
 
@@ -236,21 +257,26 @@ Max 60 notifications stored (`MAX_NOTIFICATIONS`). ⚠️ D-4: `subscription_exp
 | email | string | |
 | subscriptionStatus | `'active' \| 'expired' \| 'trial'` | Default: `'trial'` |
 | subscriptionExpiresAt | number | Unix ms; default = now + 7 days |
-| country | string \| null | User's physical location; set during onboarding step 2; no effect on routing |
+| homeRegion | string \| null | User's broad world region; set during onboarding; no effect on routing ⚠️ D-5: was `country` |
 
 ### AppSettings
 
-| Field | Type | Notes |
-|---|---|---|
-| autoLaunch | boolean | Default: false |
-| theme | `'light' \| 'dark' \| 'system'` | Default: `'dark'` |
-| dnsMode | `'system' \| 'custom'` | App-level DNS; ⚠️ D-1: different union from Service.dnsMode |
-| windowBehavior | `'tray' \| 'taskbar'` | Default: `'tray'` |
-| language | `'en' \| 'ru'` | Default: `'en'`; UI does not actually retranslate in prototype |
-| updateMode | `'automatic' \| 'manual'` | Default: `'automatic'` |
-| connectionDefaults | `{ transportType, region, encryption, ipv6: boolean }` | Applied to new services; not retroactive |
-| showAdvancedSettings | boolean | Default: false; gates advanced UI sections globally |
-| advancedNetwork | `{ degradationChance: number; tickIntervalMs: number; autoBridge: boolean }` | Defaults: 12%, 4000ms, false |
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| autoLaunch | boolean | true | Start with Windows |
+| launchInTray | boolean | true | Minimize to tray on launch |
+| reconnectOnStartup | boolean | true | Auto-reconnect saved services on start |
+| closeToTray | boolean | false | Close button goes to tray |
+| theme | `'light' \| 'dark' \| 'system'` | `'dark'` | |
+| language | `'en' \| 'ru'` | `'en'` | UI does not retranslate in prototype |
+| region | string | `REGIONS[0].id` | Default routing region for new services |
+| dns | DnsSettings | `{ current: '1.1.1.1', backups: [''] }` | ⚠️ D-6: replaces SRS `dnsMode: 'system'\|'custom'` |
+| showAdvancedSettings | boolean | false | Gates advanced UI in Settings |
+| advancedNetwork | `{ degradationChance: number; tickIntervalMs: number; autoBridge: boolean }` | 12%, 4000ms, **true** | |
+
+`DnsSettings`: `{ current: string; backups: string[] }` — stores actual DNS addresses, not a mode enum.
+
+⚠️ D-6: SRS §3.10 describes `dnsMode: 'system'|'custom'` and `windowBehavior: 'tray'|'taskbar'`. Implementation replaces both with the above restructured fields.
 
 ### LibraryEntry
 
@@ -262,8 +288,19 @@ Max 60 notifications stored (`MAX_NOTIFICATIONS`). ⚠️ D-4: `subscription_exp
 | category | ServiceCategory | |
 | domains | string[] | |
 | recommendedRegion | string | Region.id |
+| recommendedConnectionMode | ConnectionMode | ⚠️ D-2: Not in SRS |
 | description | string | |
-| popular | boolean | Controls onboarding initial visibility |
+| popular | boolean | Used for "Auto-select popular" action in Services |
+
+### OnboardingStage
+
+`'welcome' | 'region' | 'tour-home' | 'tour-services' | 'tour-selected'`
+
+4-stage first-run flow. `null` means onboarding is finished or skipped. Login sets stage to `'welcome'`; each advance/skip/commit action moves it forward. ⚠️ D-7: Entirely different from SRS §6 flow 1 description.
+
+### WorldRegion (from `src/data/worldRegions.ts`)
+
+`{ id: string; name: string }` — 12 broad regions (North America, South America, etc.). Used only in onboarding `RegionStep`. Sets `User.homeRegion`. No effect on routing. Separate from REGIONS (proxy locations).
 
 ---
 
@@ -274,7 +311,8 @@ Max 60 notifications stored (`MAX_NOTIFICATIONS`). ⚠️ D-4: `subscription_exp
 | Field | Type | Initial value |
 |---|---|---|
 | isAuthenticated | boolean | false |
-| isFirstLoginOfSession | boolean | false |
+| onboardingStage | OnboardingStage \| null | null |
+| hasSeenAutomaticTip | boolean | false |
 | authKey | string | `'1111111111111111'` |
 | user | User | defaultUser |
 | appSettings | AppSettings | defaultAppSettings |
@@ -282,66 +320,87 @@ Max 60 notifications stored (`MAX_NOTIFICATIONS`). ⚠️ D-4: `subscription_exp
 | routes | Record\<string, Route\> | {} |
 | connections | Record\<string, Connection\> | {} |
 | bridges | Bridge[] | [] |
-| presets | Preset[] | [] |
-| notifications | AppNotification[] | [] |
 | isRunning | boolean | false |
 | lastSessionServiceIds | string[] | [] |
 | activeTab | TabId | `'dashboard'` |
 | activeServiceId | string \| null | null |
+| toast | `{ id: string; message: string } \| null` | null |
+| emergencyBridge | `{ code, addedAt, status: 'active'\|'failed' } \| null` | pre-set to a "failed" example bridge |
+| backupBridges | `{ id, code, addedAt, status: 'connected'\|'disconnected' }[]` | [] |
+| pendingServiceSelection | string[] \| null | null |
+| notifications | AppNotification[] | `defaultNotifications()` (8 seed items) |
+| notificationsOpen | boolean | false |
+| notificationsUndo | `{ id, items, count } \| null` | null |
 
-`TabId = 'dashboard' | 'library' | 'presets' | 'settings'`
+`TabId = 'dashboard' | 'services' | 'settings'` — ⚠️ D-8: SRS §7 lists Library and Presets; neither exists as a tab now.
 
 ### Key conventions
 
-- `routes` and `connections` are both keyed by **serviceId**, not route.id or connection.id. One active route and one active connection per service at a time (⚠️ D-2).
-- Any action that modifies the service list calls `clearPresetActivity(presets)` to set `isActive: false` on all presets (no stale "active" badge).
-- `library` is a flat array of all services (both catalog-sourced and custom). Catalog services are found by `addedFromLibrary === true && s.name === entry.name` — there is no separate field linking a service back to its catalog entry ID.
-- The engine is imported lazily via dynamic `import('../sim/engine')` inside store actions that need to trigger simulation side-effects, avoiding circular dependency issues at module load time.
+- `routes` and `connections` are both keyed by **serviceId**, not route.id or connection.id. One active route and one active connection per service at a time (⚠️ D-9).
+- `library` is a flat array of all services. Catalog services: `addedFromLibrary === true && s.name === entry.name` — no field linking back to catalog entry ID.
+- Engine is imported lazily via `import('../sim/engine')` inside store actions to avoid circular dependency.
+- `pendingServiceSelection` is set by `editLastSession` to pre-seed the Services page selection with last-session display IDs; cleared by `clearPendingServiceSelection` on mount.
+- `notificationsUndo` auto-expires after 5s (setTimeout in `deleteAllNotifications`).
 
 ### Actions by domain
 
 **Service management**
-- `addServiceFromLibrary(entryId)` — creates Service + Route from catalog entry; enabled=false
-- `createCustomService(input)` — creates Service + Route from CustomServiceInput; enabled=false
-- `removeService(serviceId)` — stops service in engine, removes from library, routes, connections
-- `updateService(serviceId, patch)` — partial update; also syncs route.regionId when region changes
+- `addServiceFromLibrary(entryId)` — creates Service + Route; enabled=false
+- `createCustomService(input)` — creates from `CustomServiceInput`; enabled=false; shows toast
+- `removeService(serviceId)` — stops in engine; removes from library, routes, connections
+- `updateService(serviceId, patch)` — partial update; syncs route.regionId if region changes
 - `toggleServiceEnabled(serviceId)` — flips enabled; if isRunning, calls beginConnect or stopService
-- `toggleCatalogSelection(entryId)` — Library card click: if service exists, toggle enabled; if not, create and enable
-- `getOrCreateServiceForEntry(entryId)` — ensures a (disabled) service exists for a catalog entry; returns serviceId; used for "peek settings" before committing
+- `enableServices(serviceIds)` — enables multiple at once; if isRunning, begins connecting each
+- `toggleCatalogSelection(entryId)` — Services card click: if service exists, toggle enabled; if not, create enabled=true
+- `getOrCreateServiceForEntry(entryId)` — ensures disabled service exists for catalog entry; returns serviceId
 
 **Run control**
-- `startAll()` — sets isRunning=true, calls engine.startSimulation (connects all enabled services)
+- `startAll()` — sets isRunning=true, calls engine.startSimulation
 - `stopAll()` — calls engine.stopSimulation, sets isRunning=false, saves lastSessionServiceIds
 - `relaunchLastSession()` — re-enables services from lastSessionServiceIds that still exist, then startAll
+- `startWithOnly(serviceIds)` — stops any running session first, enables only given services, calls startAll; used by "Start selected" and "Reconnect with changes" in Services, and "start this service only" in ServiceDetailModal
 
 **Engine hooks** (called only by engine or store internally)
 - `setServiceStatus(serviceId, status)` — updates service.status; creates Connection on 'connected', closes it on 'inactive'
 - `setRouteStatus(serviceId, status, patch?)` — updates route fields; appends QualitySample to connection.qualityHistory when active/degraded
 - `ensureBridge(serviceId, isAuto)` — finds or creates Bridge for a service
 - `setBridgeStatus(bridgeId, status)`
-- `pushNotification(n)` — prepends notification; trims to MAX_NOTIFICATIONS (60)
+
+**Notifications**
+- `pushRandomNotification()` — pulls a random template from `notificationPool.ts`, pushes to notifications array; **prototype/debug only** — not called by engine
 - `markNotificationRead(id)`, `markAllNotificationsRead()`
-- `performNotificationAction(notificationId, actionType)` — marks read; dispatches to engine (connectBridgeFor, retryService) or sets activeTab/activeServiceId
+- `deleteAllNotifications()` — clears list, sets notificationsUndo (5s undo window)
+- `undoDeleteAllNotifications()`
+- `dismissToast(id)`, `dismissAllToasts()` — sets toastDismissed on notification(s)
 
-**Presets**
-- `createPreset(name, serviceIds)` — snapshots current configs of given serviceIds; marks new preset isActive=true
-- `applyPreset(presetId)` — rewrites region/enabled/encryption/transportType for matching services; triggers connects/disconnects if isRunning
-- `deletePreset(presetId)`
-- `removeServiceFromPreset(presetId, serviceId)`
-- `addServicesToPreset(presetId, serviceIds)` — adds only services not already in preset
+**Settings / DNS**
+- `updateAppSettings(patch)`, `resetAppSettings()`
+- `updateDns(patch)` — updates dns.current
+- `addBackupDns()`, `updateBackupDns(index, value)`, `removeBackupDns(index)` — manage dns.backups array
 
-**Settings**
-- `updateAppSettings(patch)`, `updateAdvancedNetwork(patch)` (also calls engine.updateTickInterval), `updateConnectionDefaults(patch)`
+**Bridge management (Settings screen)**
+- `addEmergencyBridge(code)` — sets emergencyBridge; shows toast
+- `addBackupBridge(code)`, `removeBackupBridge(id)`
 
 **Auth**
-- `login(code)` — compares against authKey; sets isAuthenticated=true, isFirstLoginOfSession=true; returns bool
+- `login(code)` — compares against authKey; on success: isAuthenticated=true, **onboardingStage='welcome'**; returns bool
 - `logout()` — stops simulation if running, sets isAuthenticated=false
 - `regenerateAuthKey()` — generates new 16-digit numeric string
-- `commitOnboardingSelection(entryIds, userCountry)` — creates/enables services for selected catalog entries; saves 'Onboarding preset'; sets user.country; clears isFirstLoginOfSession; calls startAll
-- `skipOnboarding()` — clears isFirstLoginOfSession only
+
+**Onboarding** (welcome → region → tour-home → tour-services → tour-selected → null)
+- `beginOnboardingRegionStep()` — stage: 'welcome' → 'region'
+- `commitOnboardingRegion(regionId)` — saves homeRegion if non-null; stage → 'tour-home'
+- `advanceOnboardingTour()` — advances through tour stages; 'tour-home' also sets activeTab='services'
+- `retreatOnboardingTour()` — steps back; 'tour-services' also sets activeTab='dashboard'
+- `skipOnboarding()` — stage → null
+- `dismissAutomaticTip()` — sets hasSeenAutomaticTip=true
 
 **UI**
 - `setActiveTab(tab)`, `openServiceDetail(serviceId)`, `closeServiceDetail()`
+- `showToast(message)` — sets toast, auto-clears after 5s
+- `editLastSession()` — converts lastSessionServiceIds to display IDs, sets pendingServiceSelection, navigates to 'services' tab
+- `clearPendingServiceSelection()`
+- `toggleNotificationsPanel()`, `closeNotificationsPanel()`
 
 ---
 
@@ -366,7 +425,7 @@ Max 60 notifications stored (`MAX_NOTIFICATIONS`). ⚠️ D-4: `subscription_exp
 | `stopSimulation()` | Clears all timers; sets all services inactive |
 | `restartTick()` | Restarts setInterval using appSettings.advancedNetwork.tickIntervalMs |
 | `updateTickInterval()` | Calls restartTick only if tick is currently running |
-| `connectBridgeFor(serviceId, isAuto)` | Creates bridge, sets connecting, after 1200–2200ms → connected + route active (usesBridge=true) |
+| `connectBridgeFor(serviceId, isAuto)` | Creates bridge, sets connecting → after 1200–2200ms → connected + route active (usesBridge=true) |
 
 ### Tick behavior (every `tickIntervalMs`, default 4000ms)
 
@@ -376,20 +435,12 @@ For each enabled service:
 
 ### Internal flow: loseRoute → bridge
 
-1. `loseRoute` → status=error, route=unavailable, push `route_unavailable` notification, call `attemptRestoreMainRoute`
-2. `attemptRestoreMainRoute` waits 2500–4000ms: 35% chance → `beginConnect`; else if autoBridge → `connectBridgeFor(auto=true)`; else push `bridge_suggested` notification
+1. `loseRoute` → status=error, route=unavailable, call `attemptRestoreMainRoute`
+2. `attemptRestoreMainRoute` waits 2500–4000ms: 35% chance → `beginConnect`; else if autoBridge → `connectBridgeFor(auto=true)`; else **no action** (no notification pushed)
 
-### Notification types actually emitted
+### Notifications: engine does NOT emit them
 
-| Type | Emitted by |
-|---|---|
-| `service_unresponsive` | `beginConnect` (8% failure path) |
-| `server_overload` | `degradeService` (50% of degradations) |
-| `quality_degraded` | `degradeService` (other 50%) |
-| `route_unavailable` | `loseRoute` |
-| `bridge_suggested` | `attemptRestoreMainRoute` (non-auto path) |
-| `bridge_connected` | `connectBridgeFor` |
-| `subscription_expiring` | **Never emitted** ⚠️ D-4 |
+The engine calls only: `setServiceStatus`, `setRouteStatus`, `ensureBridge`, `setBridgeStatus`. It does **not** call `pushRandomNotification` or any notification action. All notifications in the app are either pre-seeded static content (`defaultNotifications()`) or manually triggered via the `NotificationDebugTrigger` component. ⚠️ D-10: SRS FR-13 requires dynamic notifications on status changes.
 
 ---
 
@@ -397,24 +448,33 @@ For each enabled service:
 
 | Component | File | Owns local state? | Key store selectors | Notes |
 |---|---|---|---|---|
-| App | `src/App.tsx` | view, minimized | isAuthenticated, activeTab, theme | View state machine: 'auth'/'crossfade'/'shell' |
-| AuthScreen | `auth/AuthScreen.tsx` | cells[4], authState, shakeKey | login | 4×4-digit cells; paste support; shake animation on error |
+| App | `src/App.tsx` | view, minimized | isAuthenticated, activeTab, notificationsOpen | View state machine: 'auth'/'crossfade'/'shell' |
+| AuthScreen | `auth/AuthScreen.tsx` | cells[4], authState, shakeKey | login, theme | 4×4-digit cells; paste support; theme toggle; shake animation on error |
 | WindowTitleBar | `layout/WindowTitleBar.tsx` | no | — | Minimize = sets minimized in App; shows restore chip |
-| Sidebar | `layout/Sidebar.tsx` | accountOpen | activeTab, user, notifications, isRunning | Bell badge; account popup; nav |
-| NotificationCenter | `layout/NotificationCenter.tsx` | — | notifications, actions | Rendered inside Sidebar's bell area |
-| Dashboard | `dashboard/Dashboard.tsx` | no | isFirstLoginOfSession, library, isRunning, presets, lastSessionServiceIds | Renders onboarding OR empty-state OR routing diagram OR quick-launch |
-| WelcomeOnboarding | `dashboard/WelcomeOnboarding.tsx` | step, selectedIds, expandedCategories, homeCountry, countrySearch | commitOnboardingSelection, skipOnboarding, getOrCreateServiceForEntry | Step 1: service picker; step 2: country picker (WORLD_COUNTRIES) |
+| Sidebar | `layout/Sidebar.tsx` | no | activeTab, user, isRunning, library, notifications | Connection pulse ring; subscription footer; bell → toggleNotificationsPanel; no account popup |
+| NotificationPanel | `layout/NotificationPanel.tsx` | no | notifications, multiple actions | Full overlay window: count, mark-all-read, delete-all |
+| NoticeCard | `notifications/NoticeCard.tsx` | no | — | Shared card: tone/icon/title/message + optional action button; variant='toast'\|'window' |
+| NotificationToastStack | `notifications/NotificationToastStack.tsx` | expanded | notifications, dismissToast, dismissAllToasts | Filters `!toastDismissed`; collapses into peek stack when >1 |
+| NotificationUndoToast | `notifications/NotificationUndoToast.tsx` | no | notificationsUndo, undoDeleteAllNotifications | Shows only when notificationsUndo is non-null |
+| NotificationDebugTrigger | `notifications/NotificationDebugTrigger.tsx` | no | pushRandomNotification | Invisible button; prototype QA only |
+| Dashboard | `dashboard/Dashboard.tsx` | no | onboardingStage, library, isRunning, activeServiceId, lastSessionServiceIds | State machine renders: HeroBanner welcome → RegionStep → HeroBanner empty/stopped → RoutingDiagram |
+| HeroBanner | `dashboard/HeroBanner.tsx` | no | — | Welcome intro mode OR service-routing mode (start/edit/select) + Full Mode card (no-op placeholder) |
 | RoutingDiagram | `dashboard/RoutingDiagram.tsx` | no | library, routes, stopAll | SVG topology; computes layout; shown only while isRunning |
-| ServiceDetailModal | `dashboard/ServiceDetailModal.tsx` | no | service, route, connection, bridges, showAdvancedSettings, multiple actions | Full service config + quality charts; network rule editor behind advanced toggle |
-| Library | `library/Library.tsx` | showCustomModal, showSaveModal, tab, selectedIds, presetServiceIds | library, many actions | Tabs: All/Games/Programs/Custom; bulk select bar |
-| CreateCustomServiceModal | `library/CreateCustomServiceModal.tsx` | form fields | createCustomService | Warning box for manual detection method |
-| Presets | `presets/Presets.tsx` | showCreateModal, pendingApplyId, expandedId, addServicePresetId | presets, library, multiple actions | Expandable cards; inline service cards with remove; apply confirm |
-| CreatePresetModal | `presets/CreatePresetModal.tsx` | name, tab, selectedIds, error | library, getOrCreateServiceForEntry, createPreset | lg modal (860px); embedded LibraryPickerGrid |
-| AddServiceModal | `presets/AddServiceModal.tsx` | tab, selectedIds, error | library, presets, addServicesToPreset | lg modal; pre-filters out already-included services |
-| SavePresetModal | `presets/SavePresetModal.tsx` | name | createPreset | Simple name input; takes pre-resolved serviceIds from Library |
-| Settings | `settings/Settings.tsx` | copied, pendingRegen | appSettings, authKey, user, multiple actions | 4 sections; advanced network simulation behind toggle |
-| ServiceCard | `common/ServiceCard.tsx` | no | — | Reused in onboarding/library/presets/picker modals; optional remove button |
-| LibraryPickerGrid | `common/LibraryPickerGrid.tsx` | no | — | Tab bar + 4-col grid + "Select all" tile; reused in Library, CreatePresetModal, AddServiceModal |
+| ServiceDetailModal | `dashboard/ServiceDetailModal.tsx` | regionSearch, hasChanges, showCloseConfirm | service, showAdvancedSettings, multiple actions | Config modal: region, encryption, transport, connectionMode, DNS mode, includeSubdomains, ipRange, network rules; "Start this service only" button; close-with-changes confirm |
+| ServiceSessionModal | `dashboard/ServiceSessionModal.tsx` | no | service, route, connection, bridges, toggleServiceEnabled | Monitoring modal: status, latency/stability stats, QualityChart, bridge info, enable toggle |
+| RegionStep | `dashboard/onboarding/RegionStep.tsx` | homeRegion (local selection) | skipOnboarding, commitOnboardingRegion | Onboarding step 1/4: WORLD_REGIONS tile grid |
+| OnboardingCoachmark | `common/OnboardingCoachmark.tsx` | no | — | Steps 2/4, 3/4, 4/4; overlaid on Home and Services screens |
+| Services | `services/Services.tsx` | manualAddStep, tab, searchQuery, selectedIds | library, isRunning, multiple actions | Tab bar + search + 4-col grid + selected panel; "Auto-select popular"; onboarding coachmarks |
+| CreateCustomServiceModal | `services/CreateCustomServiceModal.tsx` | form fields | createCustomService | Form: name, domains, includeSubdomains, exePath, ipRange |
+| ManualServiceIntroModal | `services/ManualServiceIntroModal.tsx` | no | — | Pre-form advisory: recommends support contact for public services |
+| Settings | `settings/Settings.tsx` | copied, pendingRegen | appSettings, authKey, user, multiple actions | 4 tabs: General / Account / Connection / Advanced |
+| ServiceCard | `common/ServiceCard.tsx` | no | — | Grid tile; chips take LucideIcon + label; check badge when selected; gear button |
+| LibraryPickerGrid | `common/LibraryPickerGrid.tsx` | no | — | Tab bar + SearchInput + scroll-fade grid; used by Services.tsx |
+| ServiceIcon | `common/ServiceIcon.tsx` | no | — | Renders simple-icons SVG (by display name lookup); falls back to emoji string |
+| BrandLogo | `common/BrandLogo.tsx` | no | — | "n" glyph square; used in Sidebar and AuthScreen |
+| SearchInput | `common/SearchInput.tsx` | no | — | |
+| Dropdown | `common/Dropdown.tsx` | open | — | Custom styled select; used for DNS in Settings |
+| Toast | `common/Toast.tsx` | no | toast | Simple one-line toast (not a notification toast) |
 | Modal | `common/Modal.tsx` | no | — | standard=440px, lg=860px; sticky header/footer |
 | StatusBadge | `common/StatusBadge.tsx` | no | — | |
 | Toggle | `common/Toggle.tsx` | no | — | |
@@ -424,9 +484,9 @@ For each enabled service:
 
 ## Key data distinctions
 
-**REGIONS** (`src/data/regions.ts`) — the 9 proxy server locations that service traffic routes through (Sweden, Germany #1/#2, Netherlands, Finland, Moscow Gaming Node, USA East/West, Japan). Every Service.region and Route.regionId references one of these IDs. This is routing infrastructure.
+**REGIONS** (`src/data/regions.ts`) — the 9 proxy server locations that service traffic routes through. Every `Service.region` and `Route.regionId` references one of these IDs. This is routing infrastructure.
 
-**WORLD_COUNTRIES** (`src/data/worldCountries.ts`) — a large searchable list of countries representing the user's own physical location. Used only in onboarding step 2 to set `User.country`. Has no effect on routing. The `WorldCountry` shape is `{ id, name, continent }` — entirely separate from `Region`.
+**WORLD_REGIONS** (`src/data/worldRegions.ts`) — 12 broad geographic regions representing the user's own approximate physical location. Used only in onboarding `RegionStep` to set `User.homeRegion`. Has no effect on routing. Shape: `{ id: string; name: string }`. Entirely separate from Region.
 
 ---
 
@@ -435,16 +495,18 @@ For each enabled service:
 - **No TypeScript enums.** All union types use string literals. `erasableSyntaxOnly` enforces this.
 - **No `any`.** `Record<string, unknown>` is used where needed (advancedSettings).
 - **No class components.** All components are function components.
-- **No inline styles for layout.** Inline `style` is only used for dynamic values (colors from CSS vars, computed positions in RoutingDiagram, ad-hoc overrides). All structural layout is in App.css.
+- **No inline styles for layout.** Inline `style` is only used for dynamic values (computed positions in RoutingDiagram, rare overrides). All structural layout is in App.css.
 - **Import type for type-only imports.** `verbatimModuleSyntax` enforces this.
 - **State mutations only through Zustand actions.** Never call `useStore.setState` from components.
 - **IDs are nanoid strings.** All entities use `nanoid()` for ID generation. Dates are Unix millisecond numbers (`Date.now()`), never `Date` objects or ISO strings.
 - **Lucide imports are individual named imports**, e.g. `import { Play, Plus } from 'lucide-react'`.
 - **clsx for class merging** in components that need conditional classes.
 - **Engine imported dynamically** inside store actions (`import('../sim/engine').then(...)`) to avoid circular dependency at module load time.
-- **Window minimize** sets a React `minimized` state in App, showing a `.window-restore-chip` button instead of the full window — no Electron/OS integration.
+- **Window minimize** sets a React `minimized` state in App, showing a `.window-restore-chip` button — no Electron/OS integration.
 - **Auth key** is a 16-digit numeric string stored in plain store state. Default is `'1111111111111111'`. No hashing, no real auth.
-- **Onboarding** auto-saves selections as a preset named `'Onboarding preset'` (upserted on re-run) and immediately calls `startAll`.
+- **Onboarding** is a 4-stage tour (welcome / region / tour-home / tour-services / tour-selected) that sets `User.homeRegion` but does NOT automatically start services or create presets.
+- **`LibraryDisplayItem`** is the view-model for Services/picker grids. Selected IDs in the grid can be either real service IDs (custom items) or catalog entry IDs (catalog items not yet materialized). `resolveServiceIds` and `displayIdsForServices` convert between the two forms.
+- **ServiceDetailModal vs ServiceSessionModal**: Detail modal is for config (region, encryption, transport, etc.); Session modal is for monitoring (status, latency, quality charts). Only Detail modal is currently reachable from UI (RoutingDiagram, Services page settings gear).
 
 ---
 
@@ -452,16 +514,20 @@ For each enabled service:
 
 | ID | SRS section | SRS says | Implementation does | Status |
 |---|---|---|---|---|
-| D-1 | §3.10 AppSettings.dnsMode | `'system' \| 'custom'` | Matches; but Service.dnsMode uses `'default' \| 'custom'` — same field name on different entities, different union literals | Intentional (different scope) |
-| D-2 | §3.5 Route | One route per service as identifier; store keyed by route.id implied | `routes` and `connections` keyed by **serviceId**; one route per service by design | Intentional simplification |
-| D-3 | §3.7 ServiceConfigSnapshot | `{serviceId, region, enabled, ...overrides}` implies full config | Snapshot omits `dnsMode`, `additionalRules`, `advancedSettings` | Intentional — partial snapshot |
-| D-4 | §3.9 Notification type | `subscription_expiring` should be emitted when subscription nears expiry | Defined in types; never emitted by engine; no expiry check logic exists | Not yet implemented |
-| D-5 | §3.8 Bridge.triggeredBy | Described as `routeId` | Implementation stores **serviceId** in `triggeredBy` | Intentional — engine looks up bridges by serviceId |
-| D-6 | §3.8 Bridge.name | "Name/type of bridge" (open-ended) | Always `Bridge-N` sequential counter | Intentional simplification |
-| D-7 | §5.3 FR-7 | `inactive → connecting → connected` | 8% chance of `connecting → error`; auto-retry scheduled | Intentional — adds realism |
-| D-8 | §3.1 User | serviceLibrary, presets, appSettings, bridges as User fields | All live in top-level store fields, not nested under user | Architectural simplification |
-| D-9 | §6 User flow 1 | First launch → mock auth → empty library → onboarding | Auth exists (16-digit key); onboarding is a 2-step wizard (service picker + country picker) that auto-starts services on finish; "empty library" state on home has a quick-link to Library | Implemented differently — richer than spec |
-| D-10 | §7 UI: Dashboard | "List of added services with live statuses" + "general summary" + Start/Stop button | When running: replaced entirely by RoutingDiagram (topology SVG). When stopped: shows last-session quick-launch card + preset preview cards. No stat cards, no service list on home. | Intentional redesign |
-| D-11 | §7 UI: structure | "Side navigation + content area" | Windows-style title bar (32px) + sidebar (220px) + content area; title bar is a separate grid row | Intentional |
-| D-12 | §5.7 FR-17 | "Save current configuration as named preset" | Presets are created by picking services from a full picker modal (not by snapshotting current config). Library has bulk "Add to preset" action. "Onboarding preset" auto-created on first login. | Extended beyond spec |
-| D-13 | §5.1 FR-4 | "Added service defaults to inactive until app launched" | Catalog-toggle from Library and onboarding set enabled=true immediately and auto-connect if isRunning | Intentional UX improvement |
+| D-1 | §3.2 Service.transportType | `'auto' \| 'tcp' \| 'udp' \| 'wireguard-like'` | `'udp' \| 'tcp' \| 'mixed'` — 'auto' replaced by 'mixed', 'wireguard-like' dropped | Intentional redesign |
+| D-2 | §3.2 Service / §LibraryEntry | No `connectionMode` field | Added `connectionMode: 'default' \| 'fast' \| 'stable' \| 'secure'` on both Service and LibraryEntry | New field beyond spec |
+| D-3 | §3.8 Bridge.triggeredBy | `routeId` | Stores **serviceId** — engine looks up bridges by serviceId | Intentional — engine works per-service |
+| D-4 | §3.9 Notification | `type: route_unavailable \| server_overload \| quality_degraded \| ...`, `severity`, `relatedServiceId`, multiple `actions` | Completely different schema: `tone`, `icon`, `title`, `toastDismissed`, single `action: { actionType: 'reconnect' }` | Intentional redesign — content/editorial model not event model |
+| D-5 | §3.1 User | `country: string \| null` (per old implementation) | `homeRegion: string \| null` — stores a WORLD_REGIONS id (broad region), not a country name | Intentional redesign |
+| D-6 | §3.10 AppSettings | `dnsMode: 'system'\|'custom'`, `windowBehavior: 'tray'\|'taskbar'`, `updateMode`, `connectionDefaults` | `dns: DnsSettings` (actual DNS addresses + backups), `launchInTray`, `reconnectOnStartup`, `closeToTray` — mode enums replaced by concrete settings | Intentional redesign |
+| D-7 | §3.7 Preset / §5.7 / §6 flows 6–7 | Full Preset system: save config, apply preset, named preset list | **Presets feature entirely removed** — no Preset entity, no preset state, no preset UI | Intentional descoping |
+| D-8 | §3.1 User | serviceLibrary, presets, appSettings, bridges as User fields | All live as top-level store fields, not nested under user | Architectural simplification |
+| D-9 | §3.5 Route | store keyed by route.id implied | `routes` and `connections` keyed by **serviceId**; one route per service by design | Intentional simplification |
+| D-10 | §5.5 FR-13 / FR-14 | "When route status changes to degraded/unavailable/error, a Notification is created"; notifications have actionable types | Engine does **not** emit notifications. All notifications are pre-seeded static content or debug-triggered random templates. | Not yet implemented — engine-driven live notifications are missing |
+| D-11 | §3.8 Bridge.name | "Name/type of bridge" (open-ended) | Always `Bridge-N` sequential counter | Intentional simplification |
+| D-12 | §5.3 FR-7 | `inactive → connecting → connected` | 8% chance of `connecting → error`; auto-retry scheduled (4–8s) | Intentional — adds realism |
+| D-13 | §5.1 FR-4 | "Added service defaults to inactive until app launched" | Catalog-toggle from Services screen creates service with enabled=true and auto-connects if isRunning | Intentional UX improvement |
+| D-14 | §6 flow 1 | "First launch → auth → empty library → onboarding with add-services proposal" | Onboarding is a 4-stage guided tour: welcome splash → broad region picker → coachmark on Home → coachmark on Services → coachmark on selected panel; no service-picker step | Intentional redesign — richer flow |
+| D-15 | §7 UI: sidebar | Dashboard, Library, Presets, Settings | Home (dashboard), **Services**, Settings — Library and Presets tabs removed | Intentional redesign |
+| D-16 | §7 UI: Dashboard | "List of added services with live statuses + general summary + Start/Stop button" | When stopped: HeroBanner with "Service Routing" + "Full Mode" cards. When running: RoutingDiagram SVG topology. No service list or stat cards on home. | Intentional redesign |
+| D-17 | §7 UI: Full Mode card | Not mentioned in SRS | HeroBanner shows a "Full Mode" card (route all traffic through single connection). Marked in code as out of scope for this prototype pass — button has no onClick handler. | Partial/placeholder — feature not modeled in store |
