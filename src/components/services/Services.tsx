@@ -115,6 +115,28 @@ export function Services() {
 
   function handleAutoSelectPopular() {
     setSelectedIds(new Set(LIBRARY_CATALOG.filter((e) => e.popular).map((e) => e.id)));
+    if (onboardingStage === 'tour-services') advanceOnboardingTour();
+  }
+
+  // Step 3's tooltip ("Choose the services you need manually, or tap
+  // 'Auto-select popular'...") advances to step 4 the same way regardless
+  // of which of the three paths the user takes: its own "→" arrow, the
+  // "Auto-select popular" button above (handleAutoSelectPopular), or
+  // picking a card directly (this wrapper around the plain toggle).
+  function handleToggleService(id: string) {
+    toggleSelected(id);
+    if (onboardingStage === 'tour-services') advanceOnboardingTour();
+  }
+
+  // The tooltip's own "→" doesn't have a card click or an auto-select to
+  // tell it which services to move forward with, so if nothing's selected
+  // yet it seeds the first catalog entry — advancing to "here's what you
+  // picked" with an empty selection wouldn't make sense.
+  function handleTourServicesNext() {
+    if (selectedIds.size === 0 && catalogItems.length > 0) {
+      toggleSelected(catalogItems[0].id);
+    }
+    advanceOnboardingTour();
   }
 
   const countLabel = `${selectedIds.size} service${selectedIds.size > 1 ? 's' : ''}`;
@@ -162,7 +184,7 @@ export function Services() {
           onTabChange={setTab}
           visibleItems={visibleItems}
           selectedIds={selectedIds}
-          onToggle={toggleSelected}
+          onToggle={handleToggleService}
           onSettingsClick={(item) => openServiceDetail(resolveDisplayItemServiceId(item, getOrCreateServiceForEntry))}
           emptyTitle="No custom services yet"
           emptyText='Use "Add service" to add your own service.'
@@ -286,7 +308,7 @@ export function Services() {
           text='Choose the services you need manually, or tap "Auto-select popular" to preselect the most popular ones for your region'
           onSkip={skipOnboarding}
           onPrev={retreatOnboardingTour}
-          onNext={advanceOnboardingTour}
+          onNext={handleTourServicesNext}
         />
       )}
       {onboardingStage === 'tour-selected' && (
