@@ -70,6 +70,11 @@ interface StoreState {
   connections: Record<string, Connection>;
   bridges: Bridge[];
   isRunning: boolean;
+  /** Unix ms when the current run started; null when stopped. Lets
+   *  RoutingDiagram's entrance animation resume at the right phase after a
+   *  remount (e.g. navigating away and back to Home) instead of replaying
+   *  from scratch. */
+  routingStartedAt: number | null;
   lastSessionServiceIds: string[];
   activeTab: TabId;
   activeServiceId: string | null;
@@ -162,6 +167,7 @@ export const useStore = create<StoreState>((set, get) => ({
   connections: {},
   bridges: [],
   isRunning: false,
+  routingStartedAt: null,
   lastSessionServiceIds: [],
   activeTab: 'dashboard',
   activeServiceId: null,
@@ -337,7 +343,7 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   startAll: () => {
-    set({ isRunning: true });
+    set({ isRunning: true, routingStartedAt: Date.now() });
     import('../sim/engine').then(({ startSimulation }) => startSimulation());
   },
 
@@ -345,6 +351,7 @@ export const useStore = create<StoreState>((set, get) => ({
     import('../sim/engine').then(({ stopSimulation }) => stopSimulation());
     set((state) => ({
       isRunning: false,
+      routingStartedAt: null,
       lastSessionServiceIds: state.library.filter((s) => s.enabled).map((s) => s.id),
     }));
   },

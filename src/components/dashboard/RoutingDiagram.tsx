@@ -1,63 +1,63 @@
-import { useState } from 'react';
-import { Server, Gamepad2, Clock, Square } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Copy, Globe, Lock, Zap, Gauge, TriangleAlert, Square } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { REGIONS } from '../../data/regions';
+import { connectionModeChipLabel, formatLatency } from '../../lib/labels';
 import { ServiceSessionModal } from './ServiceSessionModal';
 import { ServiceIcon } from '../common/ServiceIcon';
-import type { ServiceStatus } from '../../types';
+import type { ConnectionMode, Service, ServiceStatus } from '../../types';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const ZONE1_WIDTH = 180;
-const ZONE2_LEFT = 180;
-const ZONE2_WIDTH = 320;
-const ZONE3_LEFT = 500;
-const ZONE3_WIDTH = 380;
+const USER_SIZE = 60;
+const CARD_WIDTH = 276;
+const CARD_HEIGHT = 148;
+const CARD_GAP = 12;
+const MAX_VISIBLE_CARDS = 4;
+const MAX_ROW_ICONS = 7;
 
-const USER_NODE_W = 64;
-const USER_NODE_H = 64;
-const USER_NODE_X = ZONE1_WIDTH / 2 - USER_NODE_W / 2; // 58
+// Entrance choreography timings (ms from mount) — see CLAUDE.md's Home
+// screen work for the underlying design ref; steps per the "Главный экран /
+// active-connection" reveal spec (Fixnet · Wip, nodes 1261:50077 → 1261:50829).
+const PHASE_DELAYS: Record<IntroPhase, number> = {
+  user: 0,
+  skeleton: 300,
+  lines: 650,
+  shimmer: 950,
+  content: 1700,
+  colorize: 2300,
+  done: 3000,
+};
 
-const REGION_NODE_W = 160;
-const REGION_NODE_H = 48;
-const REGION_NODE_X = ZONE2_LEFT + (ZONE2_WIDTH - REGION_NODE_W) / 2; // 260
+type IntroPhase = 'user' | 'skeleton' | 'lines' | 'shimmer' | 'content' | 'colorize' | 'done';
 
-const LEAF_NODE_W = 220;
-const LEAF_NODE_H = 68;
-const LEAF_NODE_X = ZONE3_LEFT + (ZONE3_WIDTH - LEAF_NODE_W) / 2; // 580
+const PHASE_ORDER: IntroPhase[] = ['user', 'skeleton', 'lines', 'shimmer', 'content', 'colorize', 'done'];
 
-const LEAF_GAP_INTRA = 8;   // between leaves in same region group
-const LEAF_GAP_INTER = 16;  // between different region groups
-
-// ── Types ────────────────────────────────────────────────────────────────────
+/** Which phase a run that started `elapsed` ms ago should already be in —
+ *  lets the intro resume at the right point after a remount instead of
+ *  replaying from scratch (e.g. navigating away from Home and back). */
+function phaseForElapsed(elapsed: number): IntroPhase {
+  let phase: IntroPhase = 'user';
+  for (const p of PHASE_ORDER) {
+    if (elapsed >= PHASE_DELAYS[p]) phase = p;
+  }
+  return phase;
+}
 
 type DiagState = 'connected' | 'connecting' | 'degraded' | 'error';
 
-interface LeafLayout {
-  serviceId: string;
-  top: number;
-}
-
-interface RegionLayout {
-  regionId: string;
-  displayName: string;
-  top: number;
-  state: DiagState;
-  leaves: LeafLayout[];
-}
-
-interface DiagramLayout {
-  userTop: number;
-  regions: RegionLayout[];
-  totalHeight: number;
-}
+const CONNECTION_MODE_ICON: Record<ConnectionMode, typeof Zap> = {
+  fast: Zap,
+  secure: Lock,
+  stable: Gauge,
+  default: Globe,
+};
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function serviceStatusToDiagState(status: ServiceStatus): DiagState {
   switch (status) {
     case 'connected': return 'connected';
-    case 'connecting': return 'connecting';
     case 'degraded':  return 'degraded';
     case 'error':     return 'error';
     default:          return 'connecting';
@@ -65,149 +65,125 @@ function serviceStatusToDiagState(status: ServiceStatus): DiagState {
 }
 
 function aggregateRegionState(states: DiagState[]): DiagState {
-  if (states.includes('error'))     return 'error';
-  if (states.includes('degraded'))  return 'degraded';
+  if (states.includes('error'))      return 'error';
+  if (states.includes('degraded'))   return 'degraded';
   if (states.includes('connecting')) return 'connecting';
   return 'connected';
 }
 
-function stateColor(state: DiagState): string {
+function stateLineColor(state: DiagState): string {
   switch (state) {
-    case 'connected':  return 'var(--ok)';
-    case 'connecting': return 'var(--accent)';
-    case 'degraded':   return 'var(--warn)';
-    case 'error':      return 'var(--err)';
+    case 'connected':  return 'var(--routing-line-connected)';
+    case 'degraded':   return 'var(--routing-line-degraded)';
+    case 'error':      return 'var(--routing-line-error)';
+    case 'connecting': return 'var(--routing-line-main)';
   }
 }
-
-function stateDimColor(state: DiagState): string {
-  switch (state) {
-    case 'connected':  return 'var(--ok-dim)';
-    case 'connecting': return 'var(--accent-dim)';
-    case 'degraded':   return 'var(--warn-dim)';
-    case 'error':      return 'var(--err-dim)';
-  }
-}
-
-function stateChipLabel(status: ServiceStatus): string {
-  switch (status) {
-    case 'connected':  return 'Connected';
-    case 'connecting': return 'Connecting…';
-    case 'degraded':   return 'Degraded';
-    case 'error':      return 'Error';
-    default:           return 'Inactive';
-  }
-}
-
-// ── Layout computation ───────────────────────────────────────────────────────
-
-function computeLayout(
-  regionGroups: Array<{ regionId: string; displayName: string; serviceIds: string[] }>,
-  serviceStateMap: Map<string, DiagState>
-): DiagramLayout {
-  // First pass: compute all leaf y positions
-  let cursor = 0;
-  const regionLayouts: RegionLayout[] = [];
-
-  for (let gi = 0; gi < regionGroups.length; gi++) {
-    const group = regionGroups[gi];
-
-    // Add inter-group gap before this group (not the first)
-    if (gi > 0) cursor += LEAF_GAP_INTER;
-
-    const leaves: LeafLayout[] = [];
-
-    for (let li = 0; li < group.serviceIds.length; li++) {
-      if (li > 0) cursor += LEAF_GAP_INTRA;
-      leaves.push({ serviceId: group.serviceIds[li], top: cursor });
-      cursor += LEAF_NODE_H;
-    }
-
-    // Region node is vertically centered on its group's leaf span
-    const groupTop = leaves[0].top;
-    const groupBottom = leaves[leaves.length - 1].top + LEAF_NODE_H;
-    const regionTop = (groupTop + groupBottom) / 2 - REGION_NODE_H / 2;
-
-    const leafStates = group.serviceIds.map((id) => serviceStateMap.get(id) ?? 'connecting');
-    const regionState = aggregateRegionState(leafStates);
-
-    regionLayouts.push({
-      regionId: group.regionId,
-      displayName: group.displayName,
-      top: regionTop,
-      state: regionState,
-      leaves,
-    });
-  }
-
-  const totalHeight = Math.max(cursor, USER_NODE_H);
-
-  // User node is vertically centered on the midpoint of all region nodes
-  let userTop: number;
-  if (regionLayouts.length > 0) {
-    const firstRegionCenter = regionLayouts[0].top + REGION_NODE_H / 2;
-    const lastRegionCenter = regionLayouts[regionLayouts.length - 1].top + REGION_NODE_H / 2;
-    const midY = (firstRegionCenter + lastRegionCenter) / 2;
-    userTop = midY - USER_NODE_H / 2;
-  } else {
-    userTop = totalHeight / 2 - USER_NODE_H / 2;
-  }
-
-  return { userTop, regions: regionLayouts, totalHeight };
-}
-
-// ── SVG edge helpers ─────────────────────────────────────────────────────────
 
 function bezierPath(x1: number, y1: number, x2: number, y2: number): string {
   const midX = x1 + (x2 - x1) / 2;
   return `M ${x1},${y1} C ${midX},${y1} ${midX},${y2} ${x2},${y2}`;
 }
 
-interface EdgeProps {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  state: DiagState;
-  strokeWidth: number;
+// ── Layout ───────────────────────────────────────────────────────────────────
+
+interface RegionGroup {
+  regionId: string;
+  displayName: string;
+  services: Service[];
 }
 
-function Edge({ x1, y1, x2, y2, state, strokeWidth }: EdgeProps) {
-  const pathD = bezierPath(x1, y1, x2, y2);
-  const color = stateColor(state);
-  const isConnecting = state === 'connecting';
-  const isError = state === 'error';
+function groupByRegion(services: Service[]): RegionGroup[] {
+  const order: string[] = [];
+  const map = new Map<string, Service[]>();
+  for (const svc of services) {
+    if (!map.has(svc.region)) {
+      map.set(svc.region, []);
+      order.push(svc.region);
+    }
+    map.get(svc.region)!.push(svc);
+  }
+  return order.map((regionId) => {
+    const def = REGIONS.find((r) => r.id === regionId);
+    return { regionId, displayName: def?.displayName ?? regionId, services: map.get(regionId) ?? [] };
+  });
+}
+
+// ── Card ─────────────────────────────────────────────────────────────────────
+
+interface CardProps {
+  group: RegionGroup;
+  top: number;
+  left: number;
+  routes: ReturnType<typeof useStore.getState>['routes'];
+  introPhase: IntroPhase;
+  onOpenService: (id: string) => void;
+}
+
+function Card({ group, top, left, routes, introPhase, onOpenService }: CardProps) {
+  const states = group.services.map((s) => serviceStatusToDiagState(s.status));
+  const state = aggregateRegionState(states);
+  const primary = group.services[0];
+  const Icon = CONNECTION_MODE_ICON[primary.connectionMode];
+  const modeLabel = connectionModeChipLabel(primary.connectionMode, primary.category);
+
+  const contentReady = introPhase === 'content' || introPhase === 'colorize' || introPhase === 'done';
+  const colored = introPhase === 'colorize' || introPhase === 'done';
+
+  const route = routes[primary.id];
+  const showPing = colored && (state === 'connected' || state === 'degraded');
+  const latencyMs = route?.latencyMs ?? 0;
+
+  const visibleServices = group.services.slice(0, MAX_ROW_ICONS);
+  const overflowCount = group.services.length - visibleServices.length;
 
   return (
-    <g>
-      <path
-        d={pathD}
-        fill="none"
-        stroke={color}
-        strokeWidth={strokeWidth}
-        strokeOpacity={isConnecting ? 0.35 : 1}
-        strokeDasharray={isError ? '6 3' : undefined}
-      />
-      {isConnecting && (
-        <>
-          <circle r={5} fill={color} fillOpacity={0.8}>
-            <animateMotion
-              dur="1.2s"
-              repeatCount="indefinite"
-              path={pathD}
-            />
-          </circle>
-          <circle r={5} fill={color} fillOpacity={0.8}>
-            <animateMotion
-              dur="1.2s"
-              repeatCount="indefinite"
-              begin="0.6s"
-              path={pathD}
-            />
-          </circle>
-        </>
-      )}
-    </g>
+    <div
+      className="routing-card"
+      data-state={colored ? state : 'pending'}
+      style={{ position: 'absolute', top, left, width: CARD_WIDTH, height: CARD_HEIGHT }}
+    >
+      {/* Skeleton layer */}
+      <div className="routing-card__skeleton" style={{ opacity: contentReady ? 0 : 1 }}>
+        <span className="routing-card__skeleton-bar routing-card__skeleton-bar--title" />
+        <span className="routing-card__skeleton-bar routing-card__skeleton-bar--sub" />
+      </div>
+
+      {/* Real content layer */}
+      <div className="routing-card__body" style={{ opacity: contentReady ? 1 : 0 }}>
+        <div className="routing-card__glow" />
+        <div className="routing-card__header">
+          <p className="routing-card__title">{group.displayName}</p>
+          {colored && state === 'error' && <TriangleAlert size={16} className="routing-card__attention" />}
+        </div>
+        <div className="routing-card__row">
+          <span className="routing-card__mode">
+            <Icon size={16} className="routing-card__mode-icon" />
+            {modeLabel}
+          </span>
+          <span className="routing-card__ping">{showPing ? formatLatency(latencyMs) : '— ms'}</span>
+        </div>
+        <div className="routing-card__divider" />
+        <div className="routing-card__services">
+          {visibleServices.map((svc) => (
+            <button
+              key={svc.id}
+              type="button"
+              className="routing-card__service-icon"
+              title={svc.name}
+              onClick={() => onOpenService(svc.id)}
+            >
+              <ServiceIcon name={svc.name} fallback={svc.icon} size={16} />
+            </button>
+          ))}
+          {overflowCount > 0 && (
+            <span className="routing-card__service-icon routing-card__service-icon--overflow">
+              +{overflowCount}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -217,217 +193,196 @@ export function RoutingDiagram() {
   const library = useStore((s) => s.library);
   const routes = useStore((s) => s.routes);
   const stopAll = useStore((s) => s.stopAll);
+  const routingStartedAt = useStore((s) => s.routingStartedAt);
   const [activeSessionServiceId, setActiveSessionServiceId] = useState<string | null>(null);
+  const [introPhase, setIntroPhase] = useState<IntroPhase>(() =>
+    phaseForElapsed(routingStartedAt ? Date.now() - routingStartedAt : 0)
+  );
+  const [sessionId] = useState(() => crypto.randomUUID().replace(/-/g, '').slice(0, 24));
+  const [copied, setCopied] = useState(false);
 
-  // Filter to enabled services only
-  const enabledServices = library.filter((s) => s.enabled);
+  const schemeRef = useRef<HTMLDivElement>(null);
+  const [schemeWidth, setSchemeWidth] = useState(0);
+  const [schemeHeight, setSchemeHeight] = useState(0);
 
-  // Group by region, preserving first-seen order
-  const regionOrder: string[] = [];
-  const regionMap = new Map<string, string[]>(); // regionId -> serviceIds
-  for (const svc of enabledServices) {
-    if (!regionMap.has(svc.region)) {
-      regionMap.set(svc.region, []);
-      regionOrder.push(svc.region);
-    }
-    regionMap.get(svc.region)!.push(svc.id);
+  useEffect(() => {
+    const el = schemeRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      setSchemeWidth(entries[0].contentRect.width);
+      setSchemeHeight(entries[0].contentRect.height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const startedAt = routingStartedAt ?? Date.now();
+    const elapsed = Date.now() - startedAt;
+    const timers = PHASE_ORDER.filter((phase) => PHASE_DELAYS[phase] > elapsed).map((phase) =>
+      setTimeout(() => setIntroPhase(phase), PHASE_DELAYS[phase] - elapsed)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [routingStartedAt]);
+
+  const enabledServices = useMemo(() => library.filter((s) => s.enabled), [library]);
+  const groups = useMemo(() => groupByRegion(enabledServices), [enabledServices]);
+
+  const visibleGroups = groups.slice(0, MAX_VISIBLE_CARDS);
+  const overflowGroups = groups.length - visibleGroups.length;
+
+  const cardsTotalHeight =
+    visibleGroups.length > 0 ? visibleGroups.length * CARD_HEIGHT + (visibleGroups.length - 1) * CARD_GAP : 0;
+  const bandHeight = Math.max(schemeHeight, cardsTotalHeight, USER_SIZE);
+  const cardsTop = (bandHeight - cardsTotalHeight) / 2;
+  const userTop = bandHeight / 2 - USER_SIZE / 2;
+  const cardsLeft = Math.max(schemeWidth - CARD_WIDTH, 0);
+
+  const showLines = introPhase !== 'user' && introPhase !== 'skeleton';
+  const showShimmer = introPhase === 'shimmer';
+  const colored = introPhase === 'colorize' || introPhase === 'done';
+
+  const totalServers = groups.length;
+  const errorServers = groups.filter((g) => aggregateRegionState(g.services.map((s) => serviceStatusToDiagState(s.status))) === 'error').length;
+  const totalServices = enabledServices.length;
+  const errorServices = enabledServices.filter((s) => s.status === 'error').length;
+
+  function handleCopySessionId() {
+    navigator.clipboard.writeText(sessionId).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   }
-
-  const regionGroups = regionOrder.map((rid) => {
-    const regionDef = REGIONS.find((r) => r.id === rid);
-    return {
-      regionId: rid,
-      displayName: regionDef?.displayName ?? rid,
-      serviceIds: regionMap.get(rid) ?? [],
-    };
-  });
-
-  // Build a map from serviceId -> DiagState
-  const serviceById = new Map(enabledServices.map((s) => [s.id, s]));
-  const serviceStateMap = new Map<string, DiagState>();
-  for (const svc of enabledServices) {
-    serviceStateMap.set(svc.id, serviceStatusToDiagState(svc.status));
-  }
-
-  const layout = computeLayout(regionGroups, serviceStateMap);
-
-  // Edge connection points
-  // User node right-center
-  const userRightX = USER_NODE_X + USER_NODE_W;
-  const userCenterY = layout.userTop + USER_NODE_H / 2;
-
-  // Region node left-center
-  const regionLeftX = REGION_NODE_X;
-
-  // Leaf node left-center
-  const leafLeftX = LEAF_NODE_X;
 
   return (
-    <div className="routing-diagram">
-      <div className="routing-diagram__header">
-        <button className="btn btn--lg btn--primary" onClick={stopAll}>
-          <Square size={16} />
-          <span className="btn__divider" />
-          Stop routing
-        </button>
+    <div className="routing-diagram" data-intro-phase={introPhase}>
+      <div className="routing-diagram__panel">
+        <div className="routing-diagram__panel-row">
+          <span className="routing-diagram__panel-label">Session ID</span>
+          {introPhase === 'user' ? (
+            <span className="routing-diagram__spinner" aria-label="Resolving session" />
+          ) : (
+            <button type="button" className="routing-diagram__session-id" onClick={handleCopySessionId}>
+              {sessionId}
+              <Copy size={14} />
+            </button>
+          )}
+        </div>
+        <div className="routing-diagram__panel-counts">
+          <div className="routing-diagram__panel-row">
+            <span className="routing-diagram__panel-label routing-diagram__panel-label--fixed">Servers</span>
+            <span className="routing-diagram__count routing-diagram__count--green">
+              <i /> {colored ? totalServers - errorServers : 0}
+            </span>
+            <span className="routing-diagram__count routing-diagram__count--red">
+              <i /> {colored ? errorServers : 0}
+            </span>
+          </div>
+          <div className="routing-diagram__panel-row">
+            <span className="routing-diagram__panel-label routing-diagram__panel-label--fixed">Services</span>
+            <span className="routing-diagram__count routing-diagram__count--green">
+              <i /> {colored ? totalServices - errorServices : 0}
+            </span>
+            <span className="routing-diagram__count routing-diagram__count--red">
+              <i /> {colored ? errorServices : 0}
+            </span>
+          </div>
+        </div>
+        {copied && <span className="routing-diagram__copied">Copied</span>}
       </div>
 
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: layout.totalHeight,
-          overflowX: 'hidden',
-          overflowY: 'auto',
-        }}
-      >
-        {/* SVG layer — behind nodes */}
-        <svg
-          style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}
-          width="100%"
-          height={layout.totalHeight}
-          overflow="visible"
-        >
-          {/* User → each Region */}
-          {layout.regions.map((reg) => {
-            const regionCenterY = reg.top + REGION_NODE_H / 2;
-            return (
-              <Edge
-                key={`user-reg-${reg.regionId}`}
-                x1={userRightX}
-                y1={userCenterY}
-                x2={regionLeftX}
-                y2={regionCenterY}
-                state={reg.state}
-                strokeWidth={2}
-              />
-            );
-          })}
+      <button type="button" className="btn btn--primary btn--lg routing-diagram__disconnect" onClick={stopAll}>
+        Disconnect
+        <span className="btn__divider" />
+        <Square size={14} />
+      </button>
 
-          {/* Region → each leaf */}
-          {layout.regions.map((reg) => {
-            const regionRightX = REGION_NODE_X + REGION_NODE_W;
-            const regionCenterY = reg.top + REGION_NODE_H / 2;
-            return reg.leaves.map((leaf) => {
-              const leafState = serviceStateMap.get(leaf.serviceId) ?? 'connecting';
-              const leafCenterY = leaf.top + LEAF_NODE_H / 2;
-              return (
-                <Edge
-                  key={`reg-leaf-${leaf.serviceId}`}
-                  x1={regionRightX}
-                  y1={regionCenterY}
-                  x2={leafLeftX}
-                  y2={leafCenterY}
-                  state={leafState}
-                  strokeWidth={1.5}
-                />
-              );
-            });
-          })}
-        </svg>
-
-        {/* User node */}
+      <div className="routing-diagram__scheme" ref={schemeRef}>
         <div
-          className="routing-node-user"
-          style={{
-            position: 'absolute',
-            left: USER_NODE_X,
-            top: layout.userTop,
-            width: USER_NODE_W,
-            height: USER_NODE_H,
-            zIndex: 1,
-          }}
+          className="routing-diagram__user"
+          style={{ top: userTop, left: 0 }}
         >
-          You
+          <div className="routing-diagram__user-avatar">
+            <div className="routing-diagram__user-glow" />
+          </div>
+          <span className="routing-diagram__user-label">User</span>
         </div>
 
-        {/* Region nodes */}
-        {layout.regions.map((reg) => {
-          const isGaming = reg.displayName.toLowerCase().includes('gaming');
-          const borderColor = stateColor(reg.state);
-          const dotColor = stateColor(reg.state);
-
-          return (
-            <div
-              key={`region-node-${reg.regionId}`}
-              className="routing-node-region"
-              style={{
-                position: 'absolute',
-                left: REGION_NODE_X,
-                top: reg.top,
-                width: REGION_NODE_W,
-                height: REGION_NODE_H,
-                borderColor,
-                zIndex: 1,
-              }}
-            >
-              {isGaming ? (
-                <Gamepad2 size={16} className="routing-node-region__icon" />
-              ) : (
-                <Server size={16} className="routing-node-region__icon" />
-              )}
-              <span className="routing-node-region__name">{reg.displayName}</span>
-              <span
-                className="routing-node-region__dot"
-                style={{ background: dotColor }}
-              />
-            </div>
-          );
-        })}
-
-        {/* Service leaf nodes */}
-        {layout.regions.map((reg) =>
-          reg.leaves.map((leaf) => {
-            const svc = serviceById.get(leaf.serviceId);
-            if (!svc) return null;
-            const leafState = serviceStateMap.get(leaf.serviceId) ?? 'connecting';
-            const borderColor = stateColor(leafState);
-            const route = routes[svc.id];
-            const latencyMs = route?.latencyMs ?? 0;
-            const showLatency =
-              svc.status === 'connected' || svc.status === 'degraded';
-
+        <svg
+          className="routing-diagram__lines"
+          style={{ opacity: showLines ? 1 : 0 }}
+          width="100%"
+          height={bandHeight}
+          overflow="visible"
+        >
+          <defs>
+            {visibleGroups.map((group, i) => {
+              const state = aggregateRegionState(group.services.map((s) => serviceStatusToDiagState(s.status)));
+              const y2 = cardsTop + i * (CARD_HEIGHT + CARD_GAP) + CARD_HEIGHT / 2;
+              return (
+                <linearGradient
+                  key={`grad-${group.regionId}`}
+                  id={`routing-line-grad-${group.regionId}`}
+                  gradientUnits="userSpaceOnUse"
+                  x1={USER_SIZE / 2}
+                  y1={userTop + USER_SIZE / 2}
+                  x2={cardsLeft}
+                  y2={y2}
+                >
+                  <stop offset="0%" stopColor="var(--routing-line-main)" />
+                  <stop offset="100%" stopColor={colored ? stateLineColor(state) : 'var(--routing-line-main)'} />
+                </linearGradient>
+              );
+            })}
+          </defs>
+          {visibleGroups.map((group, i) => {
+            const y1 = userTop + USER_SIZE / 2;
+            const y2 = cardsTop + i * (CARD_HEIGHT + CARD_GAP) + CARD_HEIGHT / 2;
+            const pathD = bezierPath(USER_SIZE / 2, y1, cardsLeft, y2);
             return (
-              <div
-                key={`leaf-node-${svc.id}`}
-                className="routing-node-leaf"
-                onClick={() => setActiveSessionServiceId(svc.id)}
-                style={{
-                  position: 'absolute',
-                  left: LEAF_NODE_X,
-                  top: leaf.top,
-                  width: LEAF_NODE_W,
-                  height: LEAF_NODE_H,
-                  borderColor,
-                  zIndex: 1,
-                }}
-              >
-                <div className="routing-node-leaf__row1">
-                  <span className="routing-node-leaf__emoji">
-                    <ServiceIcon name={svc.name} fallback={svc.icon} size={13} />
-                  </span>
-                  <span className="routing-node-leaf__name">{svc.name}</span>
-                </div>
-                <div className="routing-node-leaf__row2">
-                  <span className="routing-node-leaf__latency">
-                    <Clock size={12} className="routing-node-leaf__clock" />
-                    {showLatency ? `${latencyMs} ms` : '— ms'}
-                  </span>
-                  <span
-                    className="routing-node-leaf__chip"
-                    style={{
-                      background: stateDimColor(leafState),
-                      color: stateColor(leafState),
-                    }}
-                  >
-                    {stateChipLabel(svc.status)}
-                  </span>
-                </div>
-              </div>
+              <path
+                key={group.regionId}
+                d={pathD}
+                fill="none"
+                stroke={`url(#routing-line-grad-${group.regionId})`}
+                strokeWidth={1.5}
+              />
             );
-          })
-        )}
+          })}
+          {showShimmer &&
+            visibleGroups.map((group, i) => {
+              const y1 = userTop + USER_SIZE / 2;
+              const y2 = cardsTop + i * (CARD_HEIGHT + CARD_GAP) + CARD_HEIGHT / 2;
+              const pathD = bezierPath(USER_SIZE / 2, y1, cardsLeft, y2);
+              return (
+                <circle key={`dot-${group.regionId}`} r={4} className="routing-diagram__line-dot">
+                  <animateMotion dur="1.1s" repeatCount="indefinite" path={pathD} />
+                </circle>
+              );
+            })}
+        </svg>
 
+        {visibleGroups.map((group, i) => (
+          <Card
+            key={group.regionId}
+            group={group}
+            top={cardsTop + i * (CARD_HEIGHT + CARD_GAP)}
+            left={cardsLeft}
+            routes={routes}
+            introPhase={introPhase}
+            onOpenService={setActiveSessionServiceId}
+          />
+        ))}
+
+        {overflowGroups > 0 && (
+          <div
+            className="routing-diagram__ghost-stack"
+            style={{ top: cardsTop + cardsTotalHeight + CARD_GAP, left: cardsLeft, opacity: introPhase === 'done' ? 1 : 0 }}
+          >
+            <div className="routing-diagram__ghost-item routing-diagram__ghost-item--label">
+              +{overflowGroups} server{overflowGroups > 1 ? 's' : ''}
+            </div>
+          </div>
+        )}
       </div>
 
       {activeSessionServiceId && (

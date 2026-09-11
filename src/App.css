@@ -2859,14 +2859,21 @@ input.settings-text-field--input::placeholder {
   transform-origin: bottom left;
 }
 
-/* Position/corner not yet checked against Figma (step 4 wasn't in scope
-   for this pass) — placeholder matching .coachmark--home's shape so it
-   isn't unstyled in the meantime. */
+/* Points right-and-down at "Start selected" in the aside panel (Fixnet •
+   Wip, node 1170:268263), so the squared pointer corner is bottom-right
+   instead. Same viewport-fixed + centering-offset approach as
+   .coachmark--home originally used (not the live-measured-ref approach
+   .coachmark--services needed) — this tooltip's Figma y (13) sits above
+   .services-page's own top edge, same clipping problem, and the exact
+   canvas coordinates were asked for directly rather than derived from a
+   live element. Coordinates are the node's own canvas position
+   (1170:268304: x=613, y=13). */
 .coachmark--selected {
-  top: 110px;
-  right: 0;
-  border-radius: 0 var(--radius) var(--radius) var(--radius);
-  transform-origin: top left;
+  position: fixed;
+  top: calc(50vh - 400px + 13px);
+  left: calc(50vw - 600px + 613px);
+  border-radius: var(--radius) var(--radius) 0 var(--radius);
+  transform-origin: bottom right;
 }
 
 /* ── Onboarding reveal animation ────────────────────────────────────────── */
@@ -3271,148 +3278,391 @@ input.settings-text-field--input::placeholder {
   animation: service-card-badge-in 150ms ease-out both;
 }
 
-/* ── Routing Diagram ─────────────────────────────────────────────────────── */
+/* ── Routing Diagram (active-connection screen, Fixnet · Wip node 1245:122651) ── */
 
 .routing-diagram {
+  position: relative;
+  width: 100%;
+  height: 719px;
+  border-radius: var(--radius);
+  padding: var(--space-24);
+  box-sizing: border-box;
+  overflow: hidden;
+  background: linear-gradient(145deg, var(--hero-purple-1) 0%, var(--hero-purple-2) 54.9%, var(--hero-purple-3) 100%);
+  animation: routing-diagram-in 400ms ease-out both;
+}
+
+@keyframes routing-diagram-in {
+  from { opacity: 0; transform: scale(0.99); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Session-info panel (top-left) */
+.routing-diagram__panel {
+  position: absolute;
+  top: var(--space-24);
+  left: var(--space-24);
+  z-index: 2;
+  width: 176px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: var(--space-12);
+  border-radius: var(--radius-sm);
+  background: var(--routing-card-bg);
+  box-sizing: border-box;
+}
+
+.routing-diagram__panel-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
   width: 100%;
 }
 
-.routing-diagram__header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-12);
-  margin-bottom: var(--space-16);
+.routing-diagram__panel-label {
+  font-size: 12px;
+  color: var(--hero-text-primary);
+  white-space: nowrap;
 }
 
-/* User node */
-.routing-node-user {
-  background: var(--bg-2);
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  box-shadow: 0 0 0 4px var(--accent-dim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-0);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-/* Region node */
-.routing-node-region {
-  background: var(--bg-2);
-  border-radius: var(--radius);
-  border: 1.5px solid;
-  padding: var(--space-12) var(--space-16);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-8);
-  box-sizing: border-box;
-}
-
-.routing-node-region__icon {
-  color: var(--text-1);
+.routing-diagram__panel-label--fixed {
+  width: 56px;
   flex-shrink: 0;
 }
 
-.routing-node-region__name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-1);
+.routing-diagram__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hero-text-secondary);
+  border-top-color: transparent;
+  animation: routing-spin 0.8s linear infinite;
+}
+
+@keyframes routing-spin {
+  to { transform: rotate(360deg); }
+}
+
+.routing-diagram__session-id {
   flex: 1;
   min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.routing-node-region__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* Service leaf node */
-.routing-node-leaf {
-  background: var(--bg-3);
-  border-radius: var(--radius);
-  border: 1.5px solid;
-  padding: var(--space-12) var(--space-12);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: filter 0.12s;
-}
-
-.routing-node-leaf:hover {
-  filter: brightness(1.15);
-}
-
-.routing-node-leaf__row1 {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  margin-bottom: var(--space-8);
-}
-
-.routing-node-leaf__emoji {
-  width: 20px;
-  height: 20px;
-  border-radius: var(--radius-sm);
-  background: var(--icon-swatch-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.routing-node-leaf__name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-0);
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.routing-node-leaf__row2 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.routing-node-leaf__latency {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  font-size: 11px;
-  color: var(--text-1);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--hero-text-secondary);
+  text-decoration: underline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.routing-node-leaf__clock {
-  color: var(--text-1);
+.routing-diagram__session-id svg {
   flex-shrink: 0;
 }
 
-.routing-node-leaf__chip {
-  border-radius: 999px;
-  padding: var(--space-4) var(--space-8);
-  font-size: 10px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.routing-diagram__panel-counts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.routing-diagram__count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: 12px;
+}
+
+.routing-diagram__count i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  font-style: normal;
+}
+
+.routing-diagram__count--green { color: var(--text-green); }
+.routing-diagram__count--green i { background: var(--text-green); }
+.routing-diagram__count--red { color: var(--text-red); }
+.routing-diagram__count--red i { background: var(--text-red); }
+
+.routing-diagram__copied {
+  font-size: 11px;
+  color: var(--text-green);
+}
+
+/* Disconnect button */
+.routing-diagram__disconnect {
+  position: absolute;
+  top: var(--space-24);
+  right: var(--space-24);
+  z-index: 2;
+}
+
+/* Scheme (user + lines + cards) */
+.routing-diagram__scheme {
+  position: absolute;
+  left: var(--space-24);
+  right: var(--space-24);
+  top: 96px;
+  bottom: var(--space-24);
+}
+
+.routing-diagram__user {
+  position: absolute;
+  z-index: 1;
+  width: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.routing-diagram__user-avatar {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--routing-card-bg);
+  box-shadow: inset 0 0 1px var(--routing-card-shadow-inner);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.routing-diagram__user-avatar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 20c0-4 3.5-7 8-7s8 3 8 7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 22px;
+  opacity: 0.9;
+}
+
+.routing-diagram__user-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.24), transparent 70%);
+  filter: blur(2px);
+}
+
+.routing-diagram__user-label {
+  font-size: 14px;
+  color: var(--hero-text-secondary);
+}
+
+.routing-diagram__lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease-out;
+}
+
+.routing-diagram__lines path {
+  transition: stroke 600ms ease-out;
+}
+
+.routing-diagram__line-dot {
+  fill: var(--routing-line-main);
+  opacity: 0.85;
+}
+
+/* Region/service card */
+.routing-card {
+  border-radius: var(--radius);
+  border-left: 1.5px solid transparent;
+  box-sizing: border-box;
+  transition: border-color 600ms ease-out;
+}
+
+.routing-card[data-state='connected'] { border-left-color: var(--routing-line-connected); }
+.routing-card[data-state='degraded'] { border-left-color: var(--routing-line-degraded); }
+.routing-card[data-state='error'] { border-left-color: var(--routing-line-error); }
+.routing-card[data-state='connecting'] { border-left-color: var(--routing-line-main); }
+
+.routing-card__skeleton,
+.routing-card__body {
+  position: absolute;
+  inset: 0;
+  transition: opacity 400ms ease-out;
+}
+
+.routing-card__skeleton {
+  padding: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  background: var(--routing-card-bg);
+  border-radius: inherit;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Step 4 of the reveal: a soft white sweep wanders across the still-unresolved
+   skeleton cards (Fixnet · Wip, node 1263:83058/1263:83099). */
+.routing-diagram[data-intro-phase='shimmer'] .routing-card__skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+  animation: routing-skeleton-shimmer 1s ease-in-out infinite;
+}
+
+@keyframes routing-skeleton-shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.routing-card__skeleton-bar {
+  display: block;
+  height: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--routing-ghost-shadow-inner);
+}
+
+.routing-card__skeleton-bar--title { width: 60%; }
+.routing-card__skeleton-bar--sub { width: 40%; }
+
+.routing-card__body {
+  padding: var(--space-12);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  background: var(--routing-card-bg);
+  border-radius: inherit;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 1px var(--routing-card-shadow-inner);
+}
+
+.routing-card__glow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1px;
+  width: 22px;
+  border-radius: var(--radius) 0 0 var(--radius);
+  background: linear-gradient(90deg, currentColor, transparent);
+  color: inherit;
+  filter: blur(var(--routing-glow-blur));
+  opacity: var(--routing-glow-opacity);
+  pointer-events: none;
+}
+
+.routing-card[data-state='connected'] .routing-card__glow { color: var(--routing-line-connected); }
+.routing-card[data-state='degraded'] .routing-card__glow { color: var(--routing-line-degraded); }
+.routing-card[data-state='error'] .routing-card__glow { color: var(--routing-line-error); }
+.routing-card[data-state='connecting'] .routing-card__glow,
+.routing-card[data-state='pending'] .routing-card__glow { opacity: 0; }
+
+.routing-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+
+.routing-card__title {
+  margin: 0;
+  font-size: 16px;
+  color: var(--hero-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.routing-card__attention {
+  flex-shrink: 0;
+  color: var(--routing-line-error);
+}
+
+.routing-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.routing-card__mode {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: 14px;
+  color: var(--hero-text-secondary);
+  white-space: nowrap;
+}
+
+.routing-card__mode-icon {
+  flex-shrink: 0;
+  color: var(--hero-text-secondary);
+}
+
+.routing-card__ping {
+  font-size: 14px;
+  color: var(--hero-text-secondary);
+  white-space: nowrap;
+}
+
+.routing-card__divider {
+  height: 1px;
+  background: var(--routing-card-shadow-inner);
+}
+
+.routing-card__services {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.routing-card__service-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--icon-swatch-bg);
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.routing-card__service-icon--overflow {
+  background: var(--routing-overflow-bg);
+  color: var(--hero-text-secondary);
+  font-size: 12px;
+  cursor: default;
+}
+
+/* Ghost stack (collapsed overflow regions) */
+.routing-diagram__ghost-stack {
+  position: absolute;
+  width: 276px;
+  transition: opacity 300ms ease-out;
+}
+
+.routing-diagram__ghost-item {
+  border-radius: var(--radius);
+  padding: var(--space-12);
+  background: var(--routing-ghost-bg);
+  box-shadow: inset 0 0 1px var(--routing-ghost-shadow-inner), 0 12px 6px var(--routing-ghost-shadow-down);
+  box-sizing: border-box;
+}
+
+.routing-diagram__ghost-item--label {
+  font-size: 12px;
+  color: var(--hero-text-secondary);
+  text-align: center;
 }
 
 /* ── Toast ───────────────────────────────────────────────────────────────── */

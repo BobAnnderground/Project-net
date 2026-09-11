@@ -113,6 +113,14 @@
   --text-red: #fe3838;
   --text-red-rgb: 254, 56, 56;
   --window-bg: #0a0810;
+
+  /* Active-connection scheme (routing diagram) — exact values from Figma
+     (Fixnet · Wip, node 1245:122651 "desktop-app-home" / "active-connection",
+     dark theme), resolved via get_variable_defs against that frame
+     directly. --routing-line-main (neutral/pending line + shimmer color) is
+     genuinely invariant — identical in both the dark and light get_variable_defs
+     dumps ("Scheme/Lines/Main": "#ffffff" both times). */
+  --routing-line-main: #ffffff;
   --btn-gradient-1: #854dd1;
   --btn-gradient-2: #4d1c8c;
   --btn-primary-divider: rgba(255, 255, 255, 0.24);
@@ -183,6 +191,19 @@
   --hero-purple-3: #141117;
   --hero-text-primary: #ffffff;
   --hero-text-secondary: rgba(255, 255, 255, 0.56);
+
+  --routing-card-bg: rgba(255, 255, 255, 0.08);
+  --routing-card-shadow-inner: rgba(255, 255, 255, 0.24);
+  --routing-ghost-bg: #251a31;
+  --routing-ghost-shadow-inner: rgba(255, 255, 255, 0.16);
+  --routing-ghost-shadow-up: rgba(27, 21, 33, 0.4);
+  --routing-ghost-shadow-down: rgba(20, 17, 23, 0.44);
+  --routing-line-connected: #00ff7b;
+  --routing-line-degraded: #ffe600;
+  --routing-line-error: #fe3838;
+  --routing-overflow-bg: rgba(255, 255, 255, 0.08);
+  --routing-glow-opacity: 1;
+  --routing-glow-blur: 4px;
 
   --space-4: 4px;
   --space-8: 8px;
@@ -293,6 +314,26 @@
   --hero-purple-3: #f6f5f8;
   --hero-text-primary: #130026;
   --hero-text-secondary: rgba(20, 17, 23, 0.44);
+
+  /* Active-connection scheme (routing diagram) — exact values from Figma
+     (Fixnet · Wip, node 1245:122696, light theme "active-connection" frame),
+     resolved via get_variable_defs against that frame directly. The decorative
+     left-edge glow bar is switched off entirely in light theme (Figma's own
+     "Glow-appiarance" variable resolves to 0 there, vs 100 in dark) rather
+     than just recolored — confirmed, not assumed, since it would read as a
+     muddy smear on a light card instead of a glow. */
+  --routing-card-bg: rgba(255, 255, 255, 0.56);
+  --routing-card-shadow-inner: rgba(255, 255, 255, 0.24);
+  --routing-ghost-bg: #eae2f0;
+  --routing-ghost-shadow-inner: rgba(20, 17, 23, 0.12);
+  --routing-ghost-shadow-up: transparent;
+  --routing-ghost-shadow-down: transparent;
+  --routing-line-connected: #00a14e;
+  --routing-line-degraded: #f4b548;
+  --routing-line-error: #ec1313;
+  --routing-overflow-bg: rgba(20, 17, 23, 0.08);
+  --routing-glow-opacity: 0;
+  --routing-glow-blur: 0px;
 }
 
 * {
