@@ -16,6 +16,24 @@ Run through this at the end of every task that touches visual/UI design — a ne
 
 ---
 
+## Cross-track coordination (mandatory, self-initiated)
+
+Two persistent work tracks touch this repo in parallel: **logic-work** (branch `claude/app-logic-dozhzz` — store/state, actions, engine behavior, UX flow) and **design-work** (branch `claude/figma-design-access-ic4k54` — visual implementation, Figma fidelity, CSS/tokens). This exists because skipping coordination once broke prod: PR #35 (logic-work) and PR #36 (design-work) independently built two incompatible notification systems at the same time — different `AppNotification` shapes, different store actions, different components — and when both merged into `main` 21 minutes apart, the merge combined both file sets without reconciling the API. The result shipped to `main` with dead references (`formatRelativeTime`, `actionLabel`, `pushRandomNotification`, `dismissToast`, etc.) that failed `tsc -b` and broke the Vercel build.
+
+**Shared-surface files** — touching any of these means the *other* track may be mid-flight on the same area, not just your own:
+- `src/store/useStore.ts` — state shape and actions (logic-work's primary territory, but design-work adds fields here whenever new UI needs new state, e.g. `notificationsOpen`)
+- `src/types/index.ts` — canonical entity shapes (either track touches this whenever a feature adds/renames a field)
+- `src/App.tsx` — top-level wiring (both tracks add mounts/imports here)
+- `src/index.css` — design tokens (design-work's territory, but logic-work reads token names for status colors etc.)
+- `src/lib/labels.ts` — formatting helpers referenced by both store-adjacent code and components
+
+1. **Before implementing a feature that plausibly touches both tracks** (new store field + new visual component together — notifications, presets, anything with both a data shape and a screen), check for overlapping in-flight work first: `git log --all --oneline -15` and `git branch -a` for the other track's branch, looking for recent commits touching the same shared-surface files. If the other branch has touched the same area recently, coordinate before building independently — don't assume you're the only one implementing it.
+2. **Before merging any PR that touches a shared-surface file**, diff against the latest `main` and check `git log main -- <file>` for commits from the other track merged since you last synced. If the other track has touched the same file, do not merge blind — reconcile the API first (pull `main` into your branch and resolve the overlap, or align on a shared shape) before opening/merging the PR.
+3. **State-changing store actions and type fields are logic-work's call; visual tokens/markup are design-work's call** — but when a task needs both (a new store field to back a new visual state), coordinate on the shape before each side builds its half independently.
+4. **Live cross-session messaging is not always available** (session addressing/visibility can differ between environments) — treat `git log`/`git branch -a`/open-PR review on the other branch as the reliable fallback channel, not a live ping, and check it before every merge touching shared-surface files regardless of whether messaging worked.
+
+---
+
 ## Stack
 
 - **Runtime:** Node.js (ESM), TypeScript ~6.0.2
